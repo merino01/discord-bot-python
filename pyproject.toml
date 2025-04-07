@@ -1,0 +1,13 @@
+[project]
+name = "discord-bot-python"
+version = "0.1.0"
+description = "Bot de discord"
+authors = [
+		{ name = "Guillermo Merino", email = "guillermomerino2107@gmail.com" },
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "discord-py>=2.5.2",
+    "pylint>=3.3.6",
+]
