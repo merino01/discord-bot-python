@@ -2,7 +2,7 @@
 Message events for the bot.
 """
 
-from re import compile, error as re_error
+from re import compile as regex_compile, error as re_error
 from discord.ext import commands
 from utils.logger import logger
 from utils.channels import get_chatlog_channel, send_message_to_channel
@@ -86,7 +86,7 @@ class MessageEvents(commands.Cog):
             return
 
         try:
-            regex = compile(channel_format.regex)
+            regex = regex_compile(channel_format.regex)
             is_valid_format = regex.search(message.content)
             if is_valid_format:
                 return
