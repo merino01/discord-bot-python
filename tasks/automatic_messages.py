@@ -18,12 +18,12 @@ def create_message_task(client, message_config: AutomaticMessage):
     # Preparar los argumentos del decorador basados en la configuración
     decorator_kwargs = {}
 
-    if hasattr(message_config, "interval"):
+    if message_config.interval is not None:
         # Si se define un intervalo, usamos el decorador con el parámetro adecuado
         interval_unit = message_config.interval_unit
 
         # Asegurarnos de que el intervalo sea un tipo válido
-        if interval_unit not in ['seconds', 'minutes', 'hours']:
+        if interval_unit and interval_unit not in ['seconds', 'minutes', 'hours']:
             logger.error(f"Tipo de intervalo no válido: {interval_unit}")
             return None
 
