@@ -34,3 +34,28 @@ CREATE TABLE IF NOT EXISTS automatic_messages (
     minute INTEGER
     CONSTRAINT valid_interval_unit CHECK (interval_unit IN ('seconds', 'minutes', 'hours'))
 );
+
+-- Tablas para los clanes
+CREATE TABLE IF NOT EXISTS clan_channels (
+    channel_id INTEGER NOT NULL PRIMARY KEY,
+    clan_id CHAR(36) NOT NULL,
+    type TEXT NOT NULL,
+    name TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (clan_id) REFERENCES clans(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS clan_members (
+    user_id INTEGER NOT NULL PRIMARY KEY,
+    clan_id CHAR(36) NOT NULL,
+    role INTEGER NOT NULL,
+    joined_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (clan_id) REFERENCES clans(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS clans (
+    id CHAR(36) PRIMARY KEY,
+    name TEXT NOT NULL,
+    role_id INTEGER NOT NULL,
+    member_count INTEGER NOT NULL,
+    max_members INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);

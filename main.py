@@ -3,7 +3,7 @@ discord-bot-python
 """
 
 from settings import app_name
-from utils.logger import logger
+from modules.core import logger
 from bot import Bot
 
 def main():

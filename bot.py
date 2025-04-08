@@ -1,11 +1,9 @@
-"""
-    bot.py
-"""
+"""bot.py"""
 
 from discord import Intents, Object
 from discord.ext import commands
 from settings import bot_token, guild_id, prefix
-from utils.logger import logger
+from modules.core import logger
 
 class Bot(commands.Bot):
     """
@@ -34,22 +32,21 @@ class Bot(commands.Bot):
         This is where we can set up listeners and other configurations.
         """
         # Load events
-        await self.load_extension("cogs.events.base")
-        await self.load_extension("cogs.events.message")
-        await self.load_extension("cogs.events.member")
-        await self.load_extension("cogs.events.voice")
-        await self.load_extension("cogs.events.guild")
+        await self.load_extension("events.base")
+        await self.load_extension("events.message")
+        await self.load_extension("events.member")
+        await self.load_extension("events.voice")
+        await self.load_extension("events.guild")
         logger.info("Eventos registrados")
 
         # Load commands
-        await self.load_extension("cogs.commands.tasks")
         logger.info("Comandos registrados con el prefijo %s", prefix)
 
         # Load slash commands
-        await self.load_extension("cogs.slash_commands.config_logs")
-        await self.load_extension("cogs.slash_commands.triggers")
-        await self.load_extension("cogs.slash_commands.channel_formats")
-        await self.load_extension("cogs.slash_commands.automatic_messages")
+        await self.load_extension("modules.automatic_messages.slash_commands")
+        await self.load_extension("modules.channel_formats.slash_commands")
+        await self.load_extension("modules.logs_config.slash_commands")
+        await self.load_extension("modules.triggers.slash_commands")
         logger.info("Comandos de barra registrados")
 
         # Sincronize slash commands with discord

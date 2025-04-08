@@ -1,11 +1,14 @@
 """db"""
 
-from typing import TypeVar, Type, Optional
+from typing import TypeVar, Type, Optional, Any
 from pathlib import Path
 import sqlite3
-from utils.logger import logger
+from modules.core import logger
 
 T = TypeVar("T")
+NO_RESULTS = "No se han encontrado resultados"
+NO_CURSOR = "No se ha podido ejecutar la consulta a la base de datos"
+QUERY_ERROR = "Error en la consulta a la base de datos"
 
 class Database:
     """
@@ -74,48 +77,73 @@ class Database:
         """
         if self._conn is None:
             raise sqlite3.Error("Database connection is not established.")
+        logger.info(
+            "Ejecutando consulta en base de datos: '%s' con los valores '%s'",
+            query,
+            ', '.join([str(v) for v in params])
+        )
         cursor = self._conn.cursor()
         cursor.execute(query, params)
         self._conn.commit()
         return cursor
 
-    def query(
+    def select_one(
         self,
         model: Type[T],
-        query: str,
-        params: tuple = ()
-    ) -> list:
+        table: str,
+        columns: list[str],
+        contitions: dict[str, Any]
+    ) -> tuple[Optional[T], Optional[str]]:
+        """
+        Fetch a single result from a SQL query.
+        """
+        try:
+            columns_str = ', '.join(columns)
+            conditions_str = ' AND '.join([f"{k} = ?" for k in contitions.keys()])
+            query = f"SELECT {columns_str} FROM {table} WHERE {conditions_str}"
+            cursor = self.execute(query, tuple(contitions.values()))
+            if not cursor:
+                return None, NO_CURSOR
+            row = cursor.fetchone()
+            if not row:
+                return None, None
+
+            return model(**dict(row)), None
+        except sqlite3.Error as e:
+            logger.error("Error en la consulta: %s", e)
+            return None, QUERY_ERROR
+
+    def select(
+        self,
+        model: Type[T],
+        table: str,
+        columns: list[str],
+        conditions: Optional[dict[str, Any]] = None
+    ) -> tuple[Optional[list[T]], Optional[str]]:
         """
         Fetch all results from a SQL query.
         """
         try:
+            columns_str = ', '.join(columns)
+            query = f"SELECT {columns_str} FROM {table}"
+            params = ()
+            if conditions:
+                conditions_str = ' AND '.join([f"{k} = ?" for k in conditions.keys()])
+                query += f" WHERE {conditions_str}"
+                params = tuple(conditions.values())
             cursor = self.execute(query, params)
             if not cursor:
-                return []
-            return [model(**dict(row)) for row in cursor.fetchall()]
+                return None, NO_CURSOR
+            rows = cursor.fetchall()
+            if not rows:
+                return [], None
+
+            return [model(**dict(row)) for row in rows], None
         except sqlite3.Error as e:
             logger.error("Error en la consulta: %s", e)
-            return []
+            return None, QUERY_ERROR
 
-    def fetch_one(
-        self,
-        model: Type[T],
-        query: str,
-        params: tuple = (),
-    ) -> T | None:
-        """
-        Fetch a single result from a SQL query.
-        """
-        cursor = self.execute(query, params)
-        if not cursor:
-            return None
-        row = cursor.fetchone()
-        if not row:
-            return None
-
-        return model(**dict(row))
-
-    def insert(self, table: str, data: dict) -> int | None:
+    def insert(self, table: str, data: dict) -> tuple[Optional[int], Optional[str]]:
         """
         Insert a new record into a table.
         """
@@ -123,23 +151,15 @@ class Database:
             columns = ', '.join(data.keys())
             placeholders = ', '.join('?' * len(data))
             query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-            logger.info(
-                "Ejecutando consulta en base de datos: %s con los valores %s",
-                query,
-                ', '.join([str(v) for v in tuple(data.values())])
-            )
             cursor = self.execute(query, tuple(data.values()))
             if not cursor:
-                return None
-            return cursor.lastrowid
+                return None, NO_CURSOR
+            return cursor.lastrowid, None
         except sqlite3.Error as e:
             logger.error("Error en insert para tabla %s: %s", table, e)
-            return None
-        except Exception as e:
-            logger.error("Error inesperado en insert para tabla %s: %s", table, e)
-            return None
+            return None, QUERY_ERROR
 
-    def upsert(self, table: str, data: dict, primary_key: str) -> bool:
+    def upsert(self, table: str, data: dict, primary_key: str) -> tuple[Optional[int], Optional[str]]:
         """
         Inserta o actualiza un registro en la tabla.
         
@@ -170,16 +190,16 @@ class Database:
 
             cursor = self.execute(query, values)
             if not cursor:
-                return False
+                return None, NO_CURSOR
 
-            return True
+            return cursor.lastrowid, None
 
         except sqlite3.Error as e:
             logger.error("Error en upsert para tabla %s: %s", table, e)
-            return False
+            return None, QUERY_ERROR
 
 
-    def delete(self, table: str, key: str, value: str) -> bool:
+    def delete(self, table: str, key: str, value: str) -> tuple[Optional[int], Optional[str]]:
         """
         Delete a record from a table based on the key.
         
@@ -193,8 +213,8 @@ class Database:
         """
         try:
             query = f"DELETE FROM {table} WHERE {key} = ?"
-            self.execute(query, (value,))
-            return True
+            cursor = self.execute(query, (value,))
+            return cursor.rowcount, None
         except sqlite3.Error as e:
             logger.error("Error en delete para tabla %s: %s", table, e)
-            return False
+            return None, QUERY_ERROR
