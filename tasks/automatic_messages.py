@@ -106,6 +106,7 @@ def start_task(client, automatic_message_config: AutomaticMessage):
     if hasattr(automatic_message_config, "interval"):
         interval_log_text = f"{automatic_message_config.interval} "
         interval_log_text += f"{automatic_message_config.interval_unit}"
+        log_info["interval"] = interval_log_text
     else:
         log_info["time"] = f"{automatic_message_config.hour}:{automatic_message_config.minute}"
     logger.info("Mensaje automático programado")

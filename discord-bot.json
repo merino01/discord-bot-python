@@ -1,0 +1,13 @@
+{
+    "apps": [
+        {
+            "name": "discord-bot",
+            "script": "./main.py",
+            "interpreter": ".venv/bin/python3",
+            "instances": "1",
+            "wait_ready": true,
+            "autorestart": true,
+            "max_restarts": 5
+        }
+    ]
+}

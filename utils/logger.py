@@ -2,7 +2,7 @@
 logger.py
 Módulo para la configuración del logger.
 """
-
+from sys import stdout
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -48,7 +48,7 @@ class CustomLogger(logging.Logger):
         encoding = 'utf-8',
         mode = 'a'
         )
-        _console_handler = logging.StreamHandler()
+        _console_handler = logging.StreamHandler(stdout)
 
         # Definir el formato de los logs
         dt_fmt = '%Y-%m-%d %H:%M:%S'
