@@ -64,7 +64,9 @@ class ChannelFormatsService:
 
 
     @staticmethod
-    def get_all_by_channel_id(channel_id: int) -> tuple[Optional[List[ChannelFormat]], Optional[str]]:
+    def get_all_by_channel_id(
+        channel_id: int
+    ) -> tuple[Optional[List[ChannelFormat]], Optional[str]]:
         """
         Fetch channel formats by channel ID.
         :param channel_id: The ID of the channel.
@@ -117,3 +119,24 @@ class ChannelFormatsService:
             logger.error("Error al eliminar el formato de canal: %s", error)
             return None, error
         return channel_format.id, None
+
+
+    @staticmethod
+    def update(channel_format: ChannelFormat) -> Optional[str]:
+        """
+        Update an existing channel format in the database.
+        :param channel_format: The channel format to update.
+        """
+        _, error = db.upsert(
+            table="channel_formats",
+            data={
+                "id": str(channel_format.id),
+                "channel_id": channel_format.channel_id,
+                "regex": channel_format.regex
+            },
+            primary_key="id"
+        )
+        if error:
+            logger.error("Error al actualizar el formato de canal: %s", error)
+            return "Error al actualizar el formato de canal"
+        return None
