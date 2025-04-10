@@ -20,7 +20,7 @@ class Trigger:
     id: str
     channel_id: int
     delete_message: bool
-    response: str
+    response: Optional[str]
     key: str
     position: TriggerTextPosition
     response_timeout: Optional[int]
@@ -28,6 +28,10 @@ class Trigger:
     def __post_init__(self):
         """Post-initialization processing."""
         self.delete_message = bool(self.delete_message)
+        self.response_timeout = int(self.response_timeout) if self.response_timeout else None
+        self.response_timeout = min(self.response_timeout, 60) if self.response_timeout else None
+        self.response_timeout = max(self.response_timeout, 1) if self.response_timeout else None
+
 
 class TriggerPosition(Enum):
     """

@@ -94,7 +94,8 @@ async def send_error_to_admin(bot: Bot, e):
 async def send_paginated_embeds(
     interaction: Interaction,
     embeds: List[Embed],
-    ephemeral: bool = False
+    ephemeral: bool = False,
+    message: Optional[str] = None
 ) -> bool:
     """
     Envía embeds paginados en grupos de 10.
@@ -108,11 +109,29 @@ async def send_paginated_embeds(
         bool: True si se enviaron correctamente, False si hubo error
     """
     try:
+        await interaction.response.defer(ephemeral=ephemeral)
+
+        if not embeds or len(embeds) == 0:
+            await interaction.followup.send(
+                content="No hay información para mostrar.",
+                ephemeral=ephemeral
+            )
+            return False
+
         # Enviar primera página
-        await interaction.response.send_message(
-            embeds=embeds[:10],
-            ephemeral=ephemeral
-        )
+        first_message = None
+        if message:
+            first_message = {
+                'content': message,
+                'embeds': embeds[:10],
+                'ephemeral': ephemeral
+            }
+        else:
+            first_message = {
+                'embeds': embeds[:10],
+                'ephemeral': ephemeral
+            }
+        await interaction.followup.send(**first_message)
 
         # Si hay más páginas, usar followup
         for i in range(10, len(embeds), 10):

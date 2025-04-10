@@ -88,20 +88,17 @@ async def check_trigger(message) -> None:
         try:
             await message.delete()
         except Forbidden:
-            logger.warning(
-                "Error al eliminar el mensaje. No tengo permisos. ID del mensaje: %s",
-                message.id
-            )
+            logger.warning("No tengo permisos para eliminar el mensaje")
 
     if not _reply and _delete_message:
-        await delete_message(message)
+        if _reply_timeout:
+            await sleep(_reply_timeout)
+            await delete_message(message)
         return
     if not _reply:
         return
 
-    if _reply_timeout and isinstance(_reply_timeout, int):
-        _reply_timeout = max(_reply_timeout, 1)
-        _reply_timeout = min(_reply_timeout, 60)
+    if _reply_timeout:
         await sleep(_reply_timeout)
 
     await message.reply(content=_reply)

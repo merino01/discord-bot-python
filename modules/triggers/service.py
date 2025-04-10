@@ -104,6 +104,15 @@ class TriggersService:
         Delete a trigger from the database.
         :param trigger: Trigger to delete.
         """
+        # Check if trigger exists
+        trigger, error = TriggersService.get_by_id(trigger_id)
+        if error:
+            logger.error("Error al obtener el trigger: %s", error)
+            return None, error
+        if not trigger:
+            logger.error("Trigger no encontrado")
+            return None, "Trigger no encontrado"
+
         _, error = db.delete(
             table="triggers",
             key="id",
@@ -113,3 +122,20 @@ class TriggersService:
             logger.error("Error al eliminar el trigger: %s", error)
             return None, error
         return trigger_id, None
+
+
+    @staticmethod
+    def update(trigger: Trigger) -> tuple[Optional[Trigger], Optional[str]]:
+        """
+        Update a trigger in the database.
+        :param trigger: Trigger to update.
+        """
+        _, error = db.upsert(
+            table="triggers",
+            data=trigger.__dict__,
+            primary_key="id"
+        )
+        if error:
+            logger.error("Error al actualizar el trigger: %s", error)
+            return None, error
+        return trigger, None
