@@ -1,6 +1,6 @@
 """Database model for logs"""
 
-from typing import Literal
+from typing import Literal, Optional
 from dataclasses import dataclass
 
 LogConfigType = Literal["chat", "voice", "join_leave", "members"]
@@ -9,8 +9,8 @@ LogConfigType = Literal["chat", "voice", "join_leave", "members"]
 class LogConfig:
     """Represents a log config in the database."""
     type: LogConfigType
-    channel_id: int
     enabled: bool
+    channel_id: Optional[int] = None
 
     def __post_init__(self):
         """Convert enabled to boolean"""

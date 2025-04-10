@@ -1,4 +1,6 @@
 """logs config commands"""
+
+from typing import Optional
 from discord import app_commands, Interaction, TextChannel, Object, Embed, Color
 from discord.ext import commands
 from settings import guild_id
@@ -37,16 +39,22 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
         interaction: Interaction,
         tipo_de_log: LogConfigType,
         activar: bool,
-        canal: TextChannel
+        canal: Optional[TextChannel] = None
     ):
         """Config logs command"""
+        if not canal and activar:
+            await interaction.response.send_message(
+                content="No puedes activar los logs sin especificar un canal",
+                ephemeral=True
+            )
+            return
+
         log_config = LogConfig(
             type=tipo_de_log,
-            channel_id=canal.id,
+            channel_id=canal.id if canal else None,
             enabled=activar
         )
 
-        text = 'activado' if activar else 'desactivado'
         _, error = LogsConfigService.update(log_config)
         if error:
             await interaction.response.send_message(
@@ -54,10 +62,22 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
                 ephemeral=True
             )
             return
-        await interaction.response.send_message(
-            content=f"{tipo_de_log}log {text} en el canal <#{canal.id}>",
-            ephemeral=True
-        )
+
+        if activar and canal:
+            await interaction.response.send_message(
+                content=f"{tipo_de_log}log activado en el canal <#{canal.id}>",
+                ephemeral=True
+            )
+        elif not activar:
+            await interaction.response.send_message(
+                content=f"{tipo_de_log}log desactivado",
+                ephemeral=True
+            )
+        else:
+            await interaction.response.send_message(
+                content=f"Ha habido un error al activar el {tipo_de_log}log",
+                ephemeral=True
+            )
 
 
     #####################################################
@@ -70,7 +90,8 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
     @app_commands.checks.has_permissions(administrator=True)
     async def show_logs_config(
         self,
-        interaction: Interaction
+        interaction: Interaction,
+        persistente: bool = False
     ):
         """List logs command"""
         log_configs, error = LogsConfigService.get_all()
@@ -88,7 +109,7 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
             )
             return
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=not persistente)
 
         embeds = []
 
@@ -97,18 +118,20 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
                 title=f"{log_config.type}log",
                 color=Color.dark_green() if log_config.enabled else Color.dark_red()
             )
-            embed.add_field(
-                name="Canal",
-                value=f"<#{log_config.channel_id}>",
-                inline=True
-            )
+
+            if (channel_id := log_config.channel_id) and log_config.enabled:
+                embed.add_field(
+                    name="Canal",
+                    value=f"<#{channel_id}>",
+                    inline=True
+                )
             embed.add_field(
                 name="Estado",
                 value="activado" if log_config.enabled else "desactivado",
                 inline=True
             )
             embeds.append(embed)
-        await interaction.followup.send(embeds=embeds, ephemeral=True)
+        await interaction.followup.send(embeds=embeds, ephemeral=not persistente)
 
 
 async def setup(bot):
