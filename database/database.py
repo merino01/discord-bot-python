@@ -30,7 +30,6 @@ class Database:
         if not hasattr(self, '_initialized'):
             db_path = Path(__file__).parent / "database.db"
             self._conn = sqlite3.connect(str(db_path))
-            logger.info("Conectado a la base de datos")
             self._conn.row_factory = sqlite3.Row
             self._create_tables()
             self._initialized = True
@@ -56,10 +55,8 @@ class Database:
                     logger.error("El archivo schema.sql está vacío")
                     return
 
-                logger.info("Verificando base de datos")
                 self._conn.executescript(sql_script)
                 self._conn.commit()
-                logger.info("Tablas creadas correctamente")
 
         except sqlite3.Error as e:
             logger.error("Error de SQLite al crear las tablas: %s", e)
@@ -78,11 +75,6 @@ class Database:
         """
         if self._conn is None:
             raise sqlite3.Error("Database connection is not established.")
-        logger.info(
-            "Ejecutando consulta en base de datos: '%s' con los valores '%s'",
-            query.strip(),
-            ', '.join([str(v) for v in params])
-        )
         cursor = self._conn.cursor()
         cursor.execute(query, params)
         self._conn.commit()

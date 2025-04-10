@@ -19,8 +19,8 @@ EXTENSIONS = {
         "modules.channel_formats.slash_commands",
         "modules.logs_config.slash_commands",
         "modules.triggers.slash_commands",
+        "modules.clan_settings.slash_commands",
         "modules.clans.slash_commands",
-        "modules.clan_settings.slash_commands"
     }
 }
 
@@ -52,17 +52,34 @@ class Bot(commands.Bot):
         This is where we can set up listeners and other configurations.
         """
         # Events
-        try:
-            for event in EXTENSIONS['events']:
+        logger.info("Cargando eventos...")
+        for event in EXTENSIONS.get('events', []):
+            try:
                 await self.load_extension(event)
                 logger.info("Eventos cargados: (modulo %s)", event)
+            except Exception as e:
+                logger.error("Error al cargar la extension: %s", e)
+                continue
 
-            # Slash commands
-            for command in EXTENSIONS['slash_commands']:
+        # Commands
+        logger.info("Cargando comandos...")
+        for command in EXTENSIONS.get('commands', []):
+            try:
+                await self.load_extension(command)
+                logger.info("Comandos cargados: modulo (%s)", command)
+            except Exception as e:
+                logger.error("Error al cargar la extension: %s", e)
+                continue
+
+        # Slash commands
+        logger.info("Cargando comandos de barra...")
+        for command in EXTENSIONS.get('slash_commands', []):
+            try:
                 await self.load_extension(command)
                 logger.info("Comandos de barra cargados: modulo (%s)", command)
-        except Exception as e:
-            logger.error("Error al cargar las extensiones: %s", e)
+            except Exception as e:
+                logger.error("Error al cargar la extension: %s", e)
+                continue
 
         # Sincronize slash commands with discord
         await self.tree.sync(guild=Object(id=guild_id))
