@@ -35,7 +35,7 @@ class LogsConfigService:
             model=LogConfig,
             table="logs",
             columns=["*"],
-            contitions={"type": log_type}
+            conditions={"type": log_type}
         )
         if error:
             logger.error(

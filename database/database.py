@@ -34,6 +34,7 @@ class Database:
             self._conn.row_factory = sqlite3.Row
             self._create_tables()
             self._initialized = True
+            self._conn.execute("PRAGMA foreign_keys = ON")
 
     def _create_tables(self):
         """
@@ -79,7 +80,7 @@ class Database:
             raise sqlite3.Error("Database connection is not established.")
         logger.info(
             "Ejecutando consulta en base de datos: '%s' con los valores '%s'",
-            query,
+            query.strip(),
             ', '.join([str(v) for v in params])
         )
         cursor = self._conn.cursor()
@@ -92,16 +93,16 @@ class Database:
         model: Type[T],
         table: str,
         columns: list[str],
-        contitions: dict[str, Any]
+        conditions: dict[str, Any]
     ) -> tuple[Optional[T], Optional[str]]:
         """
         Fetch a single result from a SQL query.
         """
         try:
             columns_str = ', '.join(columns)
-            conditions_str = ' AND '.join([f"{k} = ?" for k in contitions.keys()])
+            conditions_str = ' AND '.join([f"{k} = ?" for k in conditions.keys()])
             query = f"SELECT {columns_str} FROM {table} WHERE {conditions_str}"
-            cursor = self.execute(query, tuple(contitions.values()))
+            cursor = self.execute(query, tuple(conditions.values()))
             if not cursor:
                 return None, NO_CURSOR
             row = cursor.fetchone()

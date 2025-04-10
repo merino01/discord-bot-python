@@ -36,7 +36,7 @@ class TriggersService:
             model=Trigger,
             table="triggers",
             columns=["*"],
-            contitions={"id": trigger_id}
+            conditions={"id": trigger_id}
         )
         if error:
             logger.error("Error al obtener el trigger: %s", error)
@@ -55,7 +55,7 @@ class TriggersService:
             model=Trigger,
             table="triggers",
             columns=["*"],
-            contitions={"channel_id": channel_id}
+            conditions={"channel_id": channel_id}
         )
         if error:
             logger.error("Error al obtener el trigger: %s", error)

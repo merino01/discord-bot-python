@@ -36,7 +36,7 @@ class AutomaticMessagesService:
             model=AutomaticMessage,
             table="automatic_messages",
             columns=["*"],
-            contitions={"id": automatic_message_id}
+            conditions={"id": automatic_message_id}
         )
         if error:
             logger.error("Error al obtener el mensaje automático: %s", error)

@@ -1,7 +1,7 @@
 """global utility functions"""
 
-from typing import Optional
-from discord import TextChannel, Message, Embed, Forbidden, HTTPException
+from typing import List, Optional
+from discord import TextChannel, Interaction, Message, Embed, Forbidden, HTTPException
 from discord.ext.commands import Bot
 from settings import admin_id, send_to_admin
 from modules.core import logger
@@ -90,3 +90,42 @@ async def send_error_to_admin(bot: Bot, e):
     """
     error_message = f"Error: {str(e)}"
     await send_message_to_admin(bot, error_message)
+
+async def send_paginated_embeds(
+    interaction: Interaction,
+    embeds: List[Embed],
+    ephemeral: bool = False
+) -> bool:
+    """
+    Envía embeds paginados en grupos de 10.
+    
+    Args:
+        interaction: Interacción del comando
+        embeds: Lista de embeds a enviar
+        ephemeral: Si el mensaje debe ser ephemeral
+    
+    Returns:
+        bool: True si se enviaron correctamente, False si hubo error
+    """
+    try:
+        # Enviar primera página
+        await interaction.response.send_message(
+            embeds=embeds[:10],
+            ephemeral=ephemeral
+        )
+
+        # Si hay más páginas, usar followup
+        for i in range(10, len(embeds), 10):
+            await interaction.followup.send(
+                embeds=embeds[i:i+10],
+                ephemeral=ephemeral
+            )
+        return True
+
+    except HTTPException as e:
+        logger.error("Error al enviar el mensaje: %s", e)
+        await interaction.followup.send(
+            content="No se pudo enviar el mensaje.",
+            ephemeral=True
+        )
+        return False

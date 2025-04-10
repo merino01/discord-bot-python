@@ -36,7 +36,7 @@ class ChannelFormatsService:
             model=ChannelFormat,
             table="channel_formats",
             columns=["*"],
-            contitions={"id": format_id}
+            conditions={"id": format_id}
         )
         if error:
             logger.error("Error al obtener el formato de canal: %s", error)
@@ -55,7 +55,7 @@ class ChannelFormatsService:
             model=ChannelFormat,
             table="channel_formats",
             columns=["*"],
-            contitions={"channel_id": channel_id}
+            conditions={"channel_id": channel_id}
         )
         if error:
             logger.error("Error al obtener el formato de canal: %s", error)
