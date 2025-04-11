@@ -13,6 +13,7 @@ from discord import (
 )
 from discord.ext import commands
 from settings import guild_id
+from modules.core import send_paginated_embeds
 from .service import AutomaticMessagesService
 from .models import AutomaticMessage
 from .tasks import stop_task_by_id, start_task
@@ -78,7 +79,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
         _, error = AutomaticMessagesService.add(new_automatic_message)
         if error:
             await interaction.response.send_message(
-                "Error al crear el mensaje automático.",
+                "Error al crear el mensaje automático",
                 ephemeral=True
             )
             return
@@ -131,18 +132,9 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
                 return
 
         if not automatic_messages:
-            await interaction.response.send_message(
-                content="No hay mensajes automáticos configurados.",
-                ephemeral=True
-            )
-            return
+            automatic_messages = []
 
-        # Enviamos el primer mensaje para confirmar que recibimos el comando
-        await interaction.response.send_message(
-            f"Mostrando {len(automatic_messages)} mensajes automáticos:",
-            ephemeral=not persistente
-        )
-
+        embeds = []
         for automatic_message in automatic_messages:
             embed = Embed(
                 title=f"Mensaje automático {automatic_message.id}",
@@ -171,8 +163,14 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
                     value=f"{automatic_message.hour}:{automatic_message.minute}",
                     inline=False
                 )
+            embeds.append(embed)
 
-            await interaction.followup.send(embed=embed, ephemeral=not persistente)
+        await send_paginated_embeds(
+            interaction=interaction,
+            message=f"Mostrando {len(automatic_messages)} mensajes automáticos",
+            embeds=embeds,
+            ephemeral=not persistente
+        )
 
 
     ###################################################
@@ -202,7 +200,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
 
         if not automatic_message:
             await interaction.response.send_message(
-                f"No existe el mensaje automático con ID {id_mensaje}.",
+                f"No se ha encontrado el mensaje automático con ID {id_mensaje}",
                 ephemeral=True
             )
             return
@@ -210,13 +208,13 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
         _, error = AutomaticMessagesService.delete_by_id(id_mensaje)
         if error:
             await interaction.response.send_message(
-                f"No se ha podido eliminar el mensaje automático con ID {id_mensaje}.",
+                f"No se ha podido eliminar el mensaje automático con ID {id_mensaje}",
                 ephemeral=True
             )
             return
 
         await interaction.response.send_message(
-            f"Mensaje automático con ID {id_mensaje} eliminado.",
+            f"Mensaje automático con ID **{id_mensaje}** eliminado",
             ephemeral=True
         )
         # Detenemos la tarea si existe

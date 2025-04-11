@@ -45,7 +45,9 @@ class AutomaticMessagesService:
 
 
     @staticmethod
-    def get_by_channel_id(channel_id: int) -> tuple[Optional[List[AutomaticMessage]], Optional[str]]:
+    def get_by_channel_id(
+        channel_id: int
+    ) -> tuple[Optional[List[AutomaticMessage]], Optional[str]]:
         """
         Fetch channel formats by channel ID.
         :param channel_id: Channel ID to filter by.
@@ -64,7 +66,9 @@ class AutomaticMessagesService:
 
 
     @staticmethod
-    def add(automatic_message: AutomaticMessage) -> tuple[Optional[AutomaticMessage], Optional[str]]:
+    def add(
+        automatic_message: AutomaticMessage
+    ) -> tuple[Optional[AutomaticMessage], Optional[str]]:
         """
         Add a new channel format to the database.
         :param automatic_message: Channel format to add.
