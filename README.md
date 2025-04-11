@@ -1,6 +1,6 @@
 # BOT DE DISCORD
 
-Este es un bot de discord para gestionar el servidor, se pueden configurar **logs**, **triggers**, **mensajes automáticos**, **formatos de canales**, etc...
+Este es un bot de discord para gestionar el servidor, se pueden configurar **logs**, **triggers**, **mensajes automáticos**, **formatos de canales**, **crear clanes**, etc...
 
 ## CONFIGURACIÓN
 
@@ -157,19 +157,19 @@ Se pueden configurar formatos específicos para los mensajes en canales usando e
 1. Canal donde los mensajes deben empezar con "+":
 
 ```txt
-/formato_canales crear canal:#comandos formato:"^\+"
+/formato_canales crear => canal:#comandos formato:"^\+"
 ```
 
 2. Canal donde solo se permiten números:
 
 ```txt
-/formato_canales crear canal:#numeros formato:"^[0-9]+$"
+/formato_canales crear => canal:#numeros formato:"^[0-9]+$"
 ```
 
 3. Canal donde los mensajes deben tener formato de título (3-50 caracteres):
 
 ```txt
-/formato_canales crear canal:#anuncios formato:"^[A-Za-zÀ-ÿ0-9\s]{3,50}$"
+/formato_canales crear => canal:#anuncios formato:"^[A-Za-zÀ-ÿ0-9\s]{3,50}$"
 ```
 
 **Expresiones regulares comunes:**
@@ -183,6 +183,86 @@ Se pueden configurar formatos específicos para los mensajes en canales usando e
 - `[A-Za-z]` : Letras
 - `[A-Za-zÀ-ÿ]` : Letras incluyendo acentos
 - `{min,max}` : Rango de repeticiones
+
+## CLANES
+
+Sistema para gestionar clanes dentro del servidor. Cada clan tiene:
+
+- Un rol específico
+- Canales privados (texto y voz)
+- Líderes y miembros
+- Sistema de permisos jerárquico
+
+### Comandos para Miembros
+
+- **/clan unirse**: Unirse a un clan existente
+  - **nombre**: Nombre del clan al que quieres unirte
+
+### Comandos para Líderes
+
+> Requiere el rol "Líder de Clan"
+
+- **/clan lider expulsar**: Expulsar a un miembro del clan
+  - **miembro**: Usuario a expulsar del clan
+
+### Comandos para el Staff
+
+> Requiere permisos de `Gestionar roles` y `Gestionar canales`
+
+- **/clan mod crear**: Crear un nuevo clan
+  - **nombre**: Nombre del clan
+  - **lider**: Usuario que será el líder del clan
+
+- **/clan mod info**: Ver información detallada de los clanes
+  - **id_clan**: (Opcional) ID del clan específico a consultar
+  - Si no se especifica ID, muestra todos los clanes
+
+- **/clan mod eliminar**: Eliminar un clan y todos sus elementos
+  - **id_clan**: ID del clan a eliminar
+
+**Ejemplo de uso:**
+
+1. Crear un nuevo clan:
+
+```txt
+/clan mod crear => nombre:"Los Invencibles" lider:@Usuario
+```
+
+2. Ver información de todos los clanes:
+
+```txt
+/clan mod info
+```
+
+3. Eliminar un clan específico:
+
+```txt
+/clan mod eliminar => id_clan:123e4567-e89b-12d3-a456-426614174000
+```
+
+### Características de los Clanes
+
+- **Rol automático**: Se crea un rol específico para el clan
+- **Canales privados**:
+  - Canal de texto privado para el clan
+  - Canal de voz privado para el clan
+- **Sistema de permisos**:
+  - Los canales son visibles solo para miembros del clan
+  - Los líderes pueden gestionar su clan
+  - El staff puede gestionar todos los clanes
+- **Jerarquía**:
+  - Miembros: Acceso básico al clan
+  - Líderes: Gestión de miembros
+  - Staff: Control total sobre clanes
+
+### Notas Importantes
+
+- Un usuario solo puede estar en un clan a la vez
+- Al eliminar un clan:
+  - Se elimina el rol asociado
+  - Se eliminan los canales del clan
+  - Se eliminan todos los registros de la base de datos
+- Los canales y roles se crean con permisos específicos para mantener la privacidad
 
 ## REQUISITOS
 
