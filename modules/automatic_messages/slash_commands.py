@@ -98,7 +98,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
         description="Lista todos los mensajes automáticos"
     )
     @app_commands.describe(
-        canal="Vero mensaje automático por canal",
+        canal="Ver mensaje automático por canal",
         persistente="Hacer persistente"
     )
     @app_commands.checks.has_permissions(
