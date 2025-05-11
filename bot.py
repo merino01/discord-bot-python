@@ -19,7 +19,6 @@ EXTENSIONS = {
         "modules.channel_formats.slash_commands",
         "modules.logs_config.slash_commands",
         "modules.triggers.slash_commands",
-        "modules.clan_settings.slash_commands",
         "modules.clans.slash_commands",
     }
 }
