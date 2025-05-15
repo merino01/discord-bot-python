@@ -82,7 +82,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
         await lider.add_roles(role)
 
-        clan, error = await ClanService.create_clan(
+        _, error = await ClanService.create_clan(
             name=nombre,
             leader_id=lider.id,
             role_id=role.id,
