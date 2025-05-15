@@ -20,6 +20,7 @@ EXTENSIONS = {
         "modules.logs_config.slash_commands",
         "modules.triggers.slash_commands",
         "modules.clans.slash_commands",
+        "modules.unbans.slash_commands",
     }
 }
 
