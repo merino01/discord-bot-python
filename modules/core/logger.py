@@ -2,6 +2,7 @@
 logger.py
 Módulo para la configuración del logger.
 """
+
 from sys import stdout
 import logging
 from pathlib import Path
@@ -12,6 +13,7 @@ from settings import app_name
 APP_NAME = app_name.replace(" ", "-").lower()
 
 root_dir = Path(__file__).resolve().parent.parent.parent
+
 
 class CustomLogger(logging.Logger):
     """Logger personalizado con método de inicialización."""
@@ -45,16 +47,14 @@ class CustomLogger(logging.Logger):
 
         # Configurar handlers
         _file_handler = logging.FileHandler(
-        filename = filename,
-        encoding = 'utf-8',
-        mode = 'a'
+            filename=filename, encoding="utf-8", mode="a"
         )
         _console_handler = logging.StreamHandler(stdout)
 
         # Definir el formato de los logs
-        dt_fmt = '%Y-%m-%d %H:%M:%S'
+        dt_fmt = "%Y-%m-%d %H:%M:%S"
         formatter = logging.Formatter(
-            '[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{'
+            "[{asctime}] [{levelname:<7}] {name}: {message}", dt_fmt, style="{"
         )
 
         # Aplicar el formato a ambos handlers
@@ -66,6 +66,7 @@ class CustomLogger(logging.Logger):
         self.addHandler(_console_handler)
 
         self._initialized = True
+
 
 # Registrar la clase personalizada
 logging.setLoggerClass(CustomLogger)

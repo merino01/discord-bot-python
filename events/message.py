@@ -7,10 +7,12 @@ from modules.triggers.utils import check_trigger
 from modules.channel_formats.utils import check_channel_format
 from modules.logs_config import LogHandler
 
+
 class MessageEvents(commands.Cog):
     """
     Message events for the bot.
     """
+
     def __init__(self, bot):
         self.bot = bot
         self.log_handler = LogHandler(bot)

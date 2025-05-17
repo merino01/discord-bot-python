@@ -8,6 +8,7 @@ from modules.core import logger
 from .service import TriggersService
 from .models import TriggerPosition, Trigger
 
+
 def _find_trigger(channel_id: int, text: str) -> Optional[Trigger]:
     """
     Searches for a trigger in the message.
@@ -21,6 +22,7 @@ def _find_trigger(channel_id: int, text: str) -> Optional[Trigger]:
     Returns:
         Optional[dict]: The trigger that was found, or None if no trigger was found.
     """
+
     def activates_trigger(trigger: Trigger) -> bool:
         position = trigger.position
         key = trigger.key
@@ -56,6 +58,7 @@ def _find_trigger(channel_id: int, text: str) -> Optional[Trigger]:
 
     return None
 
+
 async def check_trigger(message) -> None:
     """
     Comprueba si el mensaje es un trigger.
@@ -71,12 +74,12 @@ async def check_trigger(message) -> None:
         return
 
     log_info = {
-		"user_id": message.author.id,
-		"user_name": message.author.name,
-		"content": message.content,
-		"channel_id": message.channel.id,
-		"channel_name": message.channel.name
-	}
+        "user_id": message.author.id,
+        "user_name": message.author.name,
+        "content": message.content,
+        "channel_id": message.channel.id,
+        "channel_name": message.channel.name,
+    }
     logger.info("Trigger activado")
     logger.info(log_info)
 

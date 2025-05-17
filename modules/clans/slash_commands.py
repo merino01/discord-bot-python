@@ -7,6 +7,7 @@ from discord.app_commands import Group
 from settings import guild_id
 from .service import ClanService
 
+
 class ClanCommands(commands.GroupCog, name="clan"):
     """Comandos para gestionar clanes"""
 
@@ -35,21 +36,14 @@ class ClanCommands(commands.GroupCog, name="clan"):
         """Expulsar a alguien del clan"""
         # ...código para expulsar...
 
-
     ###########################################
     ### Comandos para el staff del servidor ###
     ###########################################
 
     ### ? Crear clan ###
     @mod.command(name="crear", description="Crear un nuevo clan")
-    @app_commands.describe(
-        nombre="Nombre del clan",
-        lider="Líder del clan"
-    )
-    @app_commands.checks.has_permissions(
-        manage_roles=True,
-        manage_channels=True
-    )
+    @app_commands.describe(nombre="Nombre del clan", lider="Líder del clan")
+    @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
     async def clan_create(
         self,
         interaction: Interaction,
@@ -65,19 +59,17 @@ class ClanCommands(commands.GroupCog, name="clan"):
         role = await interaction.guild.create_role(name=nombre)
         text_channel_overwrites: Mapping[Role, PermissionOverwrite] = {
             interaction.guild.default_role: PermissionOverwrite(read_messages=False),
-            role: PermissionOverwrite(read_messages=True)
+            role: PermissionOverwrite(read_messages=True),
         }
         voice_channel_overwrites: Mapping[Role, PermissionOverwrite] = {
             interaction.guild.default_role: PermissionOverwrite(connect=False),
-            role: PermissionOverwrite(connect=True)
+            role: PermissionOverwrite(connect=True),
         }
         text_channel = await interaction.guild.create_text_channel(
-            name=nombre,
-            overwrites=text_channel_overwrites
+            name=nombre, overwrites=text_channel_overwrites
         )
         voice_channel = await interaction.guild.create_voice_channel(
-            name=nombre,
-            overwrites=voice_channel_overwrites
+            name=nombre, overwrites=voice_channel_overwrites
         )
 
         await lider.add_roles(role)
@@ -87,7 +79,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
             leader_id=lider.id,
             role_id=role.id,
             text_channel=text_channel,
-            voice_channel=voice_channel
+            voice_channel=voice_channel,
         )
         if error:
             await interaction.response.send_message(error)
@@ -96,9 +88,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
     ### ? INFO ###
     @mod.command(name="info", description="Información de un clan")
-    @app_commands.describe(
-        id_clan="Id del clan"
-    )
+    @app_commands.describe(id_clan="Id del clan")
     async def clan_info(self, interaction: Interaction, id_clan: str):
         """Información de un clan"""
         clan, error = await ClanService.get_clan_by_id(id_clan)
@@ -110,7 +100,4 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
 async def setup(bot):
     """setup"""
-    await bot.add_cog(
-        ClanCommands(bot),
-        guild=Object(id=guild_id)
-    )
+    await bot.add_cog(ClanCommands(bot), guild=Object(id=guild_id))

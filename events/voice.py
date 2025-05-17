@@ -5,10 +5,12 @@ Voice events for the bot.
 from discord.ext import commands
 from modules.logs_config import LogHandler
 
+
 class VoiceEvents(commands.Cog):
     """
     Base events for the bot.
     """
+
     def __init__(self, bot):
         self.bot = bot
         self.log_handler = LogHandler(bot)

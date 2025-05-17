@@ -5,9 +5,11 @@ from dataclasses import dataclass
 
 LogConfigType = Literal["chat", "voice", "join_leave", "members"]
 
+
 @dataclass
 class LogConfig:
     """Represents a log config in the database."""
+
     type: LogConfigType
     enabled: bool
     channel_id: Optional[int] = None

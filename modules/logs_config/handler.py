@@ -1,13 +1,6 @@
 """handler for logs"""
 
-from discord import (
-    Message,
-    Member,
-    TextChannel,
-    Embed,
-    Forbidden,
-    HTTPException
-)
+from discord import Message, Member, TextChannel, Embed, Forbidden, HTTPException
 from discord.ext.commands import Bot
 from modules.core import logger
 from .utils import get_log_channel
@@ -23,11 +16,13 @@ from .embeds import (
     get_member_update_nick_embed,
     get_member_update_roles_embed,
     get_member_update_avatar_embed,
-    get_member_update_banner_embed
+    get_member_update_banner_embed,
 )
+
 
 class LogHandler:
     """Manejador centralizado de logs"""
+
     def __init__(self, bot: Bot):
         self.bot = bot
 
@@ -37,14 +32,11 @@ class LogHandler:
             await channel.send(embed=embed)
         except Forbidden:
             logger.warning(
-                "Error al enviar el log al canal %s. No tengo permisos.",
-                channel.name
+                "Error al enviar el log al canal %s. No tengo permisos.", channel.name
             )
         except HTTPException as e:
             logger.error(
-                "Error al enviar el log al canal %s. Error: %s",
-                channel.name,
-                e
+                "Error al enviar el log al canal %s. Error: %s", channel.name, e
             )
 
     async def log_message_edit(self, before: Message, after: Message) -> None:
@@ -122,10 +114,7 @@ class LogHandler:
             await self._send_log(channel, embed)
 
     async def log_voice_state_update(
-        self,
-        member: Member,
-        before: Member,
-        after: Member
+        self, member: Member, before: Member, after: Member
     ) -> None:
         """Maneja logs de miembros que entran a un canal de voz"""
         channel = await get_log_channel(self.bot, "voice")

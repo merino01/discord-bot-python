@@ -3,11 +3,16 @@ name = "discord-bot-python"
 version = "0.1.0"
 description = "Bot de discord"
 authors = [
-		{ name = "Guillermo Merino", email = "guillermomerino2107@gmail.com" },
+    { name = "Guillermo Merino", email = "guillermomerino2107@gmail.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "black>=25.1.0",
     "discord-py>=2.5.2",
-    "pylint>=3.3.6",
 ]
+
+[tool.black]
+line-length = 80
+target-version = ['py311']
+skip-string-normalization = true
