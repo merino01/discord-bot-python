@@ -9,7 +9,8 @@ from modules.core import logger
 async def send_message_to_channel(
     channel: TextChannel,
     content: Optional[str] = None,
-    embed: Optional[Embed] = None
+    embed: Optional[Embed] = None,
+    view: Optional[object] = None
 ) -> Optional[Message]:
     """
     Envía un mensaje a un canal de forma segura.
@@ -31,6 +32,8 @@ async def send_message_to_channel(
             kwargs['content'] = content
         if embed:
             kwargs['embed'] = embed
+        if view:
+            kwargs['view'] = view
         return await channel.send(**kwargs)
     except Forbidden:
         logger.error(

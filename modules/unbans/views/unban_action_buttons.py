@@ -1,33 +1,32 @@
+from datetime import datetime, timezone
 from discord import (
-	app_commands,
 	Interaction,
-	TextChannel,
-	Object,
 	Embed,
 	Color,
 	Member,
 	ui,
 	TextStyle,
-	ButtonStyle,
-	utils
+	ButtonStyle
 )
-
-from discord.ext import commands
-from settings import guild_id
-from datetime import datetime, timezone
+from modules.core.utils import send_message_to_channel
 
 class MyButtonsView(ui.View):
-
 	def __init__(self, member: Member):
 		super().__init__()
 		self.member = member
 
 	@ui.button(label="Aceptar", style=ButtonStyle.green)
 	async def onAccept(self, interaction: Interaction, button: ui.Button):
-
 		try:
 			await self.disable_all_buttons(interaction)
-			await interaction.followup.send(content="Se ha aceptado la solicitud de desbaneo del usuario: "+ self.member.display_name +" por: "+interaction.user.display_name, ephemeral=True)
+			await self.member.send(
+				content=f"Se ha aceptado la solicitud de desbaneo del usuario: {self.member.display_name}"
+			)
+			await self.member.unban()
+			await interaction.message.edit(view=None)
+			await interaction.response.send_message(
+				content=f"Se ha desbaneado al usuario <@{self.member.id}>"
+            )
 		except Exception as exception:
 			print(exception)
 
@@ -36,17 +35,22 @@ class MyButtonsView(ui.View):
 
 		try:
 			await self.disable_all_buttons(interaction)
-			await interaction.followup.send(content="Se ha rechazado la solicitud de desbaneo del usuario: "+ self.member.display_name +" por: "+interaction.user.display_name, ephemeral=True)
+			await self.member.send(
+				content=f"Se ha rechazado la solicitud de desbaneo del usuario: {self.member.display_name}"
+			)
+			await interaction.message.edit(view=None)
+			await interaction.response.send_message(
+				content=f"No se va a desbanear al usuario <@{self.member.id}>"
+            )
 		except Exception as exception:
 			print(exception)
 
 	async def disable_all_buttons(self, interaction: Interaction):
 		for btn in self.children:
 			btn.disabled = True
-		await interaction.response.edit_message(content="Todos los botones han sido deshabilitados.", view=self)
+		await interaction.message.edit(view=self)
 
 class UnbanModal(ui.Modal, title="Solicitud de desbaneo"):
-
 	razon = ui.TextInput(
 		label="¿Por qué deberías ser desbaneado?",
 		style=TextStyle.paragraph,
@@ -60,7 +64,6 @@ class UnbanModal(ui.Modal, title="Solicitud de desbaneo"):
 		self.member = member
 
 	async def on_submit(self, interaction: Interaction):
-
 		embed = Embed(
 			colour=Color.red(),
 			title=f"Solicitud desbaneo de: {self.member.display_name}",
@@ -72,32 +75,19 @@ class UnbanModal(ui.Modal, title="Solicitud de desbaneo"):
 		embed.set_thumbnail(url=self.member.display_avatar.url)
 		view = MyButtonsView(self.member)
 
-		await interaction.response.send_message(embed=embed, view=view)
+		try:
+			channel = await interaction.client.fetch_channel(1373253661467082754)
+			await send_message_to_channel(channel=channel, view=view, embed=embed)
+			await interaction.response.send_message(content="Solicitud de desbaneo enviada")
+		except Exception as exception:
+			print(exception)
 
-class UnbanCommands(commands.GroupCog, name="solicitud"):
-	
-	def __init__(self, bot):
-		self.bot = bot
+class OpenUnbanModal(ui.View):
+	def __init__(self, member: Member):
+		super().__init__()
+		self.member = member
 
-	##########################################################
-	### Comando para mandar una solicitud de desbaneo ########
-	##########################################################
-
-	@app_commands.command(name="desbaneo", description="Solicitar desbaneo a Dead by daylight España")
-	@app_commands.checks.has_permissions(
-		manage_channels=True,
-		manage_messages=True
-	)
-	async def generateModal(
-		self,
-		interaction: Interaction,
-	):
-		modal = UnbanModal(interaction.user)
-		await interaction.response.send_modal(modal)
-
-async def setup(bot):
-	"""setup"""
-	await bot.add_cog(
-		UnbanCommands(bot),
-		guild=Object(id=guild_id)
-	)
+	@ui.button(label="Solicitar desbaneo", style=ButtonStyle.primary)
+	async def openModal(self, interaction: Interaction, button: ui.Button):
+		await interaction.response.send_modal(UnbanModal(self.member))
+		await interaction.message.edit(view=None)

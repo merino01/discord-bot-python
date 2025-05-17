@@ -14,13 +14,15 @@ EXTENSIONS = {
         "events.voice",
         "events.guild",
     ],
+    'commands': {
+        "modules.unbans.commands",
+	},
     'slash_commands': {
         "modules.automatic_messages.slash_commands",
         "modules.channel_formats.slash_commands",
         "modules.logs_config.slash_commands",
         "modules.triggers.slash_commands",
         "modules.clans.slash_commands",
-        "modules.unbans.slash_commands",
     }
 }
 
