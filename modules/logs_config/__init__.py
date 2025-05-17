@@ -2,6 +2,4 @@
 
 from .handler import LogHandler
 
-__all__ = [
-    "LogHandler"
-]
+__all__ = ["LogHandler"]

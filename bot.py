@@ -7,21 +7,21 @@ from modules.core import logger
 
 
 EXTENSIONS = {
-    'events': [
+    "events": [
         "events.base",
         "events.message",
         "events.member",
         "events.voice",
         "events.guild",
     ],
-    'slash_commands': {
+    "slash_commands": {
         "modules.automatic_messages.slash_commands",
         "modules.channel_formats.slash_commands",
         "modules.logs_config.slash_commands",
         "modules.triggers.slash_commands",
         "modules.clan_settings.slash_commands",
         "modules.clans.slash_commands",
-    }
+    },
 }
 
 
@@ -41,10 +41,7 @@ class Bot(commands.Bot):
         intents.voice_states = True
         intents.guild_reactions = True
 
-        super().__init__(
-            command_prefix=prefix,
-            intents=intents
-        )
+        super().__init__(command_prefix=prefix, intents=intents)
 
     async def setup_hook(self):
         """
@@ -53,7 +50,7 @@ class Bot(commands.Bot):
         """
         # Events
         logger.info("Cargando eventos...")
-        for event in EXTENSIONS.get('events', []):
+        for event in EXTENSIONS.get("events", []):
             try:
                 await self.load_extension(event)
                 logger.info("Eventos cargados: (modulo %s)", event)
@@ -63,7 +60,7 @@ class Bot(commands.Bot):
 
         # Commands
         logger.info("Cargando comandos...")
-        for command in EXTENSIONS.get('commands', []):
+        for command in EXTENSIONS.get("commands", []):
             try:
                 await self.load_extension(command)
                 logger.info("Comandos cargados: modulo (%s)", command)
@@ -73,7 +70,7 @@ class Bot(commands.Bot):
 
         # Slash commands
         logger.info("Cargando comandos de barra...")
-        for command in EXTENSIONS.get('slash_commands', []):
+        for command in EXTENSIONS.get("slash_commands", []):
             try:
                 await self.load_extension(command)
                 logger.info("Comandos de barra cargados: modulo (%s)", command)
@@ -89,7 +86,4 @@ class Bot(commands.Bot):
         """
         Run the bot.
         """
-        self.run(
-            token=bot_token,
-            log_handler=logger.handlers[0]
-        )
+        self.run(token=bot_token, log_handler=logger.handlers[0])

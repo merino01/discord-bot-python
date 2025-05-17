@@ -4,6 +4,7 @@ from typing import Optional
 from discord import Member
 from .models import Clan
 
+
 class ClanValidator:
     """Validaciones para operaciones de clanes"""
 

@@ -1,6 +1,7 @@
 """
 Module for handling automatic messages in Discord channels.
 """
+
 from datetime import datetime, time
 from typing import Dict
 from discord.ext import tasks
@@ -9,6 +10,7 @@ from .service import AutomaticMessagesService
 from .models import AutomaticMessage
 
 message_tasks: Dict[str, tasks.Loop] = {}
+
 
 def create_message_task(client, message_config: AutomaticMessage):
     """Crea una tarea programada para un mensaje específico"""
@@ -21,7 +23,7 @@ def create_message_task(client, message_config: AutomaticMessage):
         interval_unit = message_config.interval_unit
 
         # Asegurarnos de que el intervalo sea un tipo válido
-        if interval_unit and interval_unit not in ['seconds', 'minutes', 'hours']:
+        if interval_unit and interval_unit not in ["seconds", "minutes", "hours"]:
             logger.error(f"Tipo de intervalo no válido: {interval_unit}")
             return None
 
@@ -30,7 +32,10 @@ def create_message_task(client, message_config: AutomaticMessage):
         @tasks.loop(**decorator_kwargs)
         async def send_message_interval():
             channel = await client.fetch_channel(message_config.channel_id)
-            if not channel or not channel.permissions_for(channel.guild.me).send_messages:
+            if (
+                not channel
+                or not channel.permissions_for(channel.guild.me).send_messages
+            ):
                 return
 
             await send_message_to_channel(channel, content=message_config.text)
@@ -38,7 +43,7 @@ def create_message_task(client, message_config: AutomaticMessage):
 
     else:
         # Si no se define un intervalo, usamos la hora exacta
-        if (message_config.hour is None or message_config.minute is None):
+        if message_config.hour is None or message_config.minute is None:
             return
 
         target_time = time(
@@ -52,11 +57,16 @@ def create_message_task(client, message_config: AutomaticMessage):
             now = datetime.now().time()
             if now.hour == target_time.hour and now.minute == target_time.minute:
                 channel = await client.fetch_channel(message_config.channel_id)
-                if not channel or not channel.permissions_for(channel.guild.me).send_messages:
+                if (
+                    not channel
+                    or not channel.permissions_for(channel.guild.me).send_messages
+                ):
                     return
 
                 await send_message_to_channel(channel, content=message_config.text)
-                logger.info(f"Mensaje automático enviado a {channel.name} (hora exacta)")
+                logger.info(
+                    f"Mensaje automático enviado a {channel.name} (hora exacta)"
+                )
 
     if hasattr(message_config, "interval"):
         return send_message_interval
@@ -73,6 +83,7 @@ def stop_all_tasks():
 
     message_tasks.clear()  # Limpiar el diccionario de tareas
     logger.info("Todas las tareas automáticas han sido detenidas")
+
 
 def stop_task_by_id(task_id: str):
     """Stops a specific automatic message task by its ID"""
@@ -99,14 +110,16 @@ def start_task(client, automatic_message_config: AutomaticMessage):
 
     log_info = {
         "channel_id": automatic_message_config.channel_id,
-        "message_content": automatic_message_config.text
+        "message_content": automatic_message_config.text,
     }
     if hasattr(automatic_message_config, "interval"):
         interval_log_text = f"{automatic_message_config.interval} "
         interval_log_text += f"{automatic_message_config.interval_unit}"
         log_info["interval"] = interval_log_text
     else:
-        log_info["time"] = f"{automatic_message_config.hour}:{automatic_message_config.minute}"
+        log_info["time"] = (
+            f"{automatic_message_config.hour}:{automatic_message_config.minute}"
+        )
     logger.info("Mensaje automático programado")
     logger.info(log_info)
 
