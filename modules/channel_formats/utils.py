@@ -5,12 +5,15 @@ from discord import Message, TextChannel
 from modules.core import logger
 from .service import ChannelFormatsService
 
+
 async def check_channel_format(message: Message):
     """
     Check if the message format is valid for the channel.
     If the format is invalid, delete the message.
     """
-    channel_format, error = ChannelFormatsService.get_one_by_channel_id(message.channel.id)
+    channel_format, error = ChannelFormatsService.get_one_by_channel_id(
+        message.channel.id
+    )
     if error:
         logger.error(f"Error al obtener el formato de canal: {error}")
         return
@@ -35,7 +38,7 @@ async def check_channel_format(message: Message):
         "channel_name": message.channel.name,
         "author_id": message.author.id,
         "author_name": message.author.name,
-        "message_content": message.content
+        "message_content": message.content,
     }
     logger.info("Formato de mensaje incorrecto")
     logger.info(log_info)

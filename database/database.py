@@ -10,10 +10,12 @@ NO_RESULTS = "No se han encontrado resultados"
 NO_CURSOR = "No se ha podido ejecutar la consulta a la base de datos"
 QUERY_ERROR = "Error en la consulta a la base de datos"
 
+
 class Database:
     """
     A class to manage a simple SQLite database.
     """
+
     _instance = None
     _conn = None
 
@@ -27,7 +29,7 @@ class Database:
         return cls._instance
 
     def __init__(self):
-        if not hasattr(self, '_initialized'):
+        if not hasattr(self, "_initialized"):
             db_path = Path(__file__).parent / "database.db"
             self._conn = sqlite3.connect(str(db_path))
             self._conn.row_factory = sqlite3.Row
@@ -81,18 +83,14 @@ class Database:
         return cursor
 
     def select_one(
-        self,
-        model: Type[T],
-        table: str,
-        columns: list[str],
-        conditions: dict[str, Any]
+        self, model: Type[T], table: str, columns: list[str], conditions: dict[str, Any]
     ) -> tuple[Optional[T], Optional[str]]:
         """
         Fetch a single result from a SQL query.
         """
         try:
-            columns_str = ', '.join(columns)
-            conditions_str = ' AND '.join([f"{k} = ?" for k in conditions.keys()])
+            columns_str = ", ".join(columns)
+            conditions_str = " AND ".join([f"{k} = ?" for k in conditions.keys()])
             query = f"SELECT {columns_str} FROM {table} WHERE {conditions_str}"
             cursor = self.execute(query, tuple(conditions.values()))
             if not cursor:
@@ -111,17 +109,17 @@ class Database:
         model: Type[T],
         table: str,
         columns: list[str],
-        conditions: Optional[dict[str, Any]] = None
+        conditions: Optional[dict[str, Any]] = None,
     ) -> tuple[Optional[list[T]], Optional[str]]:
         """
         Fetch all results from a SQL query.
         """
         try:
-            columns_str = ', '.join(columns)
+            columns_str = ", ".join(columns)
             query = f"SELECT {columns_str} FROM {table}"
             params = ()
             if conditions:
-                conditions_str = ' AND '.join([f"{k} = ?" for k in conditions.keys()])
+                conditions_str = " AND ".join([f"{k} = ?" for k in conditions.keys()])
                 query += f" WHERE {conditions_str}"
                 params = tuple(conditions.values())
             cursor = self.execute(query, params)
@@ -141,8 +139,8 @@ class Database:
         Insert a new record into a table.
         """
         try:
-            columns = ', '.join(data.keys())
-            placeholders = ', '.join('?' * len(data))
+            columns = ", ".join(data.keys())
+            placeholders = ", ".join("?" * len(data))
             query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
             cursor = self.execute(query, tuple(data.values()))
             if not cursor:
@@ -152,24 +150,26 @@ class Database:
             logger.error("Error en insert para tabla %s: %s", table, e)
             return None, QUERY_ERROR
 
-    def upsert(self, table: str, data: dict, primary_key: str) -> tuple[Optional[int], Optional[str]]:
+    def upsert(
+        self, table: str, data: dict, primary_key: str
+    ) -> tuple[Optional[int], Optional[str]]:
         """
         Inserta o actualiza un registro en la tabla.
-        
+
         Args:
             table: Nombre de la tabla
             data: Diccionario con los datos a insertar/actualizar
             primary_key: Nombre de la columna que es clave primaria
-                
+
         Returns:
             int | None: ID del registro insertado/actualizado o None si hay error
         """
         try:
-            columns = ', '.join(data.keys())
-            placeholders = ', '.join('?' * len(data))
+            columns = ", ".join(data.keys())
+            placeholders = ", ".join("?" * len(data))
             # Excluimos la PK del UPDATE
             update_cols = [k for k in data.keys() if k != primary_key]
-            update_stmt = ', '.join(f"{k} = ?" for k in update_cols)
+            update_stmt = ", ".join(f"{k} = ?" for k in update_cols)
 
             query = f"""
                 INSERT INTO {table} ({columns})
@@ -191,16 +191,17 @@ class Database:
             logger.error("Error en upsert para tabla %s: %s", table, e)
             return None, QUERY_ERROR
 
-
-    def delete(self, table: str, key: str, value: str) -> tuple[Optional[int], Optional[str]]:
+    def delete(
+        self, table: str, key: str, value: str
+    ) -> tuple[Optional[int], Optional[str]]:
         """
         Delete a record from a table based on the key.
-        
+
         Args:
             table: Nombre de la tabla
             key: Nombre de la columna que es clave primaria
             value: Valor de la clave primaria del registro a eliminar
-            
+
         Returns:
             bool: True si se eliminó correctamente, False en caso contrario
         """

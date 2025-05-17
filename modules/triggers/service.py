@@ -5,6 +5,7 @@ from database import db
 from modules.core import logger
 from .models import Trigger
 
+
 class TriggersService:
     """Service class for managing triggers."""
 
@@ -14,16 +15,11 @@ class TriggersService:
         Fetch all triggers from the database.
         :return: List of triggers.
         """
-        triggers, error = db.select(
-            model=Trigger,
-            table="triggers",
-            columns=["*"]
-        )
+        triggers, error = db.select(model=Trigger, table="triggers", columns=["*"])
         if error:
             logger.error("Error al obtener los triggers: %s", error)
             return None, error
         return triggers, None
-
 
     @staticmethod
     def get_by_id(trigger_id: str) -> tuple[Optional[Trigger], Optional[str]]:
@@ -36,16 +32,17 @@ class TriggersService:
             model=Trigger,
             table="triggers",
             columns=["*"],
-            conditions={"id": trigger_id}
+            conditions={"id": trigger_id},
         )
         if error:
             logger.error("Error al obtener el trigger: %s", error)
             return None, error
         return trigger, None
 
-
     @staticmethod
-    def get_one_by_channel_id(channel_id: int) -> tuple[Optional[Trigger], Optional[str]]:
+    def get_one_by_channel_id(
+        channel_id: int,
+    ) -> tuple[Optional[Trigger], Optional[str]]:
         """
         Fetch triggers by channel ID.
         :param channel_id: The ID of the channel.
@@ -55,16 +52,17 @@ class TriggersService:
             model=Trigger,
             table="triggers",
             columns=["*"],
-            conditions={"channel_id": channel_id}
+            conditions={"channel_id": channel_id},
         )
         if error:
             logger.error("Error al obtener el trigger: %s", error)
             return None, error
         return trigger, None
 
-
     @staticmethod
-    def get_all_by_channel_id(channel_id: int) -> tuple[Optional[List[Trigger]], Optional[str]]:
+    def get_all_by_channel_id(
+        channel_id: int,
+    ) -> tuple[Optional[List[Trigger]], Optional[str]]:
         """
         Fetch triggers by channel ID.
         :param channel_id: The ID of the channel.
@@ -74,13 +72,12 @@ class TriggersService:
             model=Trigger,
             table="triggers",
             columns=["*"],
-            conditions={"channel_id": channel_id}
+            conditions={"channel_id": channel_id},
         )
         if error:
             logger.error("Error al obtener los triggers: %s", error)
             return None, error
         return triggers, None
-
 
     @staticmethod
     def add(trigger: Trigger) -> tuple[Optional[Trigger], Optional[str]]:
@@ -88,15 +85,11 @@ class TriggersService:
         Add a new trigger to the database.
         :param trigger: trigger to add.
         """
-        _, error = db.insert(
-            table="triggers",
-            data=trigger.__dict__
-        )
+        _, error = db.insert(table="triggers", data=trigger.__dict__)
         if error:
             logger.error("Error al crear el trigger: %s", error)
             return None, error
         return trigger, None
-
 
     @staticmethod
     def delete_by_id(trigger_id: str) -> tuple[Optional[str], Optional[str]]:
@@ -113,16 +106,11 @@ class TriggersService:
             logger.error("Trigger no encontrado")
             return None, "Trigger no encontrado"
 
-        _, error = db.delete(
-            table="triggers",
-            key="id",
-            value=trigger_id
-        )
+        _, error = db.delete(table="triggers", key="id", value=trigger_id)
         if error:
             logger.error("Error al eliminar el trigger: %s", error)
             return None, error
         return trigger_id, None
-
 
     @staticmethod
     def update(trigger: Trigger) -> tuple[Optional[Trigger], Optional[str]]:
@@ -130,11 +118,7 @@ class TriggersService:
         Update a trigger in the database.
         :param trigger: Trigger to update.
         """
-        _, error = db.upsert(
-            table="triggers",
-            data=trigger.__dict__,
-            primary_key="id"
-        )
+        _, error = db.upsert(table="triggers", data=trigger.__dict__, primary_key="id")
         if error:
             logger.error("Error al actualizar el trigger: %s", error)
             return None, error

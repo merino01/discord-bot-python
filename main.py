@@ -6,6 +6,7 @@ from settings import app_name
 from modules.core import logger
 from bot import Bot
 
+
 def main():
     """
     Main function to run the bot.

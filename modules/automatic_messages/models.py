@@ -3,9 +3,11 @@
 from dataclasses import dataclass
 from typing import Literal, Optional
 
+
 @dataclass
 class AutomaticMessage:
     """Dataclass representing an automatic message."""
+
     id: str
     channel_id: int
     text: str
