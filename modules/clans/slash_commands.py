@@ -45,7 +45,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
         miembro="Miembro a invitar al clan"
     )
     async def invite_to_clan(self, interaction: Interaction, miembro: Member):
-        """Expulsar a alguien del clan"""
+        """Invitar a alguien del clan"""
         clans, error = await ClanService.get_member_clans(interaction.user.id)
         if error or clans is None:
             await interaction.response.send_message(
