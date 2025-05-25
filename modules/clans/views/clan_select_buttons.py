@@ -6,16 +6,18 @@ from discord.ui import View, Button
 from modules.core import logger
 from modules.clans.models import Clan
 from .clan_invite_buttons import ClanInviteView
+from .clan_kick_buttons import ClanKickView
 
 class ClanSelectView(View):
     """Vista para seleccionar un clan"""
 
-    def __init__(self, clans: List[Clan], member: Member):
+    def __init__(self, clans: List[Clan], member: Member, interaction: Interaction):
         super().__init__(timeout=30.0)
         self.clans = clans
         self.selected_clan: Optional[Clan] = None
         self.member_to_send = member
         self.message: Optional[Message] = None
+        self.interaction = interaction
 
         # Añadir un botón por clan
         for clan in clans:
@@ -24,8 +26,12 @@ class ClanSelectView(View):
                 custom_id=str(clan.id),
                 style=ButtonStyle.primary
             )
-            button.callback = self.send_invite_to_user
-            self.add_item(button)
+            if interaction.command.name == "invitar":
+                button.callback = self.send_invite_to_user
+                self.add_item(button)
+            if interaction.command.name == "expulsar":
+                button.callback = self.send_kick_request_to_leader
+                self.add_item(button)
 
     async def send_invite_to_user(self, interaction: Interaction):
         """Callback cuando se presiona un botón"""
@@ -66,6 +72,56 @@ class ClanSelectView(View):
             elif view.value is False:
                 await interaction.followup.send(
                     f"**{self.member_to_send.name}** ha rechazado la invitación",
+                    ephemeral=True
+                )
+        except Exception as e:
+            logger.error(f"Error al enviar el mensaje: {e}")
+            await interaction.response.send_message(
+                "Error al enviar el mensaje al usuario. \
+                Asegúrate de que tenga los mensajes directos habilitados.",
+                ephemeral=True
+            )
+            return
+        
+    async def send_kick_request_to_leader(self, interaction: Interaction):
+        """Callback cuando se presiona un botón"""
+        if not interaction.data or not (clan_id := interaction.data.get("custom_id")):
+            return
+        self.selected_clan = next(
+            (clan for clan in self.clans if clan.id == clan_id),
+            None
+        )
+        if not self.selected_clan:
+            await interaction.response.send_message(
+                "Clan no encontrado",
+                ephemeral=True
+            )
+            return
+        try:
+            view = ClanKickView(self.selected_clan, self.member_to_send)
+            kick_message = await self.interaction.user.send(
+                content=f"Has solicitado la expulsión del clan **{self.selected_clan.name}** al miembro **{self.member_to_send.name}** ¿Deseas continuar?",
+                view=view
+            )
+            self.message = kick_message
+
+            self.stop()
+            await interaction.response.edit_message(
+                content=f"Se le ha enviado la solicitud de expulsión del clan a **{interaction.user.name}**",
+                view=None
+            )
+
+            # Esperar respuesta
+            await view.wait()
+
+            if view.value is True:
+                await interaction.followup.send(
+                    f"Se ha expulsado del clan **{self.selected_clan.name}** a **{self.member_to_send.name}**.",
+                    ephemeral=True
+                )
+            elif view.value is False:
+                await interaction.followup.send(
+                    f"**{interaction.user.name}** ha rechazado la solicitud de expulsión del clan.",
                     ephemeral=True
                 )
         except Exception as e:

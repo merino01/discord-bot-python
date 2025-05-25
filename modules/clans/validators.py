@@ -16,10 +16,6 @@ class ClanValidator:
         name: str,
         leader: Member
     ) -> tuple[bool, Optional[str]]:
-    async def can_create_clan(
-        name: str,
-        leader: Member
-    ) -> tuple[bool, Optional[str]]:
         """Valida si se puede crear un clan con ese nombre"""
         settings, error = await ClanSettingsService.get_settings()
         if error:
@@ -43,7 +39,6 @@ class ClanValidator:
 
 
     @staticmethod
-    async def can_manage_clan(member: Member, clan: Clan) -> tuple[bool, Optional[str]]:
     async def can_manage_clan(member: Member, clan: Clan) -> tuple[bool, Optional[str]]:
         """Valida si un miembro puede gestionar el clan"""
         return True, None

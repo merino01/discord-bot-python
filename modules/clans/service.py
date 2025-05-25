@@ -269,3 +269,40 @@ class ClanService:
             return "El miembro ya pertenece a este clan"
 
         return None
+    
+    @staticmethod
+    async def kick_member_from_clan(
+        member_id: int,
+        clan_id: str
+    ) -> Optional[str]:
+        """Elimina a un miembro de un clan"""
+        settings, error = await ClanSettingsService.get_settings()
+        if error or not settings:
+            return "Error al obtener la configuración de clanes"
+        # Validar si el clan existe
+        clan, error = db.select_one(
+            model=Clan,
+            table="clans",
+            columns=["*"],
+            conditions={"id": clan_id}
+        )
+        if error or not clan:
+            return "El clan no existe"
+
+        # Validar si el miembro ya pertenece a un clan
+        member, error = db.select_one(
+            model=ClanMember,
+            table="clan_members",
+            columns=["*"],
+            conditions={"user_id": member_id}
+        )
+        if error:
+            return "Error al obtener el miembro"
+
+        if member and member.clan_id != clan_id and settings.allow_multiple_clans is False:
+            return "El miembro ya pertenece a otro clan"
+
+        if member and member.clan_id == clan_id:
+            return "El miembro ya pertenece a este clan"
+
+        return None

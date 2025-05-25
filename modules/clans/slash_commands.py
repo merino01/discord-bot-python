@@ -45,7 +45,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
         miembro="Miembro a invitar al clan"
     )
     async def invite_to_clan(self, interaction: Interaction, miembro: Member):
-        """Expulsar a alguien del clan"""
+        """Invitar a alguien del clan"""
         clans, error = await ClanService.get_member_clans(interaction.user.id)
         if error or clans is None:
             await interaction.response.send_message(
@@ -53,7 +53,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 ephemeral=True
             )
             return
-        view = ClanSelectView(clans, miembro)
+        view = ClanSelectView(clans, miembro, interaction)
         await interaction.response.send_message(
             "Selecciona el clan al que quieres invitar al usuario.",
             view=view,
@@ -62,6 +62,27 @@ class ClanCommands(commands.GroupCog, name="clan"):
         view.message = await interaction.original_response()
         return
 
+    @lider.command(name="expulsar")
+    @app_commands.describe(
+        miembro="Miembro a expulsar del clan"
+    )
+    async def kick_from_clan(self, interaction: Interaction, miembro: Member):
+        """Expulsar a miembro del clan"""
+        clans, error = await ClanService.get_member_clans(interaction.user.id)
+        if error or clans is None:
+            await interaction.response.send_message(
+                "No tienes permisos para gestionar ningún clan.",
+                ephemeral=True
+            )
+            return
+        view = ClanSelectView(clans, miembro, interaction)
+        await interaction.response.send_message(
+            "Selecciona el clan del que quieres expulsar al miembro.",
+            view=view,
+            ephemeral=True
+        )
+        view.message = await interaction.original_response()
+        return
 
 
     ###########################################
