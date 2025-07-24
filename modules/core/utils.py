@@ -10,14 +10,6 @@ from modules.core import logger
 async def send_message_to_channel(
     channel: TextChannel, content: Optional[str] = None, embed: Optional[Embed] = None
 ) -> Optional[Message]:
-    """
-    Envía un mensaje a un canal de forma segura.
-
-    Args:
-        channel: Canal donde enviar el mensaje
-        content: Contenido del mensaje (opcional)
-        embed: Embed del mensaje (opcional)
-    """
     try:
         if not channel.permissions_for(channel.guild.me).send_messages:
             logger.warning("No tengo permisos para enviar mensajes en %s", channel.name)
@@ -39,14 +31,6 @@ async def send_message_to_channel(
 async def send_message_to_admin(
     bot: Bot, content: str, embed: Optional[Embed] = None
 ) -> Optional[Message]:
-    """
-    Envía un mensaje al administrador del bot.
-
-    Args:
-        bot: Instancia del bot
-        content: Contenido del mensaje
-        embed: Embed del mensaje (opcional)
-    """
     if not send_to_admin:
         return
 
@@ -68,13 +52,6 @@ async def send_message_to_admin(
 
 
 async def send_error_to_admin(bot: Bot, e):
-    """
-    Envía un mensaje de error al administrador del bot.
-
-    Args:
-        bot: Instancia del bot
-        e: Excepción capturada
-    """
     error_message = f"Error: {str(e)}"
     await send_message_to_admin(bot, error_message)
 
@@ -85,17 +62,6 @@ async def send_paginated_embeds(
     ephemeral: bool = False,
     message: Optional[str] = None,
 ) -> bool:
-    """
-    Envía embeds paginados en grupos de 10.
-
-    Args:
-        interaction: Interacción del comando
-        embeds: Lista de embeds a enviar
-        ephemeral: Si el mensaje debe ser ephemeral
-
-    Returns:
-        bool: True si se enviaron correctamente, False si hubo error
-    """
     try:
         await interaction.response.defer(ephemeral=ephemeral)
 
@@ -119,14 +85,10 @@ async def send_paginated_embeds(
 
         # Si hay más páginas, usar followup
         for i in range(10, len(embeds), 10):
-            await interaction.followup.send(
-                embeds=embeds[i : i + 10], ephemeral=ephemeral
-            )
+            await interaction.followup.send(embeds=embeds[i : i + 10], ephemeral=ephemeral)
         return True
 
     except HTTPException as e:
         logger.error("Error al enviar el mensaje: %s", e)
-        await interaction.followup.send(
-            content="No se pudo enviar el mensaje.", ephemeral=True
-        )
+        await interaction.followup.send(content="No se pudo enviar el mensaje.", ephemeral=True)
         return False

@@ -1,5 +1,3 @@
-"""handler for logs"""
-
 from discord import Message, Member, TextChannel, Embed, Forbidden, HTTPException
 from discord.ext.commands import Bot
 from modules.core import logger
@@ -21,26 +19,19 @@ from .embeds import (
 
 
 class LogHandler:
-    """Manejador centralizado de logs"""
-
     def __init__(self, bot: Bot):
         self.bot = bot
 
     async def _send_log(self, channel: TextChannel, embed: Embed) -> None:
-        """Envía el log al canal"""
         try:
             await channel.send(embed=embed)
         except Forbidden:
-            logger.warning(
-                "Error al enviar el log al canal %s. No tengo permisos.", channel.name
-            )
+            logger.warning("Error al enviar el log al canal %s. No tengo permisos.", channel.name)
         except HTTPException as e:
-            logger.error(
-                "Error al enviar el log al canal %s. Error: %s", channel.name, e
-            )
+            logger.error("Error al enviar el log al canal %s. Error: %s", channel.name, e)
+
 
     async def log_message_edit(self, before: Message, after: Message) -> None:
-        """Maneja logs de mensajes editados"""
         if before.author.bot:
             return
         if before.content == after.content:
@@ -55,7 +46,6 @@ class LogHandler:
             await self._send_log(channel, embed)
 
     async def log_message_delete(self, message: Message) -> None:
-        """Maneja logs de mensajes borrados"""
         if message.author.bot:
             return
 
@@ -68,7 +58,6 @@ class LogHandler:
             await self._send_log(channel, embed)
 
     async def log_member_join(self, member: Member) -> None:
-        """Maneja logs de miembros que entran"""
         channel = await get_log_channel(self.bot, "join_leave")
         if not channel:
             return
@@ -78,7 +67,6 @@ class LogHandler:
             await self._send_log(channel, embed)
 
     async def log_member_remove(self, member: Member) -> None:
-        """Maneja logs de miembros que salen"""
         channel = await get_log_channel(self.bot, "join_leave")
         if not channel:
             return
@@ -88,7 +76,6 @@ class LogHandler:
             await self._send_log(channel, embed)
 
     async def log_member_update(self, before: Member, after: Member) -> None:
-        """Maneja logs de miembros que actualizan su perfil"""
         # - Apodo actualizado
         embed = None
         if before.nick != after.nick:
@@ -113,10 +100,7 @@ class LogHandler:
         if embed:
             await self._send_log(channel, embed)
 
-    async def log_voice_state_update(
-        self, member: Member, before: Member, after: Member
-    ) -> None:
-        """Maneja logs de miembros que entran a un canal de voz"""
+    async def log_voice_state_update(self, member: Member, before: Member, after: Member) -> None:
         channel = await get_log_channel(self.bot, "voice")
         if not channel:
             return
@@ -138,9 +122,6 @@ class LogHandler:
             await self._send_log(channel, embed)
 
     def get_voice_state_action(self, before, after):
-        """
-        Obtiene la acción realizada en el estado de voz.
-        """
         if before.channel is None and after.channel is not None:
             return "joined"
         if before.channel is not None and after.channel is None:

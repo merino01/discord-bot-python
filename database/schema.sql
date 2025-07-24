@@ -58,7 +58,9 @@ CREATE TABLE IF NOT EXISTS clans (
     role_id INTEGER NOT NULL,
     member_count INTEGER NOT NULL,
     max_members INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL,
+    deleted TINYINT DEFAULT 0,
+    deleted_at TIMESTAMP
 );
 
 -- Configuración global para los clanes
@@ -69,7 +71,8 @@ CREATE TABLE IF NOT EXISTS clan_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 INSERT OR IGNORE INTO clan_settings (key, value, description) VALUES
-    ('category_id', '0', 'ID de la categoría donde se crean los clanes'),
+    ('text_category_id', '0', 'ID de la categoría para canales de texto de clanes'),
+    ('voice_category_id', '0', 'ID de la categoría para canales de voz de clanes'),
     ('max_members', '50', 'Número máximo de miembros por clan'),
     ('multiple_clans', 'false', 'Si un usuario puede estar en varios clanes'),
     ('multiple_leaders', 'false', 'Si un clan puede tener múltiples líderes'),

@@ -1,7 +1,3 @@
-"""
-automatic messages commands
-"""
-
 from uuid import uuid4
 from typing import Optional, Literal, Dict
 from discord import app_commands, Interaction, TextChannel, Object, Embed, Color
@@ -20,14 +16,10 @@ TIME_TRANSLATIONS: Dict[TimeUnit, str] = {
     "hours": "horas",
 }
 
-
 class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
-    """
-    Commands for configuring the logs
-    """
-
     def __init__(self, bot):
         self.bot = bot
+        self.service = AutomaticMessagesService()
 
     #################################################
     ### Comando para añadir un mensaje automático ###
@@ -59,7 +51,6 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
         hora: Optional[int] = None,
         minuto: Optional[int] = None,
     ):
-        """Create an automatic message"""
         new_automatic_message = AutomaticMessage(
             id=str(uuid4()),
             channel_id=canal.id,
@@ -69,7 +60,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
             hour=hora,
             minute=minuto,
         )
-        _, error = AutomaticMessagesService.add(new_automatic_message)
+        _, error = self.service.add(new_automatic_message)
         if error:
             await interaction.response.send_message(
                 "Error al crear el mensaje automático", ephemeral=True
@@ -83,9 +74,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
     ##########################################################
     ### Comando para listar todos los mensajes automáticos ###
     ##########################################################
-    @app_commands.command(
-        name="listar", description="Lista todos los mensajes automáticos"
-    )
+    @app_commands.command(name="listar", description="Lista todos los mensajes automáticos")
     @app_commands.describe(
         canal="Ver mensaje automático por canal", persistente="Hacer persistente"
     )
@@ -96,18 +85,15 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
         canal: Optional[TextChannel],
         persistente: Optional[bool] = False,
     ):
-        """List channel formats command"""
         automatic_messages = []
         if canal:
-            automatic_messages, error = AutomaticMessagesService.get_by_channel_id(
-                canal.id
-            )
+            automatic_messages, error = self.service.get_by_channel_id(canal.id)
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
 
         else:
-            automatic_messages, error = AutomaticMessagesService.get_all()
+            automatic_messages, error = self.service.get_all()
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
@@ -117,26 +103,17 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
 
         embeds = []
         for automatic_message in automatic_messages:
-            embed = Embed(
-                title=f"Mensaje automático {automatic_message.id}", color=Color.blue()
-            )
-            embed.add_field(
-                name="Canal", value=f"<#{automatic_message.channel_id}>", inline=False
-            )
+            embed = Embed(title=f"Mensaje automático {automatic_message.id}", color=Color.blue())
+            embed.add_field(name="Canal", value=f"<#{automatic_message.channel_id}>", inline=False)
             embed.add_field(name="Mensaje", value=automatic_message.text, inline=False)
-            if (
-                hasattr(automatic_message, "interval")
-                and automatic_message.interval_unit
-            ):
+            if hasattr(automatic_message, "interval") and automatic_message.interval_unit:
                 _unit = automatic_message.interval_unit
                 embed.add_field(
                     name="Intervalo",
                     value=f"Cada {automatic_message.interval} {TIME_TRANSLATIONS[_unit]}",
                     inline=False,
                 )
-            elif hasattr(automatic_message, "hour") and hasattr(
-                automatic_message, "minute"
-            ):
+            elif hasattr(automatic_message, "hour") and hasattr(automatic_message, "minute"):
                 embed.add_field(
                     name="Hora",
                     value=f"{automatic_message.hour}:{automatic_message.minute}",
@@ -158,8 +135,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
     @app_commands.describe(id_mensaje="ID del mensaje automático a eliminar")
     @app_commands.checks.has_permissions(manage_channels=True, manage_messages=True)
     async def delete_automatic_message(self, interaction: Interaction, id_mensaje: str):
-        """Delete automatic message command"""
-        automatic_message, error = AutomaticMessagesService.get_by_id(id_mensaje)
+        automatic_message, error = self.service.get_by_id(id_mensaje)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
@@ -171,7 +147,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
             )
             return
 
-        _, error = AutomaticMessagesService.delete_by_id(id_mensaje)
+        _, error = self.service.delete_by_id(id_mensaje)
         if error:
             await interaction.response.send_message(
                 f"No se ha podido eliminar el mensaje automático con ID {id_mensaje}",
@@ -187,5 +163,4 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
 
 
 async def setup(bot):
-    """setup"""
     await bot.add_cog(AutomaticMessagesCommands(bot), guild=Object(id=guild_id))
