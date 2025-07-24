@@ -9,31 +9,29 @@ from discord.ui import View, Button
 from modules.clans.models import Clan
 from modules.clans.service import ClanService
 
+
 class ClanKickView(View):
     """Vista para aceptar/rechazar solicitud de expulsar de clan"""
 
-    def __init__(self, clan: Clan, member_to_send: Member):
-        super().__init__(timeout=60 * 60 * 24) # 24 horas
+    def __init__(self, clan: Clan, member_to_send: Member, service: ClanService):
+        super().__init__(timeout=60 * 60 * 24)  # 24 horas
         self.clan = clan
         self.value = None
         self.invite_id = str(uuid4())
         self.message: Optional[Message]
         self.member_to_send = member_to_send
+        self.service = service
 
         # Botón de aceptar
         accept_button = Button(
-            style=ButtonStyle.success,
-            label="Aceptar",
-            custom_id=f"accept{self.invite_id}"
+            style=ButtonStyle.success, label="Aceptar", custom_id=f"accept{self.invite_id}"
         )
         accept_button.callback = self.accept_callback
         self.add_item(accept_button)
 
         # Botón de rechazar
         reject_button = Button(
-            style=ButtonStyle.danger,
-            label="Rechazar",
-            custom_id=f"reject{self.invite_id}"
+            style=ButtonStyle.danger, label="Rechazar", custom_id=f"reject{self.invite_id}"
         )
         reject_button.callback = self.reject_callback
         self.add_item(reject_button)
@@ -46,20 +44,18 @@ class ClanKickView(View):
                 item.disabled = True
 
         # Expulsar a miembro del clan
-        error = await ClanService.kick_member_from_clan(
-            member_id=self.member_to_send.id,
-            clan_id=self.clan.id
+        error = await self.service.kick_member_from_clan(
+            member_id=self.member_to_send.id, clan_id=self.clan.id
         )
         if error:
             await interaction.response.edit_message(
-                content=f"Error al aceptar la solicitud: {error}",
-                view=None
+                content=f"Error al aceptar la solicitud: {error}", view=None
             )
             return
 
         await interaction.response.edit_message(
             content=f"Has expulsado a **{self.member_to_send.name}** del clan **{self.clan.name}**",
-            view=None
+            view=None,
         )
         self.stop()
 
@@ -71,7 +67,7 @@ class ClanKickView(View):
                 item.disabled = True
         await interaction.response.edit_message(
             content=f"Has rechazado la solicitud de expulsión de **{self.member_to_send.name}** del clan **{self.clan.name}**",
-            view=self
+            view=self,
         )
         self.stop()
 
@@ -83,6 +79,5 @@ class ClanKickView(View):
             if isinstance(item, Button):
                 item.disabled = True
         await self.message.edit(
-            content=f"La invitación al clan **{self.clan.name}** ha expirado",
-            view=self
+            content=f"La invitación al clan **{self.clan.name}** ha expirado", view=self
         )

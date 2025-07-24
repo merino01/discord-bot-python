@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+    discord-bot:
+        build: .
+        container_name: discord-bot
+        restart: unless-stopped
+
+        volumes:
+            - ./logs:/app/logs
+            - ./database:/app/database
+            - ./config.json:/app/config.json:ro
+            # Montar código para desarrollo (descomenta para dev)
+            - .:/app

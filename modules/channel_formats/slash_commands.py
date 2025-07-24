@@ -1,7 +1,3 @@
-"""
-channel formats commands
-"""
-
 from re import compile as compile_regex, error as re_error
 from typing import Optional
 from uuid import uuid4
@@ -14,12 +10,9 @@ from .models import ChannelFormat
 
 
 class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
-    """
-    Commands for configuring the channel formats
-    """
-
     def __init__(self, bot):
         self.bot = bot
+        self.service = ChannelFormatsService()
 
     #####################################################
     ### Comando para añadir un nuevo formato de canal ###
@@ -33,7 +26,6 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
     async def create_channel_format(
         self, interaction: Interaction, canal: TextChannel, formato: str
     ):
-        """Add channel format command"""
         try:
             compile_regex(formato)
         except re_error:
@@ -43,10 +35,8 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
             )
             return
 
-        new_channel_format = ChannelFormat(
-            id=str(uuid4()), channel_id=canal.id, regex=formato
-        )
-        _, error = ChannelFormatsService.add(new_channel_format)
+        new_channel_format = ChannelFormat(id=str(uuid4()), channel_id=canal.id, regex=formato)
+        _, error = self.service.add(new_channel_format)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
@@ -58,9 +48,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
     #########################################################
     ### Comando para listar todos los formatos de canal #####
     #########################################################
-    @app_commands.command(
-        name="listar", description="Lista todos los formatos de canal"
-    )
+    @app_commands.command(name="listar", description="Lista todos los formatos de canal")
     @app_commands.describe(
         id_formato="ID del formato de canal",
         canal="Listar formatos por canal",
@@ -74,10 +62,9 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
         canal: Optional[TextChannel],
         persistente: Optional[bool] = False,
     ):
-        """List channel formats command"""
         channel_formats = []
         if id_formato:
-            channel_format, error = ChannelFormatsService.get_by_id(id_formato)
+            channel_format, error = self.service.get_by_id(id_formato)
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
@@ -89,14 +76,12 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
                 return
             channel_formats.append(channel_format)
         elif canal:
-            channel_formats, error = ChannelFormatsService.get_all_by_channel_id(
-                canal.id
-            )
+            channel_formats, error = self.service.get_all_by_channel_id(canal.id)
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
         else:
-            channel_formats, error = ChannelFormatsService.get_all()
+            channel_formats, error = self.service.get_all()
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
@@ -109,12 +94,8 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
 
         embeds = []
         for channel_format in channel_formats:
-            embed = Embed(
-                title=f"Formato de canal {channel_format.id}", color=Color.blue()
-            )
-            embed.add_field(
-                name="Canal", value=f"<#{channel_format.channel_id}>", inline=True
-            )
+            embed = Embed(title=f"Formato de canal {channel_format.id}", color=Color.blue())
+            embed.add_field(name="Canal", value=f"<#{channel_format.channel_id}>", inline=True)
             embed.add_field(name="Formato", value=channel_format.regex, inline=True)
             embeds.append(embed)
         await send_paginated_embeds(
@@ -132,7 +113,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
     @app_commands.checks.has_permissions(manage_channels=True, manage_messages=True)
     async def delete_channel_format(self, interaction: Interaction, id_formato: str):
         """Delete channel format command"""
-        channel_format, error = ChannelFormatsService.get_by_id(id_formato)
+        channel_format, error = self.service.get_by_id(id_formato)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
@@ -144,7 +125,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
             )
             return
 
-        _, error = ChannelFormatsService.delete(channel_format)
+        _, error = self.service.delete(channel_format)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
@@ -169,7 +150,6 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
         canal: Optional[TextChannel],
         formato: Optional[str],
     ):
-        """Edit channel format command"""
         try:
             compile_regex(formato)
         except re_error:
@@ -179,7 +159,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
             )
             return
 
-        channel_format, error = ChannelFormatsService.get_by_id(id_formato)
+        channel_format, error = self.service.get_by_id(id_formato)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
@@ -193,15 +173,12 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
             channel_format.channel_id = canal.id
         if formato:
             channel_format.regex = formato
-        error = ChannelFormatsService.update(channel_format)
+        error = self.service.update(channel_format)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
-        await interaction.response.send_message(
-            "Formato de canal editado", ephemeral=True
-        )
+        await interaction.response.send_message("Formato de canal editado", ephemeral=True)
 
 
 async def setup(bot):
-    """setup"""
     await bot.add_cog(ChannelFormatsCommands(bot), guild=Object(id=guild_id))

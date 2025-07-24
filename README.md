@@ -2,6 +2,88 @@
 
 Este es un bot de discord para gestionar el servidor, se pueden configurar **logs**, **triggers**, **mensajes automáticos**, **formatos de canales**, **crear clanes**, etc...
 
+## INSTALACIÓN Y EJECUCIÓN
+
+### Opción 1: Con Docker (Recomendado)
+
+#### Prerrequisitos
+- Docker
+- Docker Compose
+
+#### Pasos para ejecutar con Docker
+
+1. **Clona el repositorio:**
+   ```bash
+   git clone <url-del-repositorio>
+   cd discord-bot-python
+   ```
+
+2. **Configura el archivo config.json:**
+   ```json
+   {
+       "app_name": "discord-bot",
+       "bot_token": "TU_TOKEN_AQUI",
+       "guild_id": 1212122343443524324,
+       "admin_id": 8767643756437563653,
+       "send_to_admin": true
+   }
+   ```
+
+3. **Ejecuta el bot:**
+   
+   **En Windows (PowerShell):**
+   ```powershell
+   .\start.ps1
+   ```
+   
+   **En Linux/Mac:**
+   ```bash
+   chmod +x start.sh
+   ./start.sh
+   ```
+   
+   **O manualmente:**
+   ```bash
+   # Construir la imagen
+   docker build -t discord-bot-python .
+   
+   # Ejecutar con docker-compose
+   docker-compose up -d
+   ```
+
+4. **Comandos útiles:**
+   ```bash
+   # Ver logs en tiempo real
+   docker-compose logs -f
+   
+   # Detener el bot
+   docker-compose down
+   
+   # Ver estado del contenedor
+   docker-compose ps
+   
+   # Reiniciar el bot
+   docker-compose restart
+   ```
+
+### Opción 2: Instalación Local
+
+#### Prerrequisitos
+- Python 3.12+
+- uv (gestor de paquetes)
+
+#### Pasos para ejecutar localmente
+
+1. **Instala las dependencias:**
+   ```bash
+   uv sync
+   ```
+
+2. **Ejecuta el bot:**
+   ```bash
+   uv run python main.py
+   ```
+
 ## CONFIGURACIÓN
 
 Para poder levantar el bot se necesita un archivo `config.json` en la raiz del proyecto.
