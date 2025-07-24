@@ -5,16 +5,10 @@ from discord import Embed, Color, Message, TextChannel, Member
 
 
 def create_separator(embed: Embed) -> None:
-    """
-    Create a separator in the embed.
-    """
     embed.add_field(name="\u200b", value="\u200b", inline=False)
 
 
 def get_message_edit_embed(before: Message, after: Message) -> Embed | None:
-    """
-    Create an embed for the message edit event.
-    """
     if not isinstance(after.channel, TextChannel):
         return None
 
@@ -40,15 +34,10 @@ def get_message_edit_embed(before: Message, after: Message) -> Embed | None:
 
 
 def get_message_delete_embed(message: Message) -> Embed | None:
-    """
-    Create an embed for the message delete event.
-    """
     if not isinstance(message.channel, TextChannel):
         return None
 
-    embed = Embed(
-        title="Mensaje eliminado", color=Color.red(), timestamp=datetime.now()
-    )
+    embed = Embed(title="Mensaje eliminado", color=Color.red(), timestamp=datetime.now())
 
     embed.add_field(name="Mención del autor", value=message.author.mention, inline=True)
     embed.add_field(name="Nombre del autor", value=message.author.name, inline=True)
@@ -56,9 +45,7 @@ def get_message_delete_embed(message: Message) -> Embed | None:
 
     create_separator(embed)
 
-    embed.add_field(
-        name="Mención del canal", value=message.channel.mention, inline=True
-    )
+    embed.add_field(name="Mención del canal", value=message.channel.mention, inline=True)
     embed.add_field(name="Nombre del canal", value=message.channel.name, inline=True)
     embed.add_field(name="ID del canal", value=message.channel.id, inline=True)
 
@@ -71,9 +58,6 @@ def get_message_delete_embed(message: Message) -> Embed | None:
 
 
 def get_member_join_embed(member: Member) -> Embed:
-    """
-    Create an embed for the member join event.
-    """
     embed = Embed(
         title="Un miembro se ha unido al servidor",
         color=Color.dark_green(),
@@ -93,9 +77,6 @@ def get_member_join_embed(member: Member) -> Embed:
 
 
 def get_member_remove_embed(member) -> Embed:
-    """
-    Create an embed for the member remove event.
-    """
     embed = Embed(
         title="Un miembro ha abandonado el servidor",
         color=Color.dark_red(),
@@ -115,9 +96,6 @@ def get_member_remove_embed(member) -> Embed:
 
 
 def get_voice_state_join_embed(member, after) -> Embed:
-    """
-    Crea un embed para el mensaje de estado de voz.
-    """
     embed = Embed(
         title="Usuario unido a canal de voz",
         color=Color.green(),
@@ -129,21 +107,14 @@ def get_voice_state_join_embed(member, after) -> Embed:
 
     create_separator(embed)
 
-    embed.add_field(
-        name="Mención del canal de voz", value=after.channel.mention, inline=True
-    )
-    embed.add_field(
-        name="Nombre del canal de voz", value=after.channel.name, inline=True
-    )
+    embed.add_field(name="Mención del canal de voz", value=after.channel.mention, inline=True)
+    embed.add_field(name="Nombre del canal de voz", value=after.channel.name, inline=True)
     embed.add_field(name="ID del canal de voz", value=after.channel.id, inline=True)
 
     return embed
 
 
 def get_voice_state_leave_embed(member, before) -> Embed:
-    """
-    Crea un embed para el mensaje de estado de voz.
-    """
     embed = Embed(
         title="Usuario salido de canal de voz",
         color=Color.red(),
@@ -155,21 +126,14 @@ def get_voice_state_leave_embed(member, before) -> Embed:
 
     create_separator(embed)
 
-    embed.add_field(
-        name="Mención del canal de voz", value=before.channel.mention, inline=True
-    )
-    embed.add_field(
-        name="Nombre del canal de voz", value=before.channel.name, inline=True
-    )
+    embed.add_field(name="Mención del canal de voz", value=before.channel.mention, inline=True)
+    embed.add_field(name="Nombre del canal de voz", value=before.channel.name, inline=True)
     embed.add_field(name="ID del canal de voz", value=before.channel.id, inline=True)
 
     return embed
 
 
 def get_voice_state_move_embed(member, before, after) -> Embed:
-    """
-    Crea un embed para el mensaje de estado de voz.
-    """
     embed = Embed(
         title="Usuario movido de canal de voz",
         color=Color.blue(),
@@ -186,32 +150,19 @@ def get_voice_state_move_embed(member, before, after) -> Embed:
         value=before.channel.mention,
         inline=True,
     )
-    embed.add_field(
-        name="Nombre del canal de voz antiguo", value=before.channel.name, inline=True
-    )
-    embed.add_field(
-        name="ID del canal de voz antiguo", value=before.channel.id, inline=True
-    )
+    embed.add_field(name="Nombre del canal de voz antiguo", value=before.channel.name, inline=True)
+    embed.add_field(name="ID del canal de voz antiguo", value=before.channel.id, inline=True)
 
     create_separator(embed)
 
-    embed.add_field(
-        name="Mención del canal de voz nuevo", value=after.channel.mention, inline=True
-    )
-    embed.add_field(
-        name="Nombre del canal de voz nuevo", value=after.channel.name, inline=True
-    )
-    embed.add_field(
-        name="ID del canal de voz nuevo", value=after.channel.id, inline=True
-    )
+    embed.add_field(name="Mención del canal de voz nuevo", value=after.channel.mention, inline=True)
+    embed.add_field(name="Nombre del canal de voz nuevo", value=after.channel.name, inline=True)
+    embed.add_field(name="ID del canal de voz nuevo", value=after.channel.id, inline=True)
 
     return embed
 
 
 def get_member_update_nick_embed(before: Member, after: Member) -> Embed:
-    """
-    Create an embed for the member nickname update event.
-    """
     embed = Embed(title="Cambio de apodo", color=Color.blue(), timestamp=datetime.now())
 
     embed.add_field(name="Mención del usuario", value=after.mention, inline=True)
@@ -227,12 +178,7 @@ def get_member_update_nick_embed(before: Member, after: Member) -> Embed:
 
 
 def get_member_update_username_embed(before: Member, after: Member) -> Embed:
-    """
-    Create an embed for the member username update event.
-    """
-    embed = Embed(
-        title="Cambio de nombre", color=Color.blue(), timestamp=datetime.now()
-    )
+    embed = Embed(title="Cambio de nombre", color=Color.blue(), timestamp=datetime.now())
 
     embed.add_field(name="Mención del usuario", value=after.mention, inline=True)
     embed.add_field(name="ID del usuario", value=after.id, inline=True)
@@ -246,12 +192,7 @@ def get_member_update_username_embed(before: Member, after: Member) -> Embed:
 
 
 def get_member_update_avatar_embed(before: Member, after: Member) -> Embed:
-    """
-    Create an embed for the member avatar update event.
-    """
-    embed = Embed(
-        title="Cambio de avatar", color=Color.blue(), timestamp=datetime.now()
-    )
+    embed = Embed(title="Cambio de avatar", color=Color.blue(), timestamp=datetime.now())
     if after.avatar is not None:
         embed.set_image(url=after.avatar.url)
 
@@ -276,12 +217,7 @@ def get_member_update_avatar_embed(before: Member, after: Member) -> Embed:
 
 
 def get_member_update_banner_embed(before: Member, after: Member) -> Embed:
-    """
-    Create an embed for the member banner update event.
-    """
-    embed = Embed(
-        title="Cambio de banner", color=Color.blue(), timestamp=datetime.now()
-    )
+    embed = Embed(title="Cambio de banner", color=Color.blue(), timestamp=datetime.now())
 
     embed.add_field(name="Mención del usuario", value=after.mention, inline=True)
     embed.add_field(name="Nombre del usuario", value=after.name, inline=True)
@@ -304,9 +240,6 @@ def get_member_update_banner_embed(before: Member, after: Member) -> Embed:
 
 
 def get_member_update_roles_embed(before: Member, after: Member) -> Embed:
-    """
-    Create an embed for the member roles update event.
-    """
     embed = Embed(timestamp=datetime.now())
 
     embed.add_field(name="Mención del usuario", value=after.mention, inline=True)

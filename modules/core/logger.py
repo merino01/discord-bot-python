@@ -1,8 +1,3 @@
-"""
-logger.py
-Módulo para la configuración del logger.
-"""
-
 from sys import stdout
 import logging
 from pathlib import Path
@@ -16,22 +11,14 @@ root_dir = Path(__file__).resolve().parent.parent.parent
 
 
 class CustomLogger(logging.Logger):
-    """Logger personalizado con método de inicialización."""
-
     _file_handler = None
     _console_handler = None
     _initialized = False
 
     def __init__(self, name, level=logging.NOTSET):
-        """
-        Inicializa el logger con un nombre y nivel.
-        """
         super().__init__(name, level)
 
     def start(self) -> None:
-        """
-        Inicializa el logger con los handlers y configuración.
-        """
         if self._initialized:
             return
 
@@ -46,9 +33,7 @@ class CustomLogger(logging.Logger):
         filename = f"logs/{APP_NAME}__{date}.log"
 
         # Configurar handlers
-        _file_handler = logging.FileHandler(
-            filename=filename, encoding="utf-8", mode="a"
-        )
+        _file_handler = logging.FileHandler(filename=filename, encoding="utf-8", mode="a")
         _console_handler = logging.StreamHandler(stdout)
 
         # Definir el formato de los logs
@@ -68,8 +53,6 @@ class CustomLogger(logging.Logger):
         self._initialized = True
 
 
-# Registrar la clase personalizada
 logging.setLoggerClass(CustomLogger)
 
-# Crear la instancia del logger (solo se crea una vez)
 logger = cast(CustomLogger, logging.getLogger(APP_NAME))

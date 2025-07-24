@@ -1,94 +1,74 @@
-"""automatic_messages_service.py"""
-
 from typing import List, Optional
-from database import db
+from database.database import Database
 from modules.core import logger
 from .models import AutomaticMessage
 
-
 class AutomaticMessagesService:
-    """Service class for managing channel formats."""
+    def __init__(self):
+        self.db = Database()
 
-    @staticmethod
-    def get_all() -> tuple[Optional[List[AutomaticMessage]], Optional[str]]:
-        """
-        Fetch all channel formats from the database.
-        :return: List of channel formats.
-        """
-        automatic_messages, error = db.select(
-            model=AutomaticMessage, table="automatic_messages", columns=["*"]
-        )
-        if error:
+    def get_all(self) -> tuple[Optional[List[AutomaticMessage]], Optional[str]]:
+        try:
+            rows = self.db.select("SELECT * FROM automatic_messages")
+            automatic_messages = [AutomaticMessage(**row) for row in rows]
+            return automatic_messages, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al obtener los mensajes automáticos: %s", error)
             return None, error
-        return automatic_messages, None
 
-    @staticmethod
     def get_by_id(
-        automatic_message_id: str,
+        self, automatic_message_id: str,
     ) -> tuple[Optional[AutomaticMessage], Optional[str]]:
-        """
-        Fetch a channel format by its ID.
-        :param automatic_message_id: ID of the channel format to fetch.
-        :return: Channel format with the specified ID.
-        """
-        automatic_message, error = db.select_one(
-            model=AutomaticMessage,
-            table="automatic_messages",
-            columns=["*"],
-            conditions={"id": automatic_message_id},
-        )
-        if error:
+        try:
+            row = self.db.single("SELECT * FROM automatic_messages WHERE id = ?", (automatic_message_id,))
+            if not row:
+                return None, None
+            automatic_message = AutomaticMessage(**row)
+            return automatic_message, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al obtener el mensaje automático: %s", error)
             return None, error
-        return automatic_message, None
 
-    @staticmethod
     def get_by_channel_id(
-        channel_id: int,
+        self, channel_id: int,
     ) -> tuple[Optional[List[AutomaticMessage]], Optional[str]]:
-        """
-        Fetch channel formats by channel ID.
-        :param channel_id: Channel ID to filter by.
-        :return: List of channel formats for the specified channel ID.
-        """
-        automatic_message, error = db.select(
-            model=AutomaticMessage,
-            table="automatic_messages",
-            columns=["*"],
-            conditions={"channel_id": channel_id},
-        )
-        if error:
+        try:
+            rows = self.db.select("SELECT * FROM automatic_messages WHERE channel_id = ?", (channel_id,))
+            automatic_messages = [AutomaticMessage(**row) for row in rows]
+            return automatic_messages, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al obtener los mensajes automáticos: %s", error)
             return None, error
-        return automatic_message, None
 
-    @staticmethod
-    def add(
-        automatic_message: AutomaticMessage,
-    ) -> tuple[Optional[AutomaticMessage], Optional[str]]:
-        """
-        Add a new channel format to the database.
-        :param automatic_message: Channel format to add.
-        """
-        _, error = db.insert(
-            table="automatic_messages", data=automatic_message.__dict__
-        )
-        if error:
+    def add(self, automatic_message: AutomaticMessage) -> tuple[Optional[AutomaticMessage], Optional[str]]:
+        try:
+            sql = """INSERT INTO automatic_messages 
+                     (id, channel_id, text, interval, interval_unit, hour, minute) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?)"""
+            params = (
+                automatic_message.id,
+                automatic_message.channel_id,
+                automatic_message.text,
+                automatic_message.interval,
+                automatic_message.interval_unit,
+                automatic_message.hour,
+                automatic_message.minute
+            )
+            self.db.execute(sql, params)
+            return automatic_message, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al crear el mensaje automático: %s", error)
             return None, error
-        return automatic_message, None
 
-    @staticmethod
-    def delete_by_id(automatic_message_id: str) -> tuple[Optional[int], Optional[str]]:
-        """
-        Delete a channel format from the database.
-        :param automatic_message_id: ID of the channel format to delete.
-        """
-        _id, error = db.delete(
-            table="automatic_messages", key="id", value=automatic_message_id
-        )
-        if error:
+    def delete_by_id(self, automatic_message_id: str) -> tuple[Optional[int], Optional[str]]:
+        try:
+            self.db.execute("DELETE FROM automatic_messages WHERE id = ?", (automatic_message_id,))
+            return 1, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al eliminar el mensaje automático: %s", error)
             return None, error
-        return _id, None

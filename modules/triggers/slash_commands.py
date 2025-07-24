@@ -1,7 +1,3 @@
-"""
-triggers commands
-"""
-
 from typing import Optional
 from uuid import uuid4
 from discord import app_commands, Interaction, TextChannel, Object, Embed, Color
@@ -23,12 +19,9 @@ TRIGGER_POSITIONS_TRANSLATIONS = {
 
 
 class TriggersCommands(commands.GroupCog, name="triggers"):
-    """
-    Commands for configuring the triggers
-    """
-
     def __init__(self, bot):
         self.bot = bot
+        self.service = TriggersService()
 
     ######################################
     ### Comando para añadir un trigger ###
@@ -81,7 +74,6 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
         posicion: TriggerTextPosition,
         tiempo_respuesta: Optional[int],
     ):
-        """Add trigger command"""
         new_trigger = Trigger(
             id=str(uuid4()),
             channel_id=canal.id,
@@ -91,7 +83,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
             position=posicion,
             response_timeout=tiempo_respuesta,
         )
-        _, error = TriggersService.add(new_trigger)
+        _, error = self.service.add(new_trigger)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
@@ -114,10 +106,9 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
         canal: Optional[TextChannel] = None,
         persistente: bool = False,
     ):
-        """List triggers command"""
         triggers = []
         if id_trigger:
-            trigger, error = TriggersService.get_by_id(id_trigger)
+            trigger, error = self.service.get_by_id(id_trigger)
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
@@ -129,20 +120,18 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
                 return
             triggers.append(trigger)
         elif canal:
-            triggers, error = TriggersService.get_all_by_channel_id(canal.id)
+            triggers, error = self.service.get_all_by_channel_id(canal.id)
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
         else:
-            triggers, error = TriggersService.get_all()
+            triggers, error = self.service.get_all()
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
 
         if not triggers or len(triggers) == 0:
-            await interaction.response.send_message(
-                "No hay triggers configurados.", ephemeral=True
-            )
+            await interaction.response.send_message("No hay triggers configurados.", ephemeral=True)
             return
 
         embeds = []
@@ -192,13 +181,11 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
     @app_commands.checks.has_permissions(manage_channels=True, manage_messages=True)
     async def delete_trigger(self, interaction: Interaction, id_del_trigger: str):
         """Delete trigger command"""
-        _, error = TriggersService.delete_by_id(id_del_trigger)
+        _, error = self.service.delete_by_id(id_del_trigger)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
-        await interaction.response.send_message(
-            content="Trigger eliminado", ephemeral=True
-        )
+        await interaction.response.send_message(content="Trigger eliminado", ephemeral=True)
 
     #######################################
     ### Comando para editar un trigger ####
@@ -253,8 +240,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
         posicion: Optional[TriggerTextPosition] = None,
         tiempo_respuesta: Optional[int] = None,
     ):
-        """Edit trigger command"""
-        trigger, error = TriggersService.get_by_id(id_trigger)
+        trigger, error = self.service.get_by_id(id_trigger)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
@@ -279,16 +265,13 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
         if tiempo_respuesta:
             trigger.response_timeout = tiempo_respuesta
 
-        _, error = TriggersService.update(trigger)
+        _, error = self.service.update(trigger)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
 
-        await interaction.response.send_message(
-            content="Trigger editado", ephemeral=True
-        )
+        await interaction.response.send_message(content="Trigger editado", ephemeral=True)
 
 
 async def setup(bot):
-    """setup"""
     await bot.add_cog(TriggersCommands(bot), guild=Object(id=guild_id))

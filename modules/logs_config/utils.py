@@ -1,5 +1,3 @@
-"""Utility functions for log configs."""
-
 from typing import Optional
 from discord import TextChannel
 from discord.ext.commands import Bot
@@ -10,7 +8,6 @@ from .models import LogConfigType
 
 
 async def _get_text_channel(bot: Bot, channel_id: int) -> Optional[TextChannel]:
-    """Get a text channel by its ID."""
     if not channel_id:
         return None
 
@@ -36,11 +33,10 @@ async def get_log_channel(bot: Bot, log_type: LogConfigType) -> Optional[TextCha
     Returns:
         The log channel, or None if not found or not enabled.
     """
-    log_config, error = LogsConfigService.get_by_type(log_type)
+    service = LogsConfigService()
+    log_config, error = service.get_by_type(log_type)
     if error:
-        logger.error(
-            "Error al obtener la configuracion de logs de tipo members: %s", error
-        )
+        logger.error("Error al obtener la configuracion de logs de tipo members: %s", error)
         return None
     if not log_config or not log_config.enabled:
         return None

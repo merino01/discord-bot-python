@@ -1,7 +1,3 @@
-"""
-Module for handling automatic messages in Discord channels.
-"""
-
 from datetime import datetime, time
 from typing import Dict
 from discord.ext import tasks
@@ -13,8 +9,6 @@ message_tasks: Dict[str, tasks.Loop] = {}
 
 
 def create_message_task(client, message_config: AutomaticMessage):
-    """Crea una tarea programada para un mensaje específico"""
-
     # Preparar los argumentos del decorador basados en la configuración
     decorator_kwargs = {}
 
@@ -32,10 +26,7 @@ def create_message_task(client, message_config: AutomaticMessage):
         @tasks.loop(**decorator_kwargs)
         async def send_message_interval():
             channel = await client.fetch_channel(message_config.channel_id)
-            if (
-                not channel
-                or not channel.permissions_for(channel.guild.me).send_messages
-            ):
+            if not channel or not channel.permissions_for(channel.guild.me).send_messages:
                 return
 
             await send_message_to_channel(channel, content=message_config.text)
@@ -57,16 +48,11 @@ def create_message_task(client, message_config: AutomaticMessage):
             now = datetime.now().time()
             if now.hour == target_time.hour and now.minute == target_time.minute:
                 channel = await client.fetch_channel(message_config.channel_id)
-                if (
-                    not channel
-                    or not channel.permissions_for(channel.guild.me).send_messages
-                ):
+                if not channel or not channel.permissions_for(channel.guild.me).send_messages:
                     return
 
                 await send_message_to_channel(channel, content=message_config.text)
-                logger.info(
-                    f"Mensaje automático enviado a {channel.name} (hora exacta)"
-                )
+                logger.info(f"Mensaje automático enviado a {channel.name} (hora exacta)")
 
     if hasattr(message_config, "interval"):
         return send_message_interval
@@ -75,7 +61,6 @@ def create_message_task(client, message_config: AutomaticMessage):
 
 
 def stop_all_tasks():
-    """Stops all automatic message tasks"""
     for task_id, task in message_tasks.items():
         if task.is_running():
             task.stop()
@@ -86,7 +71,6 @@ def stop_all_tasks():
 
 
 def stop_task_by_id(task_id: str):
-    """Stops a specific automatic message task by its ID"""
     task = message_tasks.get(task_id)
     if task and task.is_running():
         task.stop()
@@ -97,7 +81,6 @@ def stop_task_by_id(task_id: str):
 
 
 def start_task(client, automatic_message_config: AutomaticMessage):
-    """Starts a task for a specific automatic message configuration"""
     task = create_message_task(client, automatic_message_config)
 
     if task is None:
@@ -117,16 +100,14 @@ def start_task(client, automatic_message_config: AutomaticMessage):
         interval_log_text += f"{automatic_message_config.interval_unit}"
         log_info["interval"] = interval_log_text
     else:
-        log_info["time"] = (
-            f"{automatic_message_config.hour}:{automatic_message_config.minute}"
-        )
+        log_info["time"] = f"{automatic_message_config.hour}:{automatic_message_config.minute}"
     logger.info("Mensaje automático programado")
     logger.info(log_info)
 
 
 def setup_automatic_messages(client):
-    """Configures all automatic message tasks"""
-    automatic_messages, error = AutomaticMessagesService.get_all()
+    service = AutomaticMessagesService()
+    automatic_messages, error = service.get_all()
     if error:
         logger.error("Error al obtener los mensajes automáticos: %s", error)
         return

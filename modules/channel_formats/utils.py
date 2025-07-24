@@ -1,5 +1,3 @@
-"""util functions for channel formats"""
-
 from re import compile as regex_compile, error as re_error
 from discord import Message, TextChannel
 from modules.core import logger
@@ -7,13 +5,8 @@ from .service import ChannelFormatsService
 
 
 async def check_channel_format(message: Message):
-    """
-    Check if the message format is valid for the channel.
-    If the format is invalid, delete the message.
-    """
-    channel_format, error = ChannelFormatsService.get_one_by_channel_id(
-        message.channel.id
-    )
+    service = ChannelFormatsService()
+    channel_format, error = service.get_one_by_channel_id(message.channel.id)
     if error:
         logger.error(f"Error al obtener el formato de canal: {error}")
         return

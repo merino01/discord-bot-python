@@ -1,5 +1,3 @@
-"""logs config commands"""
-
 from typing import Optional
 from discord import app_commands, Interaction, TextChannel, Object, Embed, Color
 from discord.ext import commands
@@ -9,19 +7,14 @@ from .models import LogConfig, LogConfigType
 
 
 class ConfigLogsCommands(commands.GroupCog, name="logs"):
-    """
-    Commands for configuring the logs
-    """
-
     def __init__(self, bot):
         self.bot = bot
+        self.service = LogsConfigService()
 
     #####################################################
     ### Comando para configurar los logs del servidor ###
     #####################################################
-    @app_commands.command(
-        name="configurar", description="Configura los logs del servidor"
-    )
+    @app_commands.command(name="configurar", description="Configura los logs del servidor")
     @app_commands.describe(
         tipo_de_log="Tipo de log a configurar",
         activar="Activar o desactivar los logs",
@@ -43,7 +36,6 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
         activar: bool,
         canal: Optional[TextChannel] = None,
     ):
-        """Config logs command"""
         if not canal and activar:
             await interaction.response.send_message(
                 content="No puedes activar los logs sin especificar un canal",
@@ -55,7 +47,7 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
             type=tipo_de_log, channel_id=canal.id if canal else None, enabled=activar
         )
 
-        _, error = LogsConfigService.update(log_config)
+        _, error = self.service.update(log_config)
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
@@ -78,23 +70,16 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
     #####################################################
     ### Comando para ver la configuración de los logs ###
     #####################################################
-    @app_commands.command(
-        name="listar", description="Muestra la configuración de los logs"
-    )
+    @app_commands.command(name="listar", description="Muestra la configuración de los logs")
     @app_commands.checks.has_permissions(administrator=True)
-    async def show_logs_config(
-        self, interaction: Interaction, persistente: bool = False
-    ):
-        """List logs command"""
-        log_configs, error = LogsConfigService.get_all()
+    async def show_logs_config(self, interaction: Interaction, persistente: bool = False):
+        log_configs, error = self.service.get_all()
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
 
         if not log_configs:
-            await interaction.response.send_message(
-                "No hay logs configurados", ephemeral=True
-            )
+            await interaction.response.send_message("No hay logs configurados", ephemeral=True)
             return
 
         await interaction.response.defer(ephemeral=not persistente)
@@ -119,5 +104,4 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
 
 
 async def setup(bot):
-    """setup"""
     await bot.add_cog(ConfigLogsCommands(bot), guild=Object(id=guild_id))

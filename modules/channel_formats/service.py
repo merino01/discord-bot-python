@@ -1,138 +1,99 @@
-"""channel_formats_service.py"""
-
 from typing import List, Optional
-from database import db
+from database.database import Database
 from modules.core import logger
 from .models import ChannelFormat
 
 
 class ChannelFormatsService:
-    """Service class for managing channel formats."""
+    def __init__(self):
+        self.db = Database()
 
-    @staticmethod
-    def get_all() -> tuple[Optional[List[ChannelFormat]], Optional[str]]:
-        """
-        Fetch all channel formats from the database.
-        :return: List of channel formats.
-        """
-        channel_formats, error = db.select(
-            model=ChannelFormat, table="channel_formats", columns=["*"]
-        )
-        if error:
+    def get_all(self) -> tuple[Optional[List[ChannelFormat]], Optional[str]]:
+        try:
+            rows = self.db.select("SELECT * FROM channel_formats")
+            channel_formats = [ChannelFormat(**row) for row in rows]
+            return channel_formats, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al obtener los formatos de canal: %s", error)
             return None, error
 
-        return channel_formats, None
-
-    @staticmethod
-    def get_by_id(format_id: str) -> tuple[Optional[ChannelFormat], Optional[str]]:
-        """
-        Fetch a channel format by its ID.
-        :param id: The ID of the channel format.
-        :return: The channel format if found, otherwise None.
-        """
-        channel_format, error = db.select_one(
-            model=ChannelFormat,
-            table="channel_formats",
-            columns=["*"],
-            conditions={"id": format_id},
-        )
-        if error:
+    def get_by_id(self, format_id: str) -> tuple[Optional[ChannelFormat], Optional[str]]:
+        try:
+            row = self.db.single("SELECT * FROM channel_formats WHERE id = ?", (format_id,))
+            if not row:
+                return None, None
+            channel_format = ChannelFormat(**row)
+            return channel_format, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al obtener el formato de canal: %s", error)
             return None, error
-        return channel_format, None
 
-    @staticmethod
     def get_one_by_channel_id(
-        channel_id: int,
+        self, channel_id: int,
     ) -> tuple[Optional[ChannelFormat], Optional[str]]:
-        """
-        Fetch channel formats by channel ID.
-        :param channel_id: The ID of the channel.
-        :return: List of channel formats for the specified channel.
-        """
-        channel_format, error = db.select_one(
-            model=ChannelFormat,
-            table="channel_formats",
-            columns=["*"],
-            conditions={"channel_id": channel_id},
-        )
-        if error:
+        try:
+            row = self.db.single("SELECT * FROM channel_formats WHERE channel_id = ?", (channel_id,))
+            if not row:
+                return None, None
+            channel_format = ChannelFormat(**row)
+            return channel_format, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al obtener el formato de canal: %s", error)
             return None, error
-        return channel_format, None
 
-    @staticmethod
     def get_all_by_channel_id(
-        channel_id: int,
+        self, channel_id: int,
     ) -> tuple[Optional[List[ChannelFormat]], Optional[str]]:
-        """
-        Fetch channel formats by channel ID.
-        :param channel_id: The ID of the channel.
-        :return: List of channel formats for the specified channel.
-        """
-        channel_formats, error = db.select(
-            model=ChannelFormat,
-            table="channel_formats",
-            columns=["*"],
-            conditions={"channel_id": channel_id},
-        )
-        if error:
+        try:
+            rows = self.db.select("SELECT * FROM channel_formats WHERE channel_id = ?", (channel_id,))
+            channel_formats = [ChannelFormat(**row) for row in rows]
+            return channel_formats, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al obtener los formatos de canal: %s", error)
             return None, error
-        return channel_formats, None
 
-    @staticmethod
     def add(
-        channel_format: ChannelFormat,
+        self, channel_format: ChannelFormat,
     ) -> tuple[Optional[ChannelFormat], Optional[str]]:
-        """
-        Add a new channel format to the database.
-        :param channel_format: The channel format to add.
-        """
-        _, error = db.insert(
-            table="channel_formats",
-            data={
-                "id": str(channel_format.id),
-                "channel_id": channel_format.channel_id,
-                "regex": channel_format.regex,
-            },
-        )
-        if error:
+        try:
+            sql = """INSERT INTO channel_formats (id, channel_id, regex) VALUES (?, ?, ?)"""
+            params = (
+                str(channel_format.id),
+                channel_format.channel_id,
+                channel_format.regex,
+            )
+            self.db.execute(sql, params)
+            return channel_format, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al crear el formato de canal: %s", error)
             return None, error
-        return channel_format, None
 
-    @staticmethod
-    def delete(channel_format: ChannelFormat) -> tuple[Optional[str], Optional[str]]:
-        """
-        Delete a channel format from the database.
-        :param channel_format: The channel format to delete.
-        """
-        _, error = db.delete(
-            table="channel_formats", key="id", value=str(channel_format.id)
-        )
-        if error:
+    def delete(self, channel_format: ChannelFormat) -> tuple[Optional[str], Optional[str]]:
+        try:
+            self.db.execute("DELETE FROM channel_formats WHERE id = ?", (str(channel_format.id),))
+            return channel_format.id, None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al eliminar el formato de canal: %s", error)
             return None, error
-        return channel_format.id, None
 
-    @staticmethod
-    def update(channel_format: ChannelFormat) -> Optional[str]:
-        """
-        Update an existing channel format in the database.
-        :param channel_format: The channel format to update.
-        """
-        _, error = db.upsert(
-            table="channel_formats",
-            data={
-                "id": str(channel_format.id),
-                "channel_id": channel_format.channel_id,
-                "regex": channel_format.regex,
-            },
-            primary_key="id",
-        )
-        if error:
+    def update(self, channel_format: ChannelFormat) -> Optional[str]:
+        try:
+            sql = """INSERT OR REPLACE INTO channel_formats (id, channel_id, regex) 
+                     VALUES (?, ?, ?)"""
+            params = (
+                str(channel_format.id),
+                channel_format.channel_id,
+                channel_format.regex,
+            )
+            self.db.execute(sql, params)
+            return None
+        except Exception as e:
+            error = str(e)
             logger.error("Error al actualizar el formato de canal: %s", error)
             return "Error al actualizar el formato de canal"
-        return None

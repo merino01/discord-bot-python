@@ -44,7 +44,8 @@ def _find_trigger(channel_id: int, text: str) -> Optional[Trigger]:
 
         return False
 
-    triggers, error = TriggersService.get_all_by_channel_id(channel_id)
+    service = TriggersService()
+    triggers, error = service.get_all_by_channel_id(channel_id)
     if error:
         logger.error("Error al obtener los triggers: %s", error)
         return None
