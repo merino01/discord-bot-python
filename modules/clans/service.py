@@ -297,6 +297,19 @@ class ClanService:
         except Exception as e:
             return f"Error al eliminar el clan: {str(e)}"
 
+    async def get_clan_by_role_id(self, role_id: int) -> tuple[Optional[FullClan], Optional[str]]:
+        try:
+            # Obtener el clan por role_id
+            clan_sql = "SELECT * FROM clans WHERE role_id = ? AND deleted = 0"
+            clan_row = self.db.single(clan_sql, (role_id,))
+            if not clan_row:
+                return None, "No se encontró un clan con ese rol"
+            
+            # Usar get_clan_by_id para obtener todos los datos
+            return await self.get_clan_by_id(clan_row["id"])
+        except Exception as e:
+            return None, f"Error al obtener el clan por rol: {str(e)}"
+
     async def get_clan_by_channel_id(self, channel_id: int) -> tuple[Optional[FullClan], Optional[str]]:
         try:
             # Obtener el clan a través del canal

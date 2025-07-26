@@ -57,7 +57,7 @@ class Database:
             self._conn = None
 
     def execute(self, query: str, params: tuple = ()) -> sqlite3.Cursor:
-        logger.info("Ejecutando consulta: %s", query)
+        # logger.info("Ejecutando consulta: %s", query)
 
         if self._conn is None:
             raise sqlite3.Error("Database connection is not established.")
