@@ -2,14 +2,15 @@ from uuid import uuid4
 from typing import Optional
 from discord import ButtonStyle, Interaction, Message, Guild, Member
 from discord.ui import View, Button
-from constants import ONE_SECOND
+from constants import ONE_MINUTE
 from modules.clans.models import Clan
 from modules.clans.service import ClanService
+from modules.clans.utils import add_member_to_clan
 
 
 class ClanInviteView(View):
     def __init__(self, clan: Clan, guild: Guild, service: ClanService, channel_message: Optional[Message] = None):
-        super().__init__(timeout=ONE_SECOND * 30)
+        super().__init__(timeout=ONE_MINUTE * 10)
         self.clan = clan
         self.value = None
         self.invite_id = str(uuid4())
@@ -33,40 +34,62 @@ class ClanInviteView(View):
         self.add_item(reject_button)
 
     async def accept_callback(self, interaction: Interaction):
+        """Callback cuando se acepta la invitación"""
         self.value = True
         for item in self.children:
             if isinstance(item, Button):
                 item.disabled = True
 
-        error = await self.service.add_member_to_clan(
-            member_id=interaction.user.id, clan_id=self.clan.id
+        # Usar la función de utils que maneja roles adicionales
+        error = await add_member_to_clan(
+            guild=self.guild, 
+            member_id=interaction.user.id, 
+            clan_id=self.clan.id
         )
+        
         if error:
-            return await interaction.response.edit_message(
-                content=f"Error al aceptar la invitación: {error}", view=None
+            await interaction.response.edit_message(
+                content=f"Error al aceptar la invitación: {error}", view=self
             )
+            return
 
-        role = await self.guild.fetch_role(self.clan.role_id)
-        member = await self.guild.fetch_member(interaction.user.id)
-        if role is not None and member is not None:
-            await member.add_roles(role, reason="Se ha unido al clan")
+        # Responder la interacción con éxito
+        await interaction.response.edit_message(
+            content=f"¡Te has unido al clan **{self.clan.name}** exitosamente!", view=self
+        )
+        
+        # Actualizar el mensaje del canal si existe
         if self.channel_message:
-            await self.channel_message.edit(
-                content=f"{interaction.user.mention} se ha unido al clan.", view=None, ephemeral=False
-            )
+            try:
+                await self.channel_message.edit(
+                    content=f"{interaction.user.mention} se ha unido al clan **{self.clan.name}**."
+                )
+            except:
+                pass  # Si no se puede editar, continuar
+                
         self.stop()
 
     async def reject_callback(self, interaction: Interaction):
+        """Callback cuando se rechaza la invitación"""
         self.value = False
         for item in self.children:
             if isinstance(item, Button):
                 item.disabled = True
+                
+        # Responder la interacción
+        await interaction.response.edit_message(
+            content=f"Has rechazado la invitación al clan **{self.clan.name}**.", view=self
+        )
+        
+        # Actualizar el mensaje del canal si existe
         if self.channel_message:
-            await self.channel_message.edit(
-                content=f"{interaction.user.mention} ha rechazado la invitación al clan.",
-                ephemeral=True,
-                view=None,
-            )
+            try:
+                await self.channel_message.edit(
+                    content=f"{interaction.user.mention} ha rechazado la invitación al clan **{self.clan.name}**."
+                )
+            except Exception:
+                pass  # Si no se puede editar, continuar
+                
         self.stop()
 
     async def on_timeout(self) -> None:

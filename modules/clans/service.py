@@ -2,8 +2,9 @@ from uuid import uuid4
 from datetime import datetime
 from typing import Optional, List
 from discord import TextChannel, VoiceChannel, Role, Guild
-from database.database import Database
+from database import Database
 from modules.clan_settings.service import ClanSettingsService
+from modules.core import logger
 from .models import Clan, ClanMember, ClanChannel, ClanMemberRole, ChannelType, FullClan
 
 
@@ -168,10 +169,20 @@ class ClanService:
         if member and member["clan_id"] == clan_id:
             return "El miembro ya pertenece a este clan"
 
+        # Insertar el miembro en la base de datos
+        try:
+            insert_member_sql = """
+                INSERT INTO clan_members (user_id, clan_id, role, joined_at) 
+                VALUES (?, ?, ?, ?)
+            """
+            self.db.execute(insert_member_sql, (member_id, clan_id, "member", datetime.now()))
+        except Exception as e:
+            logger.error(f"Error al insertar miembro en clan: {str(e)}")
+            return "Error al añadir el miembro al clan en la base de datos"
+
         return None
 
     async def kick_member_from_clan(self, member_id: int, clan_id: str) -> Optional[str]:
-        """Elimina a un miembro de un clan"""
         settings, error = await self.clan_settings_service.get_settings()
         if error or not settings:
             return "Error al obtener la configuración de clanes"
@@ -200,3 +211,113 @@ class ClanService:
         self.db.execute(delete_sql, (member_id, clan_id))
         
         return None
+
+    async def get_clan_by_id(self, clan_id: str) -> tuple[Optional[FullClan], Optional[str]]:
+        try:
+            # Obtener datos básicos del clan
+            clan_sql = "SELECT * FROM clans WHERE id = ? AND deleted = 0"
+            clan_row = self.db.single(clan_sql, (clan_id,))
+            if not clan_row:
+                return None, "Clan no encontrado"
+            
+            clan = Clan(**clan_row)
+            
+            # Obtener miembros del clan
+            members_sql = "SELECT * FROM clan_members WHERE clan_id = ?"
+            members_rows = self.db.select(members_sql, (clan_id,))
+            members = [ClanMember(**row) for row in members_rows] if members_rows else []
+            
+            # Obtener canales del clan
+            channels_sql = "SELECT * FROM clan_channels WHERE clan_id = ?"
+            channels_rows = self.db.select(channels_sql, (clan_id,))
+            channels = [ClanChannel(**row) for row in channels_rows] if channels_rows else []
+            
+            # Crear el objeto FullClan
+            full_clan = FullClan(
+                id=clan.id,
+                name=clan.name,
+                role_id=clan.role_id,
+                created_at=clan.created_at,
+                member_count=clan.member_count,
+                max_members=clan.max_members,
+                members=members,
+                channels=channels
+            )
+            
+            return full_clan, None
+        except Exception as e:
+            return None, f"Error al obtener el clan: {str(e)}"
+
+    async def get_all_clans(self) -> tuple[Optional[List[FullClan]], Optional[str]]:
+        try:
+            # Obtener todos los clanes
+            clans_sql = "SELECT * FROM clans WHERE deleted = 0"
+            clans_rows = self.db.select(clans_sql)
+            if not clans_rows:
+                return [], None
+            
+            full_clans = []
+            for clan_row in clans_rows:
+                clan = Clan(**clan_row)
+                
+                # Obtener miembros del clan
+                members_sql = "SELECT * FROM clan_members WHERE clan_id = ?"
+                members_rows = self.db.select(members_sql, (clan.id,))
+                members = [ClanMember(**row) for row in members_rows] if members_rows else []
+                
+                # Obtener canales del clan
+                channels_sql = "SELECT * FROM clan_channels WHERE clan_id = ?"
+                channels_rows = self.db.select(channels_sql, (clan.id,))
+                channels = [ClanChannel(**row) for row in channels_rows] if channels_rows else []
+                
+                # Crear el objeto FullClan
+                full_clan = FullClan(
+                    id=clan.id,
+                    name=clan.name,
+                    role_id=clan.role_id,
+                    created_at=clan.created_at,
+                    member_count=clan.member_count,
+                    max_members=clan.max_members,
+                    members=members,
+                    channels=channels
+                )
+                full_clans.append(full_clan)
+            
+            return full_clans, None
+        except Exception as e:
+            return None, f"Error al obtener los clanes: {str(e)}"
+
+    async def delete_clan(self, clan_id: str) -> Optional[str]:
+        try:
+            delete_sql = "UPDATE clans SET deleted = 1 WHERE id = ?"
+            result = self.db.execute(delete_sql, (clan_id,))
+            if not result:
+                return "No se pudo eliminar el clan"
+            return None
+        except Exception as e:
+            return f"Error al eliminar el clan: {str(e)}"
+
+    async def get_clan_by_channel_id(self, channel_id: int) -> tuple[Optional[FullClan], Optional[str]]:
+        try:
+            # Obtener el clan a través del canal
+            clan_sql = """--sql
+                SELECT c.* FROM clans c
+                INNER JOIN clan_channels cc ON c.id = cc.clan_id
+                WHERE cc.channel_id = ? AND c.deleted = 0
+            """
+            clan_row = self.db.single(clan_sql, (channel_id,))
+            if not clan_row:
+                return None, "No se encontró un clan asociado a este canal"
+            
+            # Usar get_clan_by_id para obtener todos los datos
+            return await self.get_clan_by_id(clan_row["id"])
+        except Exception as e:
+            return None, f"Error al obtener el clan por canal: {str(e)}"
+
+    async def is_clan_leader(self, user_id: int, clan_id: str) -> tuple[bool, Optional[str]]:
+        try:
+            sql = "SELECT * FROM clan_members WHERE user_id = ? AND clan_id = ? AND role = ?"
+            member = self.db.single(sql, (user_id, clan_id, ClanMemberRole.LEADER.value))
+            return member is not None, None
+        except Exception as e:
+            return False, f"Error al verificar liderazgo: {str(e)}"
