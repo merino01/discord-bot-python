@@ -12,14 +12,14 @@ EXTENSIONS = {
         "events.voice",
         "events.guild"
     ],
-    "slash_commands": {
+    "slash_commands": [
         "modules.automatic_messages.slash_commands",
         "modules.channel_formats.slash_commands",
         "modules.logs_config.slash_commands",
         "modules.triggers.slash_commands",
         "modules.clans.slash_commands",
         "modules.clan_settings.slash_commands"
-    },
+    ],
 }
 
 
