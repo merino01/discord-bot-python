@@ -8,6 +8,7 @@ from discord import ButtonStyle, Interaction, Message, Member
 from discord.ui import View, Button
 from modules.clans.models import Clan
 from modules.clans.service import ClanService
+from modules.clans.utils import logica_expulsar_del_clan
 
 
 class ClanKickView(View):
@@ -43,9 +44,11 @@ class ClanKickView(View):
             if isinstance(item, Button):
                 item.disabled = True
 
-        # Expulsar a miembro del clan
-        error = await self.service.kick_member_from_clan(
-            member_id=self.member_to_send.id, clan_id=self.clan.id
+        # Expulsar a miembro del clan usando la lógica completa
+        error = await logica_expulsar_del_clan(
+            id_usuario=self.member_to_send.id, 
+            id_clan=self.clan.id, 
+            guild=interaction.guild
         )
         if error:
             await interaction.response.edit_message(
