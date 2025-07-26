@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from discord import app_commands, Interaction, Member, Object, Embed, Color, ChannelType
+from discord import app_commands, Interaction, Member, Object, Embed, Color, ChannelType, Role, TextChannel, VoiceChannel
 from discord.ext import commands
 from discord.app_commands import Group
 from settings import guild_id
@@ -233,7 +233,105 @@ class ClanCommands(commands.GroupCog, name="clan"):
             view = ClanDeleteView(clans, self.service)
             await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
-    ### ? Estadísticas de clanes ###
+    ### ? Migrar clanes existentes ###
+    @mod.command(name="migrar", description="Migrar un clan existente al sistema de base de datos")
+    @app_commands.describe(
+        rol="Rol del clan a migrar",
+        canal_texto="Canal de texto del clan",
+        canal_voz="Canal de voz del clan",
+        lider="Líder del clan (si no se especifica se toma el primer miembro con el rol)"
+    )
+    @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
+    async def migrate_clans(
+        self, 
+        interaction: Interaction, 
+        rol: Role,
+        canal_texto: TextChannel,
+        canal_voz: VoiceChannel,
+        lider: Optional[Member] = None
+    ):
+        await interaction.response.defer(ephemeral=True)
+        
+        try:
+            # Verificar si el clan ya existe en la BD
+            existing_clans, _ = await self.service.get_all_clans()
+            if existing_clans and any(clan.role_id == rol.id for clan in existing_clans):
+                return await interaction.followup.send(
+                    f"El rol {rol.name} ya está registrado como clan.", ephemeral=True
+                )
+            
+            # Encontrar miembros con el rol
+            members_with_role = [member for member in interaction.guild.members if rol in member.roles and not member.bot]
+            
+            if not members_with_role:
+                return await interaction.followup.send(
+                    f"No se encontraron miembros con el rol {rol.name}.", ephemeral=True
+                )
+            
+            # Determinar el líder
+            if lider:
+                if rol not in lider.roles:
+                    return await interaction.followup.send(
+                        f"El miembro {lider.mention} no tiene el rol {rol.name}.", ephemeral=True
+                    )
+                leader = lider
+            else:
+                leader = members_with_role[0]  # Tomar el primer miembro como líder
+            
+            # Obtener configuración
+            settings, _ = await self.clan_settings_service.get_settings()
+            
+            # Crear clan en la base de datos
+            _, error = await self.service.create_clan(
+                name=rol.name,  # Usar el nombre del rol como nombre del clan
+                leader_id=leader.id,
+                role_id=rol.id,
+                text_channel=canal_texto,
+                voice_channel=canal_voz,
+                max_members=settings.max_members if settings else 50,
+            )
+            
+            if error:
+                return await interaction.followup.send(
+                    f"Error al crear clan {rol.name}: {error}", ephemeral=True
+                )
+            
+            # Obtener el clan recién creado
+            clan, _ = await self.service.get_clan_by_role_id(rol.id)
+            if not clan:
+                return await interaction.followup.send(
+                    "Error: No se pudo obtener el clan después de crearlo.", ephemeral=True
+                )
+            
+            # Añadir todos los demás miembros al clan (el líder ya se añadió automáticamente)
+            members_added = 0
+            for member in members_with_role:
+                if member != leader:  # El líder ya está añadido
+                    error = await self.service.add_member_to_clan(member.id, clan.id)
+                    if not error:
+                        members_added += 1
+            
+            # Crear embed con resultado
+            embed = Embed(
+                title="✅ Clan migrado exitosamente",
+                description=f"El clan **{rol.name}** ha sido migrado al sistema de base de datos.",
+                color=Color.green()
+            )
+            
+            embed.add_field(name="👑 Líder", value=leader.mention, inline=True)
+            embed.add_field(name="👥 Miembros totales", value=str(len(members_with_role)), inline=True)
+            embed.add_field(name="🔧 Miembros añadidos", value=str(members_added + 1), inline=True)  # +1 por el líder
+            embed.add_field(name="🎭 Rol", value=rol.mention, inline=True)
+            embed.add_field(name="💬 Canal texto", value=canal_texto.mention, inline=True)
+            embed.add_field(name="🔊 Canal voz", value=canal_voz.mention, inline=True)
+            
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            
+        except Exception as e:
+            logger.error(f"Error en migración de clan: {str(e)}")
+            await interaction.followup.send(
+                f"Error inesperado durante la migración: {str(e)}", ephemeral=True
+            )
     @mod.command(name="estadisticas", description="Ver estadísticas generales de los clanes")
     @app_commands.checks.has_permissions(manage_roles=True)
     async def clan_stats(self, interaction: Interaction):
