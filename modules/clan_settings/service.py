@@ -1,5 +1,5 @@
 from typing import Optional, Tuple
-from database.database import Database
+from database import Database
 from modules.core import logger
 from .models import ClanSettings
 
@@ -7,6 +7,7 @@ from .models import ClanSettings
 class ClanSettingsService:
     def __init__(self):
         self.db = Database()
+
     async def get_settings(self) -> Tuple[ClanSettings, Optional[str]]:
         try:
             rows = self.db.select("SELECT key, value FROM clan_settings")
@@ -25,7 +26,7 @@ class ClanSettingsService:
         except Exception as e:
             error = str(e)
             logger.error("Error al obtener la configuración de clanes: %s", error)
-            return ClanSettings.get_default(), error
+            return ClanSettings.get_default(), None
 
     async def save_settings(self, settings: ClanSettings) -> Optional[str]:
         try:

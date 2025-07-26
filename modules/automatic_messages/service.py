@@ -1,5 +1,5 @@
 from typing import List, Optional
-from database.database import Database
+from database import Database
 from modules.core import logger
 from .models import AutomaticMessage
 

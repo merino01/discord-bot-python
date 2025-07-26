@@ -33,11 +33,10 @@ class ClanSelectView(View):
         if not self.selected_clan:
             return await interaction.response.send_message("Clan no encontrado", ephemeral=True)
         try:
-            view = ClanInviteView(self.selected_clan, interaction.guild, self.service)
+            view = ClanInviteView(self.selected_clan, interaction.guild, self.service, None)
             invite_message = await self.member_to_send.send(
                 content=f"Te han invitado al clan **{self.selected_clan.name}**", view=view
             )
-            self.message = invite_message
             view.message = invite_message
 
             self.stop()
