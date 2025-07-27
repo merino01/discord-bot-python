@@ -38,9 +38,12 @@ class Clan:
     role_id: int
     created_at: datetime
     member_count: int
-    max_members: int
+    max_members: int  # Este campo ya existe y se puede modificar directamente
     deleted: bool = False
     deleted_at: Optional[datetime] = None
+    # Configuración específica del clan (siempre tiene valores, inicializados con config global)
+    max_text_channels: int = 1
+    max_voice_channels: int = 1
 
 
 @dataclass
