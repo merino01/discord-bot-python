@@ -15,6 +15,7 @@ class ClanModSelectionView(discord.ui.View):
     def __init__(self, clans: list, action_type: str, **kwargs):
         super().__init__(timeout=300)
         self.clans = clans
+        self.service = ClanService()
         self.action_type = action_type
         self.selected_clan = None
         self.kwargs = kwargs
@@ -37,7 +38,7 @@ class ClanModSelectionView(discord.ui.View):
                     view=self, 
                     embed=None
                 )
-        except:
+        except Exception:
             pass
 
     async def execute_action(self, interaction: Interaction):
@@ -62,7 +63,6 @@ class ClanModSelectionView(discord.ui.View):
         """Manejar creación de canal"""
         clan = self.selected_clan
         tipo = self.kwargs.get('tipo')
-        service = ClanService()
         
         try:
             # Obtener configuración para verificar límites
@@ -120,29 +120,36 @@ class ClanModSelectionView(discord.ui.View):
             # Calcular la posición del nuevo canal
             position = None
             if categoria:
-                # Obtener todos los canales del clan en esta categoría del mismo tipo
-                canales_clan_en_categoria = []
-                for ch in categoria.channels:
-                    # Verificar si este canal pertenece al clan
-                    if any(clan_ch.channel_id == ch.id for clan_ch in clan.channels):
-                        # Verificar que sea del mismo tipo
-                        if (tipo == "text" and hasattr(ch, 'send')) or (tipo == "voice" and hasattr(ch, 'connect')):
-                            canales_clan_en_categoria.append(ch)
-                
-                # Si hay canales del clan, colocar el nuevo después del último
-                if canales_clan_en_categoria:
-                    # Ordenar por posición y tomar el último
-                    canales_clan_en_categoria.sort(key=lambda x: x.position)
-                    ultimo_canal = canales_clan_en_categoria[-1]
-                    position = ultimo_canal.position + 1
+                # Obtener información actualizada del clan desde la BD
+                clan_actualizado, _ = await self.service.get_clan_by_id(clan.id)
+                if clan_actualizado:
+                    # Obtener todos los canales del clan en esta categoría del mismo tipo
+                    canales_clan_en_categoria = []
+                    for ch in categoria.channels:
+                        # Verificar si este canal pertenece al clan usando la información actualizada
+                        pertenece_al_clan = any(clan_ch.channel_id == ch.id for clan_ch in clan_actualizado.channels)
+                        
+                        if pertenece_al_clan:
+                            # Verificar que sea del mismo tipo usando el tipo nativo de Discord
+                            canal_es_texto = ch.type == discord.ChannelType.text
+                            canal_es_voz = ch.type == discord.ChannelType.voice
+                            
+                            if (tipo == "text" and canal_es_texto) or (tipo == "voice" and canal_es_voz):
+                                canales_clan_en_categoria.append(ch)
+                    
+                    # Si hay canales del clan, colocar el nuevo después del último
+                    if canales_clan_en_categoria:
+                        # Ordenar por posición y tomar el último
+                        canales_clan_en_categoria.sort(key=lambda x: x.position)
+                        ultimo_canal = canales_clan_en_categoria[-1]
+                        position = ultimo_canal.position + 1
             
             # Crear el canal
             if tipo == "text":
                 if categoria:
                     nuevo_canal = await categoria.create_text_channel(
                         name=nombre, 
-                        overwrites=permisos, 
-                        position=position
+                        overwrites=permisos
                     )
                 else:
                     nuevo_canal = await interaction.guild.create_text_channel(name=nombre, overwrites=permisos)
@@ -150,11 +157,17 @@ class ClanModSelectionView(discord.ui.View):
                 if categoria:
                     nuevo_canal = await categoria.create_voice_channel(
                         name=nombre, 
-                        overwrites=permisos, 
-                        position=position
+                        overwrites=permisos
                     )
                 else:
                     nuevo_canal = await interaction.guild.create_voice_channel(name=nombre, overwrites=permisos)
+            
+            # Si se calculó una posición específica, mover el canal después de crearlo
+            if position is not None:
+                try:
+                    await nuevo_canal.edit(position=position)
+                except Exception as e:
+                    logger.error(f"Error al posicionar canal {nuevo_canal.name}: {e}")
             
             # Guardar en la base de datos
             canal_obj = ClanChannel(
@@ -165,7 +178,7 @@ class ClanModSelectionView(discord.ui.View):
                 created_at=datetime.now()
             )
             
-            error = service.save_clan_channel(canal_obj)
+            error = self.service.save_clan_channel(canal_obj)
             if error:
                 # Si hay error al guardar, eliminar el canal creado
                 await nuevo_canal.delete()
@@ -187,7 +200,6 @@ class ClanModSelectionView(discord.ui.View):
     
     async def _handle_add_leader(self, interaction: Interaction):
         """Manejar promoción a líder"""
-        service = ClanService()
         clan = self.selected_clan
         miembro = self.kwargs.get('miembro')
         
@@ -208,7 +220,7 @@ class ClanModSelectionView(discord.ui.View):
             )
         
         # Promover a líder
-        error = service.promote_member_to_leader(miembro.id, clan.id)
+        error = self.service.promote_member_to_leader(miembro.id, clan.id)
         if error:
             return await interaction.followup.send(
                 f"❌ Error al promover a líder: {error}",
@@ -217,7 +229,7 @@ class ClanModSelectionView(discord.ui.View):
         
         # Asignar roles de Discord
         success, role_error = await assign_clan_roles_to_leader(
-            interaction.guild, miembro, clan.id, service
+            interaction.guild, miembro, clan.id, self.service
         )
         
         if success:
@@ -233,13 +245,12 @@ class ClanModSelectionView(discord.ui.View):
     
     async def _handle_remove_leader(self, interaction: Interaction):
         """Manejar degradación de líder"""
-        service = ClanService()
         clan = self.selected_clan
         miembro = self.kwargs.get('miembro')
         
         # Quitar liderazgo
         success, error_msg = await demote_leader_to_member(
-            interaction.guild, miembro, clan.id, service
+            interaction.guild, miembro, clan.id, self.service
         )
         
         if success:
@@ -308,10 +319,18 @@ class ClanSelectionButton(discord.ui.Button):
         self.style = ButtonStyle.success
         self.label = f"✅ {self.clan.name[:77]}"
         
-        await interaction.response.edit_message(
-            content=f"**Clan seleccionado:** {self.clan.name}",
-            view=view
-        )
+        # Usar defer para poder seguir procesando
+        await interaction.response.defer(ephemeral=True)
+        
+        # Editar el mensaje original
+        try:
+            await interaction.edit_original_response(
+                content=f"**Clan seleccionado:** {self.clan.name}",
+                view=view,
+                embed=None
+            )
+        except Exception as e:
+            logger.error(f"Error al editar mensaje: {e}")
         
         # Ejecutar la acción correspondiente
         await view.execute_action(interaction)

@@ -665,7 +665,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                     clan = clans[0]
                 else:
                     # Usar la nueva view con botones para seleccionar clan
-                    view = ClanModSelectionView(clans, self.service, "add_channel", tipo=tipo)
+                    view = ClanModSelectionView(clans, "add_channel", tipo=tipo)
                     embed = Embed(
                         title="🔧 Seleccionar clan para añadir canal",
                         description="Selecciona el clan al que quieres añadir el canal:",
@@ -801,7 +801,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                     clan = clans[0]
                 else:
                     # Usar la nueva view con botones para seleccionar clan
-                    view = ClanModSelectionView(clans, self.service, "add_leader", miembro=miembro)
+                    view = ClanModSelectionView(clans, "add_leader", miembro=miembro)
                     embed = Embed(
                         title="👑 Seleccionar clan para añadir líder",
                         description=f"Selecciona el clan al que quieres añadir a {miembro.mention} como líder:",
@@ -888,7 +888,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                     clan = clans[0]
                 else:
                     # Usar la nueva view con botones para seleccionar clan
-                    view = ClanModSelectionView(clans, self.service, "remove_leader", miembro=miembro)
+                    view = ClanModSelectionView(clans, "remove_leader", miembro=miembro)
                     embed = Embed(
                         title="👑 Seleccionar clan para quitar líder",
                         description=f"Selecciona el clan del que quieres quitar a {miembro.mention} como líder:",
@@ -954,7 +954,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                     clan = clans[0]
                 else:
                     # Usar la nueva view con botones para seleccionar clan
-                    view = ClanModSelectionView(clans, self.service, "remove_channel", canal=canal)
+                    view = ClanModSelectionView(clans, "remove_channel", canal=canal)
                     embed = Embed(
                         title="🗑️ Seleccionar clan para quitar canal",
                         description=f"Selecciona el clan del que quieres quitar el canal {canal.mention}:",
