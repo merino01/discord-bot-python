@@ -13,6 +13,7 @@ from .validators import ClanValidator
 from .views import ClanSelectView
 from .views.clan_invite_buttons import ClanInviteView
 from .views.clan_leave_buttons import ClanLeaveView
+from .views.clan_mod_selection import ClanModSelectionView
 from .views.clan_delete_buttons import ClanDeleteView
 from modules.core import logger
 
@@ -663,13 +664,14 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 if len(clans) == 1:
                     clan = clans[0]
                 else:
-                    clan_list = "\n".join([f"**{i+1}.** {c.name} (ID: `{c.id}`)" for i, c in enumerate(clans[:10])])
+                    # Usar la nueva view con botones para seleccionar clan
+                    view = ClanModSelectionView(clans, self.service, "add_channel", tipo=tipo)
                     embed = Embed(
                         title="🔧 Seleccionar clan para añadir canal",
-                        description=f"Usa el comando con el parámetro `id_clan` especificando el ID del clan deseado.\n\n**Clanes disponibles:**\n{clan_list}",
+                        description="Selecciona el clan al que quieres añadir el canal:",
                         color=Color.blue()
                     )
-                    return await interaction.followup.send(embed=embed, ephemeral=True)
+                    return await interaction.followup.send(embed=embed, view=view, ephemeral=True)
         
         # Obtener configuración para verificar límites
         settings, error = await self.clan_settings_service.get_settings()
@@ -798,13 +800,14 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 if len(clans) == 1:
                     clan = clans[0]
                 else:
-                    clan_list = "\n".join([f"**{i+1}.** {c.name} (ID: `{c.id}`)" for i, c in enumerate(clans[:10])])
+                    # Usar la nueva view con botones para seleccionar clan
+                    view = ClanModSelectionView(clans, self.service, "add_leader", miembro=miembro)
                     embed = Embed(
                         title="👑 Seleccionar clan para añadir líder",
-                        description=f"Usa el comando con el parámetro `id_clan` especificando el ID del clan deseado.\n\n**Clanes disponibles:**\n{clan_list}",
+                        description=f"Selecciona el clan al que quieres añadir a {miembro.mention} como líder:",
                         color=Color.gold()
                     )
-                    return await interaction.followup.send(embed=embed, ephemeral=True)
+                    return await interaction.followup.send(embed=embed, view=view, ephemeral=True)
         
         # Verificar que el miembro está en el clan
         miembro_en_clan = any(m.user_id == miembro.id for m in clan.members)
@@ -884,13 +887,14 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 if len(clans) == 1:
                     clan = clans[0]
                 else:
-                    clan_list = "\n".join([f"**{i+1}.** {c.name} (ID: `{c.id}`)" for i, c in enumerate(clans[:10])])
+                    # Usar la nueva view con botones para seleccionar clan
+                    view = ClanModSelectionView(clans, self.service, "remove_leader", miembro=miembro)
                     embed = Embed(
                         title="👑 Seleccionar clan para quitar líder",
-                        description=f"Usa el comando con el parámetro `id_clan` especificando el ID del clan deseado.\n\n**Clanes disponibles:**\n{clan_list}",
+                        description=f"Selecciona el clan del que quieres quitar a {miembro.mention} como líder:",
                         color=Color.orange()
                     )
-                    return await interaction.followup.send(embed=embed, ephemeral=True)
+                    return await interaction.followup.send(embed=embed, view=view, ephemeral=True)
         
         try:
             # Quitar liderazgo
@@ -949,13 +953,14 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 if len(clans) == 1:
                     clan = clans[0]
                 else:
-                    clan_list = "\n".join([f"**{i+1}.** {c.name} (ID: `{c.id}`)" for i, c in enumerate(clans[:10])])
+                    # Usar la nueva view con botones para seleccionar clan
+                    view = ClanModSelectionView(clans, self.service, "remove_channel", canal=canal)
                     embed = Embed(
                         title="🗑️ Seleccionar clan para quitar canal",
-                        description=f"Usa el comando con el parámetro `id_clan` especificando el ID del clan deseado.\n\n**Clanes disponibles:**\n{clan_list}",
+                        description=f"Selecciona el clan del que quieres quitar el canal {canal.mention}:",
                         color=Color.red()
                     )
-                    return await interaction.followup.send(embed=embed, ephemeral=True)
+                    return await interaction.followup.send(embed=embed, view=view, ephemeral=True)
         
         try:
             # Verificar que el canal pertenece al clan
