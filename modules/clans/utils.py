@@ -358,11 +358,10 @@ async def logica_salir_del_clan(id_usuario: int, id_clan: str, guild: Guild) -> 
         
         # No permitir que el líder se salga si es el único líder
         lideres = [m for m in clan_completo.members if m.role == ClanMemberRole.LEADER.value]
-        # TODO: Descomentar esto cuando se pueda pasar el liderazgo del clan
-        # if len(lideres) <= 1:
-        #     usuario_es_lider = any(m.user_id == id_usuario and m.role == ClanMemberRole.LEADER.value for m in clan_completo.members)
-        #     if usuario_es_lider:
-        #         return "No puedes salir del clan siendo el único líder. Transfiere el liderazgo primero."
+        if len(lideres) <= 1:
+            usuario_es_lider = any(m.user_id == id_usuario and m.role == ClanMemberRole.LEADER.value for m in clan_completo.members)
+            if usuario_es_lider:
+                return "No puedes salir del clan siendo el único líder. Transfiere el liderazgo primero."
         
         # Eliminar del clan en la base de datos
         error = await servicio.kick_member_from_clan(id_usuario, id_clan)
@@ -491,7 +490,7 @@ async def crear_canal_adicional(
             created_at=datetime.now()
         )
         
-        error = await servicio.save_clan_channel(canal_obj)
+        error = servicio.save_clan_channel(canal_obj)
         if error:
             # Si hay error al guardar, eliminar el canal creado
             await nuevo_canal.delete()
@@ -502,3 +501,174 @@ async def crear_canal_adicional(
     except Exception as e:
         logger.error(f"Error en crear_canal_adicional: {str(e)}")
         return False, f"Error al crear el canal: {str(e)}"
+
+
+async def assign_clan_roles_to_leader(guild, miembro, clan_id, service) -> tuple[bool, Optional[str]]:
+    """Asignar roles de clan al nuevo líder promovido"""
+    try:
+        clan_role, role_error = await service.get_clan_role(guild, clan_id)
+        if role_error or not clan_role:
+            logger.warning(f"No se pudo obtener el rol del clan {clan_id}: {role_error}")
+            return False, f"No se pudo obtener el rol del clan: {role_error}"
+        
+        # Asignar roles de clan (rol del clan + rol de líder si está configurado)
+        role_error = await setup_clan_roles(guild, miembro, clan_role)
+        if role_error:
+            logger.warning(f"Error al asignar roles al nuevo líder: {role_error}")
+            return False, f"Error al asignar los roles: {role_error}"
+        
+        return True, None
+        
+    except Exception as e:
+        logger.error(f"Error en assign_clan_roles_to_leader: {str(e)}")
+        return False, f"Error inesperado al asignar roles: {str(e)}"
+
+
+def generate_channel_name(clan_name: str, existing_channels: list, channel_type: str) -> str:
+    """
+    Genera automáticamente el nombre del canal siguiendo el patrón: Nombre del clan #número
+    
+    Args:
+        clan_name: Nombre del clan
+        existing_channels: Lista de canales existentes del clan
+        channel_type: Tipo de canal ('text' o 'voice')
+    
+    Returns:
+        Nombre generado para el canal
+    """
+    try:
+        # Filtrar solo los canales del tipo especificado
+        channels_of_type = [ch for ch in existing_channels if ch.type == channel_type]
+        
+        # El número será la cantidad de canales del mismo tipo + 1
+        next_number = len(channels_of_type) + 1
+        
+        # Generar el nombre final
+        return f"{clan_name} #{next_number}"
+        
+    except Exception as e:
+        logger.error(f"Error generando nombre de canal: {str(e)}")
+        # Fallback en caso de error
+        return f"{clan_name} #2"
+
+
+async def demote_leader_to_member(guild, miembro, clan_id, service) -> tuple[bool, Optional[str]]:
+    """Degradar un líder a miembro regular del clan"""
+    try:
+        # Verificar que el usuario es líder del clan
+        is_leader_result, error = await service.is_clan_leader(miembro.id, clan_id)
+        if error:
+            return False, f"Error al verificar liderazgo: {error}"
+        
+        if not is_leader_result:
+            return False, "El usuario no es líder de este clan"
+        
+        # Verificar que no es el único líder
+        success, error_msg = await _check_can_demote_leader(clan_id, service)
+        if not success:
+            return False, error_msg
+        
+        # Degradar en la base de datos
+        _demote_in_database(miembro.id, clan_id)
+        
+        # Quitar rol de líder de Discord si corresponde
+        await _remove_discord_leader_role_if_needed(guild, miembro, clan_id, service)
+        
+        return True, None
+        
+    except Exception as e:
+        logger.error(f"Error en demote_leader_to_member: {str(e)}")
+        return False, f"Error inesperado al quitar liderazgo: {str(e)}"
+
+
+async def _check_can_demote_leader(clan_id: str, service) -> tuple[bool, Optional[str]]:
+    """Verificar si se puede degradar al líder"""
+    clan, error = await service.get_clan_by_id(clan_id)
+    if error or not clan:
+        return False, f"Error al obtener información del clan: {error}"
+    
+    leaders = [m for m in clan.members if m.role == ClanMemberRole.LEADER.value]
+    if len(leaders) <= 1:
+        return False, "No se puede quitar el liderazgo del único líder del clan"
+    
+    return True, None
+
+
+def _demote_in_database(user_id: int, clan_id: str):
+    """Degradar al usuario en la base de datos"""
+    service_instance = ClanService()
+    update_sql = "UPDATE clan_members SET role = ? WHERE user_id = ? AND clan_id = ?"
+    service_instance.db.execute(update_sql, (ClanMemberRole.MEMBER.value, user_id, clan_id))
+
+
+async def _remove_discord_leader_role_if_needed(guild, miembro, clan_id: str, service):
+    """Quitar rol de líder de Discord si no es líder de otros clanes"""
+    settings_service = ClanSettingsService()
+    settings, settings_error = await settings_service.get_settings()
+    
+    if settings_error or not settings or not settings.leader_role_id:
+        return
+    
+    # Verificar si es líder de otros clanes
+    is_leader_elsewhere = await _check_is_leader_elsewhere(miembro.id, clan_id, service)
+    
+    # Solo quitar el rol de líder si no es líder de otros clanes
+    if not is_leader_elsewhere:
+        await _remove_leader_role_from_discord(guild, miembro, settings.leader_role_id)
+
+
+async def _check_is_leader_elsewhere(user_id: int, current_clan_id: str, service) -> bool:
+    """Verificar si el usuario es líder de otros clanes"""
+    member_clans, _ = await service.get_member_clans(user_id)
+    
+    if not member_clans:
+        return False
+    
+    for other_clan in member_clans:
+        if other_clan.id != current_clan_id:
+            is_leader_other, _ = await service.is_clan_leader(user_id, other_clan.id)
+            if is_leader_other:
+                return True
+    
+    return False
+
+
+async def _remove_leader_role_from_discord(guild, miembro, leader_role_id: int):
+    """Quitar el rol de líder de Discord del miembro"""
+    leader_role = guild.get_role(leader_role_id)
+    if leader_role and leader_role in miembro.roles:
+        try:
+            await miembro.remove_roles(leader_role)
+        except Exception as e:
+            logger.warning(f"No se pudo quitar el rol de líder de Discord: {str(e)}")
+
+
+async def remove_clan_channel(guild, channel_id: int, clan_id: str) -> tuple[bool, Optional[str]]:
+    """Eliminar un canal de clan"""
+    try:
+        # Verificar que el canal existe en la base de datos
+        service_instance = ClanService()
+        check_sql = "SELECT * FROM clan_channels WHERE channel_id = ? AND clan_id = ?"
+        channel_record = service_instance.db.single(check_sql, (channel_id, clan_id))
+        
+        if not channel_record:
+            return False, "El canal no pertenece a este clan"
+        
+        # Obtener el canal de Discord
+        discord_channel = guild.get_channel(channel_id)
+        if discord_channel:
+            # Eliminar el canal de Discord
+            await discord_channel.delete()
+        else:
+            # Si el canal no existe en Discord, solo limpiarlo de la BD
+            logger.warning(f"Canal {channel_id} no encontrado en Discord, solo limpiando BD")
+        
+        # Eliminar de la base de datos
+        delete_sql = "DELETE FROM clan_channels WHERE channel_id = ? AND clan_id = ?"
+        service_instance.db.execute(delete_sql, (channel_id, clan_id))
+        
+        return True, None
+        
+    except Exception as e:
+        logger.error(f"Error en remove_clan_channel: {str(e)}")
+        return False, f"Error inesperado al eliminar canal: {str(e)}"
