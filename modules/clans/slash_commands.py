@@ -113,15 +113,19 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
     ### ? INFO ###
     @mod.command(name="info", description="Información de un clan")
-    @app_commands.describe(id_clan="Id del clan")
+    @app_commands.describe(
+        id_clan="Id del clan",
+        persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)"
+    )
     @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
-    async def clan_info(self, interaction: Interaction, id_clan: Optional[str] = None):
+    async def clan_info(self, interaction: Interaction, id_clan: Optional[str] = None, persistente: Optional[bool] = False):
+        ephemeral = not persistente  # Si persistente=True, ephemeral=False
         clans = []
         if id_clan:
             clan, error = await self.service.get_clan_by_id(id_clan)
             if error or not clan:
                 return await interaction.response.send_message(
-                    error or "Clan no encontrado.", ephemeral=True
+                    error or "Clan no encontrado.", ephemeral=ephemeral
                 )
             clans.append(clan)
 
@@ -129,7 +133,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
             clans, error = await self.service.get_all_clans()
             if error or not clans or len(clans) == 0:
                 return await interaction.response.send_message(
-                    error or "No hay clanes.", ephemeral=True
+                    error or "No hay clanes.", ephemeral=ephemeral
                 )
 
         embeds = []
@@ -174,7 +178,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
             embed.add_field(name="Fecha de creación", value=clan.created_at, inline=False)
 
             embeds.append(embed)
-        await send_paginated_embeds(interaction=interaction, embeds=embeds, ephemeral=True)
+        await send_paginated_embeds(interaction=interaction, embeds=embeds, ephemeral=ephemeral)
 
     ### ? Eliminar clan ###
     @mod.command(name="eliminar", description="Eliminar un clan")
@@ -344,12 +348,14 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 f"Error inesperado durante la migración: {str(e)}", ephemeral=True
             )
     @mod.command(name="estadisticas", description="Ver estadísticas generales de los clanes")
+    @app_commands.describe(persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)")
     @app_commands.checks.has_permissions(manage_roles=True)
-    async def clan_stats(self, interaction: Interaction):
+    async def clan_stats(self, interaction: Interaction, persistente: Optional[bool] = False):
+        ephemeral = not persistente  # Si persistente=True, ephemeral=False
         clans, error = await self.service.get_all_clans()
         if error or not clans:
             return await interaction.response.send_message(
-                error or "No hay clanes creados.", ephemeral=True
+                error or "No hay clanes creados.", ephemeral=ephemeral
             )
 
         # Calcular estadísticas
@@ -392,7 +398,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
             inline=True
         )
 
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
 
     #####################################
@@ -525,25 +531,27 @@ class ClanCommands(commands.GroupCog, name="clan"):
         )
 
     @lider.command(name="miembros", description="Ver la lista de miembros del clan")
-    async def list_members(self, interaction: Interaction):
-        await interaction.response.defer(ephemeral=True)
+    @app_commands.describe(persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)")
+    async def list_members(self, interaction: Interaction, persistente: Optional[bool] = False):
+        ephemeral = not persistente  # Si persistente=True, ephemeral=False
+        await interaction.response.defer(ephemeral=ephemeral)
         
         clan, error = await self.service.get_clan_by_channel_id(interaction.channel.id)
         if error or not clan:
             return await interaction.followup.send(
-                "Este canal no pertenece a ningún clan.", ephemeral=True
+                "Este canal no pertenece a ningún clan.", ephemeral=ephemeral
             )
         
         # Verificar que es líder del clan
         is_leader, error = await self.service.is_clan_leader(interaction.user.id, clan.id)
         if error or not is_leader:
             return await interaction.followup.send(
-                "No tienes permisos para ver la lista de miembros.", ephemeral=True
+                "No tienes permisos para ver la lista de miembros.", ephemeral=ephemeral
             )
 
         if not clan.members:
             return await interaction.followup.send(
-                "El clan no tiene miembros.", ephemeral=True
+                "El clan no tiene miembros.", ephemeral=ephemeral
             )
 
         # Separar líderes y miembros
@@ -586,17 +594,19 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 inline=False
             )
 
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed, ephemeral=ephemeral)
 
     @lider.command(name="info", description="Ver información del clan")
-    async def clan_info(self, interaction: Interaction):
-        await interaction.response.defer(ephemeral=True)
+    @app_commands.describe(persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)")
+    async def clan_info(self, interaction: Interaction, persistente: Optional[bool] = False):
+        ephemeral = not persistente  # Si persistente=True, ephemeral=False
+        await interaction.response.defer(ephemeral=ephemeral)
         
         try:
             clan, error = await self.service.get_clan_by_channel_id(interaction.channel.id)
             if error or not clan:
                 return await interaction.followup.send(
-                    "Este canal no pertenece a ningún clan.", ephemeral=True
+                    "Este canal no pertenece a ningún clan.", ephemeral=ephemeral
                 )
             
             # Obtener líderes de forma segura
@@ -632,11 +642,11 @@ class ClanCommands(commands.GroupCog, name="clan"):
                             f"Límite de canales de voz: {clan.max_voice_channels}\n"
             )
 
-            await interaction.followup.send(embed=embed, ephemeral=True)
+            await interaction.followup.send(embed=embed, ephemeral=ephemeral)
             
         except Exception as e:
             logger.error(f"Error en clan_info: {str(e)}")
-            await interaction.followup.send(f"Error inesperado: {str(e)}", ephemeral=True)
+            await interaction.followup.send(f"Error inesperado: {str(e)}", ephemeral=ephemeral)
 
     @mod.command(name="añadir_canal", description="Añadir un canal adicional a un clan existente")
     @app_commands.describe(
