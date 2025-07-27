@@ -8,12 +8,14 @@ from modules.core import send_paginated_embeds
 from modules.clan_settings import ClanSettingsService
 from .models import ClanMemberRole, ClanChannel, ChannelType as ClanChannelType
 from .service import ClanService
+from .models import FullClan  # Agregar import para FullClan
 from .utils import create_clan_role, create_clan_channels, setup_clan_roles, logica_salir_del_clan, logica_expulsar_del_clan, crear_canal_adicional, remove_clan_roles_from_member, assign_clan_roles_to_leader, generate_channel_name, demote_leader_to_member, remove_clan_channel
 from .validators import ClanValidator
 from .views import ClanSelectView
 from .views.clan_invite_buttons import ClanInviteView
 from .views.clan_leave_buttons import ClanLeaveView
 from .views.clan_mod_selection import ClanModSelectionView
+from .views.clan_config_selection import ClanConfigSelectionView
 from .views.clan_delete_buttons import ClanDeleteView
 from modules.core import logger
 
@@ -159,8 +161,16 @@ class ClanCommands(commands.GroupCog, name="clan"):
             voice_channels = [
                 f"<#{channel.channel_id}>" for channel in clan.channels if channel.type == "voice"
             ]
-            embed.add_field(name="Canales de texto", value=", ".join(text_channels), inline=True)
-            embed.add_field(name="Canales de voz", value=", ".join(voice_channels), inline=True)
+            embed.add_field(
+                name="Canales de texto", 
+                value=f"{', '.join(text_channels) if text_channels else 'Ninguno'} ({len(text_channels)}/{clan.max_text_channels})", 
+                inline=True
+            )
+            embed.add_field(
+                name="Canales de voz", 
+                value=f"{', '.join(voice_channels) if voice_channels else 'Ninguno'} ({len(voice_channels)}/{clan.max_voice_channels})", 
+                inline=True
+            )
             embed.add_field(name="Fecha de creación", value=clan.created_at, inline=False)
 
             embeds.append(embed)
@@ -616,8 +626,10 @@ class ClanCommands(commands.GroupCog, name="clan"):
                             f"Miembros: {len(clan.members)}\n"
                             f"Límite de miembros: {clan.max_members}\n"
                             f"Rol del clan: <@&{clan.role_id}>\n"
-                            f"Canales de texto: {', '.join(text_channels)}\n"
-                            f"Canales de voz: {', '.join(voice_channels)}\n"
+                            f"Canales de texto: {', '.join(text_channels)} ({len(text_channels)}/{clan.max_text_channels})\n"
+                            f"Canales de voz: {', '.join(voice_channels)} ({len(voice_channels)}/{clan.max_voice_channels})\n"
+                            f"Límite de canales de texto: {clan.max_text_channels}\n"
+                            f"Límite de canales de voz: {clan.max_voice_channels}\n"
             )
 
             await interaction.followup.send(embed=embed, ephemeral=True)
@@ -1048,6 +1060,72 @@ class ClanCommands(commands.GroupCog, name="clan"):
         )
         view.message = await interaction.original_response()
 
+    @mod.command(name="configurar", description="[MOD] Configurar límites específicos de un clan")
+    @app_commands.describe(
+        max_miembros="Máximo número de miembros (opcional)",
+        max_canales_texto="Máximo número de canales de texto (opcional)", 
+        max_canales_voz="Máximo número de canales de voz (opcional)"
+    )
+    @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
+    async def configurar_clan(
+        self,
+        interaction: Interaction,
+        max_miembros: Optional[int] = None,
+        max_canales_texto: Optional[int] = None,
+        max_canales_voz: Optional[int] = None
+    ):
+        """Configurar límites específicos de un clan"""
+        # Verificar permisos de moderador
+        if not interaction.user.guild_permissions.manage_guild:
+            return await interaction.response.send_message(
+                "❌ No tienes permisos para usar este comando.", ephemeral=True
+            )
+        
+        # Validar que se proporcione al menos un parámetro
+        if all(param is None for param in [max_miembros, max_canales_texto, max_canales_voz]):
+            return await interaction.response.send_message(
+                "❌ Debes proporcionar al menos un parámetro para configurar.", ephemeral=True
+            )
+        
+        # Validar valores positivos
+        for param_name, param_value in [
+            ("max_miembros", max_miembros),
+            ("max_canales_texto", max_canales_texto), 
+            ("max_canales_voz", max_canales_voz)
+        ]:
+            if param_value is not None and param_value < 1:
+                return await interaction.response.send_message(
+                    f"❌ {param_name} debe ser mayor que 0.", ephemeral=True
+                )
+
+        await interaction.response.defer(ephemeral=True)
+
+        # Obtener todos los clanes
+        clans, error = await self.service.get_all_clans()
+        if error:
+            return await interaction.followup.send(
+                f"❌ Error al obtener clanes: {error}", ephemeral=True
+            )
+
+        if not clans:
+            return await interaction.followup.send(
+                "❌ No hay clanes disponibles para configurar.", ephemeral=True
+            )
+
+        # Mostrar vista de selección de clan
+        view = ClanConfigSelectionView(
+            clans, 
+            self.service,
+            max_miembros=max_miembros,
+            max_canales_texto=max_canales_texto,
+            max_canales_voz=max_canales_voz
+        )
+        await interaction.followup.send(
+            "**🔧 Configurar Clan**\n\nSelecciona el clan que quieres configurar:",
+            view=view,
+            ephemeral=True
+        )
+        view.message = await interaction.original_response()
 
 
 async def setup(bot):

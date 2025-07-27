@@ -16,6 +16,47 @@ class ClanService:
         self.db = Database()
         self.clan_settings_service = ClanSettingsService()
 
+    async def update_clan_config(
+        self, 
+        clan_id: str, 
+        max_text_channels: Optional[int] = None, 
+        max_voice_channels: Optional[int] = None
+    ) -> Optional[str]:
+        """
+        Actualiza la configuración personalizada de un clan.
+        """
+        try:
+            # Verificar que el clan existe
+            clan_sql = "SELECT id FROM clans WHERE id = ? AND deleted = 0"
+            clan_row = self.db.single(clan_sql, (clan_id,))
+            if not clan_row:
+                return "Clan no encontrado"
+
+            # Construir query dinámico solo para campos no nulos
+            update_fields = []
+            params = []
+            
+            if max_text_channels is not None:
+                update_fields.append("max_text_channels = ?")
+                params.append(max_text_channels)
+            
+            if max_voice_channels is not None:
+                update_fields.append("max_voice_channels = ?")
+                params.append(max_voice_channels)
+            
+            if not update_fields:
+                return "No se especificaron campos para actualizar"
+            
+            params.append(clan_id)
+            update_sql = f"UPDATE clans SET {', '.join(update_fields)} WHERE id = ?"
+            self.db.execute(update_sql, tuple(params))
+            
+            logger.info(f"Configuración del clan {clan_id} actualizada: texto={max_text_channels}, voz={max_voice_channels}")
+            return None
+        except Exception as e:
+            logger.error(f"Error al actualizar configuración del clan {clan_id}: {str(e)}")
+            return f"Error al actualizar la configuración: {str(e)}"
+
     async def create_clan(
         self,
         name: str,
@@ -24,7 +65,21 @@ class ClanService:
         text_channel: TextChannel,
         voice_channel: VoiceChannel,
         max_members: int,
+        max_text_channels: Optional[int] = None,
+        max_voice_channels: Optional[int] = None,
     ) -> tuple[Optional[Clan], Optional[str]]:
+        
+        # Si no se proporcionan límites específicos, usar la configuración global
+        if max_text_channels is None or max_voice_channels is None:
+            global_settings, error = await self.clan_settings_service.get_settings()
+            if error:
+                return None, f"Error al obtener configuración: {error}"
+            
+            if max_text_channels is None:
+                max_text_channels = global_settings.max_text_channels
+            if max_voice_channels is None:
+                max_voice_channels = global_settings.max_voice_channels
+        
         clan = Clan(
             id=str(uuid4()),
             name=name,
@@ -32,10 +87,12 @@ class ClanService:
             created_at=datetime.now(),
             member_count=1,
             max_members=max_members,
+            max_text_channels=max_text_channels,
+            max_voice_channels=max_voice_channels,
         )
         sql = """--sql
-            INSERT INTO clans (id, name, role_id, created_at, member_count, max_members)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO clans (id, name, role_id, created_at, member_count, max_members, max_text_channels, max_voice_channels)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """
         self.db.execute(
             sql,
@@ -46,6 +103,8 @@ class ClanService:
                 clan.created_at,
                 clan.member_count,
                 clan.max_members,
+                clan.max_text_channels,
+                clan.max_voice_channels,
             ),
         )
 
@@ -265,6 +324,8 @@ class ClanService:
                 created_at=clan.created_at,
                 member_count=clan.member_count,
                 max_members=clan.max_members,
+                max_text_channels=clan.max_text_channels,
+                max_voice_channels=clan.max_voice_channels,
                 members=members,
                 channels=channels
             )
@@ -303,6 +364,8 @@ class ClanService:
                     created_at=clan.created_at,
                     member_count=clan.member_count,
                     max_members=clan.max_members,
+                    max_text_channels=clan.max_text_channels,
+                    max_voice_channels=clan.max_voice_channels,
                     members=members,
                     channels=channels
                 )

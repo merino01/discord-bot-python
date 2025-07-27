@@ -429,20 +429,23 @@ async def crear_canal_adicional(
         if error or not es_lider:
             return False, "No tienes permisos para crear canales en este clan."
 
-        # Obtener configuración para verificar límites
+        # Contar canales existentes del tipo solicitado
+        canales_existentes = [c for c in clan.channels if c.type == tipo_canal]
+        
+        # Obtener límite del clan directamente
+        if tipo_canal == "text":
+            max_canales = clan.max_text_channels
+        else:
+            max_canales = clan.max_voice_channels
+        
+        if len(canales_existentes) >= max_canales:
+            return False, f"El clan ya tiene el máximo de canales de {tipo_canal} ({max_canales})."
+
+        # Obtener configuración para las categorías
         servicio_configuracion = ClanSettingsService()
         configuracion, error = await servicio_configuracion.get_settings()
         if error:
             return False, "Error al obtener la configuración."
-
-        # Contar canales existentes del tipo solicitado
-        canales_existentes = [c for c in clan.channels if c.type == tipo_canal]
-        max_canales = (configuracion.max_text_channels 
-                      if tipo_canal == "text" 
-                      else configuracion.max_voice_channels)
-        
-        if len(canales_existentes) >= max_canales:
-            return False, f"El clan ya tiene el máximo de canales de {tipo_canal} ({max_canales})."
 
         # Obtener el rol del clan para los permisos
         rol_clan = await interaction.guild.fetch_role(clan.role_id)

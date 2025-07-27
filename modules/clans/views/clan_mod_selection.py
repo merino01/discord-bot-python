@@ -65,22 +65,29 @@ class ClanModSelectionView(discord.ui.View):
         tipo = self.kwargs.get('tipo')
         
         try:
-            # Obtener configuración para verificar límites
+            # Obtener servicios necesarios
             settings_service = ClanSettingsService()
-            settings, error = await settings_service.get_settings()
-            if error:
-                return await interaction.followup.send(
-                    f"❌ Error al obtener configuración: {error}", ephemeral=True
-                )
             
-            # Verificar límites de canales
+            # Verificar límites de canales usando configuración per-clan
             canales_existentes = [c for c in clan.channels if c.type == tipo]
-            max_canales = (settings.max_text_channels if tipo == "text" else settings.max_voice_channels)
+            
+            # Obtener límite del clan directamente
+            if tipo == "text":
+                max_canales = clan.max_text_channels
+            else:
+                max_canales = clan.max_voice_channels
             
             if len(canales_existentes) >= max_canales:
                 return await interaction.followup.send(
                     f"❌ El clan **{clan.name}** ya tiene el máximo de canales de {tipo} ({max_canales}).", 
                     ephemeral=True
+                )
+            
+            # Obtener configuración para categorías
+            settings, error = await settings_service.get_settings()
+            if error:
+                return await interaction.followup.send(
+                    f"❌ Error al obtener configuración: {error}", ephemeral=True
                 )
             
             # Generar nombre automático
