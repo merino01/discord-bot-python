@@ -4,7 +4,7 @@ from discord.ext import tasks
 from modules.core import logger, send_message_to_channel
 from .service import AutomaticMessagesService
 from .models import AutomaticMessage
-from .utils import process_message_text
+from .text_processor import process_message_text
 
 message_tasks: Dict[str, tasks.Loop] = {}
 
