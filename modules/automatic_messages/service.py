@@ -43,15 +43,29 @@ class AutomaticMessagesService:
             logger.error("Error al obtener los mensajes automáticos: %s", error)
             return None, error
 
+    def get_by_category_id(
+        self, category_id: int,
+    ) -> tuple[Optional[List[AutomaticMessage]], Optional[str]]:
+        try:
+            rows = self.db.select("SELECT * FROM automatic_messages WHERE category_id = ?", (category_id,))
+            automatic_messages = [AutomaticMessage(**row) for row in rows]
+            return automatic_messages, None
+        except Exception as e:
+            error = str(e)
+            logger.error("Error al obtener los mensajes automáticos por categoría: %s", error)
+            return None, error
+
     def add(self, automatic_message: AutomaticMessage) -> tuple[Optional[AutomaticMessage], Optional[str]]:
         try:
             sql = """INSERT INTO automatic_messages 
-                     (id, channel_id, text, interval, interval_unit, hour, minute) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?)"""
+                     (id, channel_id, category_id, text, name, interval, interval_unit, hour, minute) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"""
             params = (
                 automatic_message.id,
                 automatic_message.channel_id,
+                automatic_message.category_id,
                 automatic_message.text,
+                automatic_message.name,
                 automatic_message.interval,
                 automatic_message.interval_unit,
                 automatic_message.hour,

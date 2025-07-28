@@ -4,6 +4,7 @@ from discord.ext import commands
 from settings import guild_id
 from .service import LogsConfigService
 from .models import LogConfig, LogConfigType
+from . import constants
 
 
 class ConfigLogsCommands(commands.GroupCog, name="logs"):
@@ -14,18 +15,18 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
     #####################################################
     ### Comando para configurar los logs del servidor ###
     #####################################################
-    @app_commands.command(name="configurar", description="Configura los logs del servidor")
+    @app_commands.command(name="configurar", description=constants.COMMAND_CONFIG_DESC)
     @app_commands.describe(
-        tipo_de_log="Tipo de log a configurar",
-        activar="Activar o desactivar los logs",
-        canal="Canal donde se enviarán los logs",
+        tipo_de_log=constants.PARAM_LOG_TYPE_DESC,
+        activar=constants.PARAM_ACTIVATE_DESC,
+        canal=constants.PARAM_CHANNEL_DESC,
     )
     @app_commands.choices(
         tipo_de_log=[
-            app_commands.Choice(name="Mensajes", value="chat"),
-            app_commands.Choice(name="Voz", value="voice"),
-            app_commands.Choice(name="Miembros", value="members"),
-            app_commands.Choice(name="Entradas/Salidas", value="join_leave"),
+            app_commands.Choice(name=constants.CHOICE_CHAT, value=constants.LOG_TYPE_CHAT),
+            app_commands.Choice(name=constants.CHOICE_VOICE, value=constants.LOG_TYPE_VOICE),
+            app_commands.Choice(name=constants.CHOICE_MEMBERS, value=constants.LOG_TYPE_MEMBERS),
+            app_commands.Choice(name=constants.CHOICE_JOIN_LEAVE, value=constants.LOG_TYPE_JOIN_LEAVE),
         ]
     )
     @app_commands.checks.has_permissions(administrator=True)
@@ -38,7 +39,7 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
     ):
         if not canal and activar:
             await interaction.response.send_message(
-                content="No puedes activar los logs sin especificar un canal",
+                content=constants.ERROR_NO_CHANNEL_FOR_ACTIVATION,
                 ephemeral=True,
             )
             return
@@ -54,23 +55,23 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
 
         if activar and canal:
             await interaction.response.send_message(
-                content=f"{tipo_de_log}log activado en el canal <#{canal.id}>",
+                content=constants.SUCCESS_LOG_ACTIVATED.format(log_type=tipo_de_log, channel_id=canal.id),
                 ephemeral=True,
             )
         elif not activar:
             await interaction.response.send_message(
-                content=f"{tipo_de_log}log desactivado", ephemeral=True
+                content=constants.SUCCESS_LOG_DEACTIVATED.format(log_type=tipo_de_log), ephemeral=True
             )
         else:
             await interaction.response.send_message(
-                content=f"Ha habido un error al activar el {tipo_de_log}log",
+                content=constants.ERROR_ACTIVATING_LOG.format(log_type=tipo_de_log),
                 ephemeral=True,
             )
 
     #####################################################
     ### Comando para ver la configuración de los logs ###
     #####################################################
-    @app_commands.command(name="listar", description="Muestra la configuración de los logs")
+    @app_commands.command(name="listar", description=constants.COMMAND_LIST_DESC)
     @app_commands.checks.has_permissions(administrator=True)
     async def show_logs_config(self, interaction: Interaction, persistente: bool = False):
         log_configs, error = self.service.get_all()
@@ -79,7 +80,7 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
             return
 
         if not log_configs:
-            await interaction.response.send_message("No hay logs configurados", ephemeral=True)
+            await interaction.response.send_message(constants.NO_LOGS_CONFIGURED, ephemeral=True)
             return
 
         await interaction.response.defer(ephemeral=not persistente)
@@ -88,15 +89,15 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
 
         for log_config in log_configs:
             embed = Embed(
-                title=f"{log_config.type}log",
+                title=constants.TITLE_LOG_TYPE.format(log_type=log_config.type),
                 color=Color.dark_green() if log_config.enabled else Color.dark_red(),
             )
 
             if (channel_id := log_config.channel_id) and log_config.enabled:
-                embed.add_field(name="Canal", value=f"<#{channel_id}>", inline=True)
+                embed.add_field(name=constants.FIELD_CHANNEL, value=f"<#{channel_id}>", inline=True)
             embed.add_field(
-                name="Estado",
-                value="activado" if log_config.enabled else "desactivado",
+                name=constants.FIELD_STATUS,
+                value=constants.VALUE_ENABLED if log_config.enabled else constants.VALUE_DISABLED,
                 inline=True,
             )
             embeds.append(embed)
