@@ -1,6 +1,7 @@
 from discord.ext import commands
 from modules.logs_config import LogHandler
 from modules.automatic_messages import AutomaticMessagesService
+from modules.automatic_messages.utils import process_message_text
 from modules.core import logger
 
 
@@ -32,7 +33,9 @@ class GuildEvents(commands.Cog):
 
         for message in messages:
             try:
-                await channel.send(message.text)
+                # Procesar el texto para interpretar \n como saltos de línea
+                processed_text = process_message_text(message.text)
+                await channel.send(processed_text)
             except Exception as e:
                 logger.error(f"Error sending automatic message in channel {channel.name}: {e}")
 

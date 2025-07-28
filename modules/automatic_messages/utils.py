@@ -11,6 +11,20 @@ from .tasks import stop_task_by_id
 from . import constants
 
 
+def process_message_text(text: str) -> str:
+    """
+    Procesa el texto del mensaje para interpretar caracteres de escape.
+    
+    Args:
+        text: Texto original con posibles caracteres de escape
+        
+    Returns:
+        Texto procesado con caracteres de escape interpretados
+    """
+    # Reemplazar las secuencias de escape más comunes
+    return text.replace('\\n', '\n').replace('\\t', '\t')
+
+
 async def show_message_selection_for_delete(interaction: Interaction):
     """Mostrar vista de selección para eliminar mensaje automático"""
     service = AutomaticMessagesService()
