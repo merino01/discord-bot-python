@@ -1,7 +1,7 @@
 from discord.ext import commands
 from modules.logs_config import LogHandler
 from modules.automatic_messages import AutomaticMessagesService
-from modules.automatic_messages.utils import process_message_text
+from modules.automatic_messages.text_processor import process_message_text
 from modules.core import logger
 
 
