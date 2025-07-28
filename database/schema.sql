@@ -26,13 +26,16 @@ CREATE TABLE IF NOT EXISTS channel_formats (
 -- Tabla para mensajes automáticos
 CREATE TABLE IF NOT EXISTS automatic_messages (
     id CHAR(36) PRIMARY KEY,
-    channel_id INTEGER NOT NULL,
+    channel_id INTEGER,
+    category_id INTEGER,
     text TEXT NOT NULL,
+    name TEXT,
     interval INTEGER,
     interval_unit TEXT,
     hour INTEGER,
-    minute INTEGER
-    CONSTRAINT valid_interval_unit CHECK (interval_unit IN ('seconds', 'minutes', 'hours'))
+    minute INTEGER,
+    CONSTRAINT valid_interval_unit CHECK (interval_unit IN ('seconds', 'minutes', 'hours')),
+    CONSTRAINT channel_or_category CHECK ((channel_id IS NOT NULL AND category_id IS NULL) OR (channel_id IS NULL AND category_id IS NOT NULL))
 );
 
 -- Tablas para los clanes

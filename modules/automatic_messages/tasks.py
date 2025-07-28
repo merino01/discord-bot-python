@@ -9,6 +9,9 @@ message_tasks: Dict[str, tasks.Loop] = {}
 
 
 def create_message_task(client, message_config: AutomaticMessage):
+    if message_config.is_category_based:
+        return None
+    
     # Preparar los argumentos del decorador basados en la configuración
     decorator_kwargs = {}
 
@@ -81,6 +84,9 @@ def stop_task_by_id(task_id: str):
 
 
 def start_task(client, automatic_message_config: AutomaticMessage):
+    if automatic_message_config.is_category_based:
+        return
+    
     task = create_message_task(client, automatic_message_config)
 
     if task is None:
@@ -95,7 +101,7 @@ def start_task(client, automatic_message_config: AutomaticMessage):
         "channel_id": automatic_message_config.channel_id,
         "message_content": automatic_message_config.text,
     }
-    if hasattr(automatic_message_config, "interval"):
+    if automatic_message_config.interval:
         interval_log_text = f"{automatic_message_config.interval} "
         interval_log_text += f"{automatic_message_config.interval_unit}"
         log_info["interval"] = interval_log_text
