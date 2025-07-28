@@ -4,6 +4,7 @@ from discord.ext import tasks
 from modules.core import logger, send_message_to_channel
 from .service import AutomaticMessagesService
 from .models import AutomaticMessage
+from .utils import process_message_text
 
 message_tasks: Dict[str, tasks.Loop] = {}
 
@@ -32,7 +33,9 @@ def create_message_task(client, message_config: AutomaticMessage):
             if not channel or not channel.permissions_for(channel.guild.me).send_messages:
                 return
 
-            await send_message_to_channel(channel, content=message_config.text)
+            # Procesar el texto para interpretar \n como saltos de línea
+            processed_text = process_message_text(message_config.text)
+            await send_message_to_channel(channel, content=processed_text)
             logger.info("Mensaje automático enviado a %s (intervalo)", channel.name)
 
     else:
@@ -42,8 +45,7 @@ def create_message_task(client, message_config: AutomaticMessage):
 
         target_time = time(
             hour=message_config.hour,
-            minute=message_config.minute,
-            # second=message_config.second
+            minute=message_config.minute
         )
 
         @tasks.loop(seconds=31)
@@ -54,7 +56,9 @@ def create_message_task(client, message_config: AutomaticMessage):
                 if not channel or not channel.permissions_for(channel.guild.me).send_messages:
                     return
 
-                await send_message_to_channel(channel, content=message_config.text)
+                # Procesar el texto para interpretar \n como saltos de línea
+                processed_text = process_message_text(message_config.text)
+                await send_message_to_channel(channel, content=processed_text)
                 logger.info(f"Mensaje automático enviado a {channel.name} (hora exacta)")
 
     if hasattr(message_config, "interval"):
