@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Dict, Optional
 import json
 from modules.core import logger
-from .service import AutomaticMessagesService
+from .services import AutomaticMessagesService
 from .models import AutomaticMessage
 from .text_processor import process_message_text
 

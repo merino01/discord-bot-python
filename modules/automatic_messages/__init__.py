@@ -12,7 +12,7 @@ Tipos de programación soportados:
 - Al crear canal: cuando se crea un canal en una categoría
 """
 
-from .service import AutomaticMessagesService
+from .services import AutomaticMessagesService
 from .models import AutomaticMessage, ScheduleTypeEnum, IntervalUnitEnum
 from .slash_commands import AutomaticMessagesCommands
 
