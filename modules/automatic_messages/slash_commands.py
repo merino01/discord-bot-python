@@ -1,22 +1,26 @@
 from typing import Optional, Union
-from uuid import uuid4
-import discord
-from discord import app_commands, Interaction, TextChannel, CategoryChannel, Embed, Color
+from discord import (
+    app_commands,
+    Interaction,
+    TextChannel,
+    CategoryChannel,
+    Embed,
+    Color,
+    Object
+)
 from discord.ext import commands
 from settings import guild_id
-from .service import AutomaticMessagesService
-from .models import AutomaticMessage, ScheduleTypeEnum, IntervalUnitEnum
+from .services import AutomaticMessagesService
 from .utils import (
-    format_message_for_embed, 
-    validate_cron_expression, 
-    validate_weekdays_json,
+    validate_cron_expression,
     validate_time,
-    send_error_message,
-    send_success_message
+    send_error_message
 )
-from .views import MessageSelectView, ProgramMessageModal, ScheduleConfigView, IntervalConfigView, TimeConfigView, ProgramMessageTextModal, MessageBuilderView
+from .views import (
+    MessageSelectView,
+    MessageBuilderView
+)
 from . import constants
-from .tasks import reload_all_schedules
 
 
 class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
@@ -78,10 +82,10 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
         # Mostrar la nueva interfaz de configuración con embed y botones
         view = MessageBuilderView(tipo_programacion, destino, nombre)
         
-        embed = discord.Embed(
+        embed = Embed(
             title=constants.TITLE_CONFIGURE_MESSAGE,
             description=constants.DESC_CONFIGURE_MESSAGE,
-            color=discord.Color.blue()
+            color=Color.blue()
         )
         
         embed.add_field(
@@ -262,5 +266,4 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
 
 
 async def setup(bot):
-    """Setup function para cargar el cog"""
-    await bot.add_cog(AutomaticMessagesCommands(bot), guild=discord.Object(guild_id))
+    await bot.add_cog(AutomaticMessagesCommands(bot), guild=Object(guild_id))

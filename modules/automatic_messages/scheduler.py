@@ -6,7 +6,7 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 import asyncio
 from .models import AutomaticMessage
-from .service import AutomaticMessagesService
+from .services import AutomaticMessagesService
 from modules.core import logger
 import json
 
