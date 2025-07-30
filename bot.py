@@ -2,6 +2,7 @@ from discord import Intents, Object
 from discord.ext import commands
 from settings import bot_token, guild_id, prefix
 from modules.core import logger
+from modules.automatic_messages.tasks import setup_automatic_messages
 
 
 EXTENSIONS = {
@@ -68,6 +69,13 @@ class Bot(commands.Bot):
         # Sincronize slash commands with discord
         await self.tree.sync(guild=Object(id=guild_id))
         logger.info("Comandos de barra sincronizados")
+        
+        # Inicializar sistema de mensajes automáticos
+        try:
+            setup_automatic_messages(self)
+            logger.info("Sistema de mensajes automáticos iniciado")
+        except Exception as e:
+            logger.error("Error al iniciar mensajes automáticos: %s", e)
 
     def init(self):
         self.run(token=bot_token, log_handler=logger.handlers[0])

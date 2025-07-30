@@ -1,129 +1,306 @@
-from datetime import datetime, time
-from typing import Dict
-from discord.ext import tasks
-from modules.core import logger, send_message_to_channel
+"""
+Tareas programadas para el módulo de mensajes automáticos usando schedule
+"""
+
+import asyncio
+import threading
+import time
+import schedule
+from datetime import datetime
+from typing import Dict, Optional
+import json
+from modules.core import logger
 from .service import AutomaticMessagesService
 from .models import AutomaticMessage
 from .text_processor import process_message_text
 
-message_tasks: Dict[str, tasks.Loop] = {}
 
-
-def create_message_task(client, message_config: AutomaticMessage):
-    if message_config.is_category_based:
-        return None
+class AutomaticMessagesScheduler:
+    """Programador de mensajes automáticos usando schedule (cron-like)"""
     
-    # Preparar los argumentos del decorador basados en la configuración
-    decorator_kwargs = {}
+    def __init__(self, bot):
+        self.bot = bot
+        self.service = AutomaticMessagesService()
+        self.interval_trackers: Dict[str, datetime] = {}
+        self.running = False
+        self.scheduler_thread = None
+    
+    def start(self):
+        """Inicia el programador de mensajes"""
+        if not self.running:
+            self.running = True
 
-    if message_config.interval is not None:
-        # Si se define un intervalo, usamos el decorador con el parámetro adecuado
-        interval_unit = message_config.interval_unit
-
-        # Asegurarnos de que el intervalo sea un tipo válido
-        if interval_unit and interval_unit not in ["seconds", "minutes", "hours"]:
-            logger.error(f"Tipo de intervalo no válido: {interval_unit}")
-            return None
-
-        decorator_kwargs[interval_unit] = message_config.interval
-
-        @tasks.loop(**decorator_kwargs)
-        async def send_message_interval():
-            channel = await client.fetch_channel(message_config.channel_id)
-            if not channel or not channel.permissions_for(channel.guild.me).send_messages:
-                return
-
-            # Procesar el texto para interpretar \n como saltos de línea
-            processed_text = process_message_text(message_config.text)
-            await send_message_to_channel(channel, content=processed_text)
-            logger.info("Mensaje automático enviado a %s (intervalo)", channel.name)
-
-    else:
-        # Si no se define un intervalo, usamos la hora exacta
-        if message_config.hour is None or message_config.minute is None:
+            self._setup_scheduled_jobs()
+            self._start_scheduler_thread()
+    
+    def stop(self):
+        """Detiene el programador de mensajes"""
+        if self.running:
+            self.running = False
+            schedule.clear()
+            if self.scheduler_thread and self.scheduler_thread.is_alive():
+                self.scheduler_thread.join(timeout=5)
+            logger.info("Programador de mensajes automáticos detenido")
+    
+    def _setup_scheduled_jobs(self):
+        """Configura todos los trabajos programados basados en la base de datos"""
+        # Limpiar trabajos anteriores
+        schedule.clear()
+        
+        # Obtener todos los mensajes programados
+        messages, error = self.service.get_all()
+        logger.info("Cargando mensajes automáticos - Error: %s, Total mensajes: %s", 
+                   error, len(messages) if messages else 0)
+        
+        if error or not messages:
+            logger.warning("No se pudieron cargar mensajes automáticos: %s", error or "Sin mensajes")
             return
-
-        target_time = time(
-            hour=message_config.hour,
-            minute=message_config.minute
-        )
-
-        @tasks.loop(seconds=31)
-        async def send_message_at_specified_time():
-            now = datetime.now().time()
-            if now.hour == target_time.hour and now.minute == target_time.minute:
-                channel = await client.fetch_channel(message_config.channel_id)
-                if not channel or not channel.permissions_for(channel.guild.me).send_messages:
-                    return
-
-                # Procesar el texto para interpretar \n como saltos de línea
-                processed_text = process_message_text(message_config.text)
-                await send_message_to_channel(channel, content=processed_text)
-                logger.info(f"Mensaje automático enviado a {channel.name} (hora exacta)")
-
-    if hasattr(message_config, "interval"):
-        return send_message_interval
-    else:
-        return send_message_at_specified_time
-
-
-def stop_all_tasks():
-    for task_id, task in message_tasks.items():
-        if task.is_running():
-            task.stop()
-            logger.info("Tarea %s detenida", task_id)
-
-    message_tasks.clear()  # Limpiar el diccionario de tareas
-    logger.info("Todas las tareas automáticas han sido detenidas")
-
-
-def stop_task_by_id(task_id: str):
-    task = message_tasks.get(task_id)
-    if task and task.is_running():
-        task.stop()
-        logger.info("Tarea %s detenida", task_id)
-        del message_tasks[task_id]
-    else:
-        logger.warning("No se encontró la tarea %s o ya está detenida", task_id)
-
-
-def start_task(client, automatic_message_config: AutomaticMessage):
-    if automatic_message_config.is_category_based:
-        return
+        
+        for message in messages:
+            try:
+                logger.info("Procesando mensaje: ID=%s, Tipo=%s, Canal=%s, Hora=%s:%s, Días=%s", 
+                           message.id, message.schedule_type, message.channel_id, 
+                           message.hour, message.minute, message.weekdays)
+                self._schedule_message(message)
+            except Exception as e:
+                logger.error("Error programando mensaje %s: %s", message.id, str(e))
     
-    task = create_message_task(client, automatic_message_config)
+    def _schedule_message(self, message: AutomaticMessage):
+        """Programa un mensaje específico usando schedule"""
+        if message.schedule_type == "interval":
+            self._schedule_interval_message(message)
+        elif message.schedule_type == "daily":
+            self._schedule_daily_message(message)
+        elif message.schedule_type == "weekly":
+            self._schedule_weekly_message(message)
+        # on_channel_create no necesita programación, se maneja por eventos
+    
+    def _schedule_interval_message(self, message: AutomaticMessage):
+        """Programa un mensaje con intervalo"""
+        if not message.interval or not message.interval_unit:
+            logger.error("Mensaje %s sin datos de intervalo válidos", message.id)
+            return
+        
+        def job_func():
+            if self.bot.loop and not self.bot.loop.is_closed():
+                asyncio.run_coroutine_threadsafe(
+                    self._send_message_safe(message), 
+                    self.bot.loop
+                )
+            else:
+                logger.error("Loop del bot no disponible para mensaje %s", message.id)
+        
+        if message.interval_unit == "seconds":
+            schedule.every(message.interval).seconds.do(job_func).tag(message.id)
+        elif message.interval_unit == "minutes":
+            schedule.every(message.interval).minutes.do(job_func).tag(message.id)
+        elif message.interval_unit == "hours":
+            schedule.every(message.interval).hours.do(job_func).tag(message.id)
+        
+        logger.debug("Programado mensaje intervalo %s cada %d %s", 
+                    message.id, message.interval, message.interval_unit)
+    
+    def _schedule_daily_message(self, message: AutomaticMessage):
+        """Programa un mensaje diario"""
+        if message.hour is None or message.minute is None:
+            logger.error("Mensaje %s sin hora válida", message.id)
+            return
+        
+        time_str = f"{message.hour:02d}:{message.minute:02d}"
+        
+        # Función que se ejecutará en el scheduler
+        def job_func():
+            # Programar la corrutina en el loop del bot
+            if self.bot.loop and not self.bot.loop.is_closed():
+                asyncio.run_coroutine_threadsafe(
+                    self._send_message_safe(message), 
+                    self.bot.loop
+                )
+            else:
+                logger.error("Loop del bot no disponible para mensaje %s", message.id)
+        
+        schedule.every().day.at(time_str).do(job_func).tag(message.id)
+        logger.info("✅ Programado mensaje diario %s para las %s - Canal ID: %s", 
+                   message.id, time_str, message.channel_id)
+    
+    def _schedule_weekly_message(self, message: AutomaticMessage):
+        """Programa un mensaje semanal"""
+        if message.hour is None or message.minute is None or not message.weekdays:
+            logger.error("Mensaje %s sin datos semanales válidos", message.id)
+            return
+        
+        try:
+            weekdays = json.loads(message.weekdays)
+        except (json.JSONDecodeError, TypeError):
+            logger.error("Formato de días inválido para mensaje %s", message.id)
+            return
+        
+        time_str = f"{message.hour:02d}:{message.minute:02d}"
+        
+        def job_func():
+            if self.bot.loop and not self.bot.loop.is_closed():
+                asyncio.run_coroutine_threadsafe(
+                    self._send_message_safe(message), 
+                    self.bot.loop
+                )
+            else:
+                logger.error("Loop del bot no disponible para mensaje %s", message.id)
+        
+        # Mapeo de días (0=lunes -> schedule usa nombres)
+        day_names = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        
+        for weekday in weekdays:
+            if 0 <= weekday <= 6:
+                day_name = day_names[weekday]
+                getattr(schedule.every(), day_name).at(time_str).do(job_func).tag(message.id)
+                logger.info("✅ Programado mensaje semanal %s para %s a las %s", 
+                           message.id, day_name, time_str)
+    
+    def _start_scheduler_thread(self):
+        def run_scheduler():
+            while self.running:
+                # Ejecutar trabajos pendientes
+                jobs_run = schedule.run_pending()
+                if jobs_run:
+                    logger.info("⏰ Ejecutados %d trabajos a las %s", 
+                               len([j for j in schedule.jobs if j.should_run]), 
+                               datetime.now().strftime("%H:%M:%S"))
+                time.sleep(1)  # Verificar cada segundo
+            logger.info("🛑 Hilo del scheduler detenido")
+        
+        self.scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
+        self.scheduler_thread.start()
+    
+    async def _send_message_safe(self, message: AutomaticMessage):
+        try:
+            await self._send_message(message)
+        except Exception as e:
+            logger.error("Error enviando mensaje %s: %s", message.id, str(e))
+    
+    def reload_schedules(self):
+        """Recarga todos los trabajos programados desde la base de datos"""
+        if self.running:
+            logger.info("Recargando trabajos programados...")
+            self._setup_scheduled_jobs()
+    
+    def remove_message_schedule(self, message_id: str):
+        """Elimina la programación de un mensaje específico"""
+        schedule.clear(message_id)
+        logger.debug("Eliminada programación para mensaje %s", message_id)
+    
+    def add_message_schedule(self, message: AutomaticMessage):
+        """Agrega la programación para un nuevo mensaje"""
+        try:
+            logger.info("Agregando programación para mensaje: ID=%s, Tipo=%s", 
+                       message.id, message.schedule_type)
+            self._schedule_message(message)
+            logger.info("✅ Agregada programación para mensaje %s", message.id)
+        except Exception as e:
+            logger.error("Error agregando programación para mensaje %s: %s", message.id, str(e))
+    
+    async def _send_message(self, message: AutomaticMessage):
+        """Envía un mensaje automático"""
+        try:
+            # Determinar el canal
+            channel = None
+            if message.channel_id:
+                channel = self.bot.get_channel(message.channel_id)
+            elif message.category_id:
+                # Para mensajes de categoría, no se envían por scheduler
+                logger.warning("Mensaje de categoría %s siendo procesado por scheduler", message.id)
+                return
+            
+            if not channel:
+                logger.warning(
+                    "Canal %s no encontrado para mensaje %s", 
+                    message.channel_id, message.id
+                )
+                return
+            
+            # Procesar el texto del mensaje (variables, menciones, etc.)
+            processed_text = process_message_text(message.text, channel, self.bot)
+            
+            # Usar el nuevo formatter para enviar mensajes con embeds e imágenes
+            from .message_formatter import send_formatted_message
+            sent_message = await send_formatted_message(channel, processed_text)
+            
+            if sent_message:
+                # Actualizar el tracker para evitar duplicados
+                self.interval_trackers[message.id] = datetime.now()
+                
+                logger.info(
+                    "Mensaje automático enviado: %s en canal %s", 
+                    message.display_name, channel.name
+                )
+            else:
+                logger.error("No se pudo enviar el mensaje %s", message.id)
+            
+        except Exception as e:
+            logger.error(
+                "Error enviando mensaje automático %s: %s", 
+                message.id, str(e)
+            )
+    
+    async def send_category_message(self, category_id: int, new_channel):
+        """Envía mensajes automáticos cuando se crea un canal en una categoría"""
+        try:
+            messages, error = self.service.get_by_category_id(category_id)
+            
+            if error or not messages:
+                return
+            
+            for message in messages:
+                if message.schedule_type == "on_channel_create":
+                    processed_text = process_message_text(message.text, new_channel, self.bot)
+                    
+                    # Usar el nuevo formatter para enviar mensajes con embeds e imágenes
+                    from .message_formatter import send_formatted_message
+                    sent_message = await send_formatted_message(new_channel, processed_text)
+                    
+                    if sent_message:
+                        logger.info(
+                            "Mensaje automático de categoría enviado: %s en canal %s", 
+                            message.display_name, new_channel.name
+                        )
+                    else:
+                        logger.error("No se pudo enviar mensaje de categoría %s", message.id)
+                    
+        except Exception as e:
+            logger.error(
+                "Error enviando mensajes de categoría %s: %s", 
+                category_id, str(e)
+            )
 
-    if task is None:
-        return
 
-    message_tasks[str(automatic_message_config.id)] = task
-
-    # Iniciar la tarea
-    task.start()
-
-    log_info = {
-        "channel_id": automatic_message_config.channel_id,
-        "message_content": automatic_message_config.text,
-    }
-    if automatic_message_config.interval:
-        interval_log_text = f"{automatic_message_config.interval} "
-        interval_log_text += f"{automatic_message_config.interval_unit}"
-        log_info["interval"] = interval_log_text
-    else:
-        log_info["time"] = f"{automatic_message_config.hour}:{automatic_message_config.minute}"
-    logger.info("Mensaje automático programado")
-    logger.info(log_info)
+# Instancia global del programador
+_scheduler = None
 
 
-def setup_automatic_messages(client):
-    service = AutomaticMessagesService()
-    automatic_messages, error = service.get_all()
-    if error:
-        logger.error("Error al obtener los mensajes automáticos: %s", error)
-        return
-    if not automatic_messages:
-        logger.info("No hay mensajes automáticos configurados")
-        return
+def setup_automatic_messages(bot):
+    """Configura e inicia el sistema de mensajes automáticos"""
+    global _scheduler
+    
+    if _scheduler is None:
+        _scheduler = AutomaticMessagesScheduler(bot)
+        _scheduler.start()
 
-    for msg_config in automatic_messages:
-        start_task(client, msg_config)
+
+def get_scheduler():
+    """Obtiene la instancia del programador"""
+    return _scheduler
+
+
+def stop_automatic_messages():
+    """Detiene el sistema de mensajes automáticos"""
+    global _scheduler
+    
+    if _scheduler:
+        _scheduler.stop()
+        _scheduler = None
+
+
+def reload_all_schedules():
+    """Recarga todos los trabajos programados"""
+    global _scheduler
+    if _scheduler:
+        _scheduler.reload_schedules()
