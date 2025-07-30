@@ -1,73 +1,81 @@
-"""Automatic message model for the database."""
-
+from typing import Optional, Literal
 from dataclasses import dataclass
-from typing import Literal, Optional
+from enum import Enum
+
+ScheduleType = Literal["interval", "daily", "weekly", "custom", "on_channel_create"]
+IntervalUnit = Literal["seconds", "minutes", "hours"]
 
 
 @dataclass
 class AutomaticMessage:
-    """Dataclass representing an automatic message."""
-
     id: str
+    channel_id: Optional[int]
+    category_id: Optional[int]
     text: str
-    name: Optional[str] = None
-    channel_id: Optional[int] = None
-    category_id: Optional[int] = None
-    interval: Optional[int] = None
-    interval_unit: Optional[Literal["seconds", "minutes", "hours"]] = None
-    hour: Optional[int] = None
-    minute: Optional[int] = None
+    name: Optional[str]
+    interval: Optional[int]
+    interval_unit: Optional[IntervalUnit]
+    hour: Optional[int]
+    minute: Optional[int]
+    schedule_type: Optional[ScheduleType] = "interval"
+    weekdays: Optional[str] = None  # JSON array de días de la semana
+    cron_expression: Optional[str] = None
 
     def __post_init__(self):
-        """Post-initialization to validate the automatic message."""
-        self._validate_channel_and_category()
+        # Validaciones post-inicialización más permisivas para datos existentes
+        if self.channel_id is None and self.category_id is None:
+            raise ValueError("Se debe especificar channel_id o category_id")
         
-        # Si es un mensaje por categoría, no necesita configuración de tiempo
-        if self.category_id:
-            self._clear_time_settings()
-            return
+        if self.channel_id is not None and self.category_id is not None:
+            raise ValueError("No se puede especificar tanto channel_id como category_id")
         
-        # Para mensajes de canal, aplicar las validaciones de tiempo
-        self._setup_time_settings()
-        self._validate_time_ranges()
-
-    def _validate_channel_and_category(self):
-        """Validar que se especifique canal o categoría, pero no ambos."""
-        if not self.channel_id and not self.category_id:
-            raise ValueError("Debe especificar un canal o una categoría")
-        if self.channel_id and self.category_id:
-            raise ValueError("No se puede especificar tanto canal como categoría")
-
-    def _clear_time_settings(self):
-        """Limpiar configuraciones de tiempo para mensajes basados en categoría."""
-        self.interval = None
-        self.interval_unit = None
-        self.hour = None
-        self.minute = None
-
-    def _setup_time_settings(self):
-        """Configurar valores por defecto para mensajes de canal."""
-        if not self.hour and not self.minute and not self.interval:
-            self.interval = 10
-        if self.interval and not self.interval_unit:
-            self.interval_unit = "seconds"
-        if self.hour and self.minute:
-            self.interval = None
-
-    def _validate_time_ranges(self):
-        """Validar que los rangos de tiempo estén dentro de los límites."""
-        if self.hour and self.hour < 0:
-            self.hour = 0
-        if self.hour and self.hour > 23:
-            self.hour = 23
-        if self.minute and self.minute < 0:
-            self.minute = 0
-        if self.minute and self.minute > 59:
-            self.minute = 59
-        if self.interval and self.interval < 1:
-            self.interval = 1
+        # Configurar valores por defecto para datos antiguos
+        if self.schedule_type is None:
+            self.schedule_type = "interval"
+        
+        # Para datos antiguos sin schedule_type específico, inferir el tipo
+        if self.schedule_type == "interval":
+            # Si no tiene interval/interval_unit, configurar valores por defecto
+            if self.interval is None:
+                self.interval = 60  # 60 minutos por defecto
+            if self.interval_unit is None:
+                self.interval_unit = "minutes"
 
     @property
     def is_category_based(self) -> bool:
-        """Verifica si este mensaje automático está basado en categoría."""
+        """Retorna True si el mensaje está asociado a una categoría"""
         return self.category_id is not None
+
+    @property
+    def is_channel_based(self) -> bool:
+        """Retorna True si el mensaje está asociado a un canal específico"""
+        return self.channel_id is not None
+
+    @property
+    def display_name(self) -> str:
+        """Retorna el nombre para mostrar del mensaje automático"""
+        return self.name if self.name else f"Mensaje {self.id[:8]}"
+
+
+class ScheduleTypeEnum(Enum):
+    INTERVAL = "interval"
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    CUSTOM = "custom"
+    ON_CHANNEL_CREATE = "on_channel_create"
+
+
+class IntervalUnitEnum(Enum):
+    SECONDS = "seconds"
+    MINUTES = "minutes"
+    HOURS = "hours"
+
+
+class WeekDay(Enum):
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
