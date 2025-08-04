@@ -66,11 +66,9 @@ class Bot(commands.Bot):
                 logger.error("Error al cargar la extension: %s", e)
                 continue
 
-        # Sincronize slash commands with discord
         await self.tree.sync(guild=Object(id=guild_id))
         logger.info("Comandos de barra sincronizados")
-        
-        # Inicializar sistema de mensajes automáticos
+
         try:
             setup_automatic_messages(self)
             logger.info("Sistema de mensajes automáticos iniciado")
@@ -79,3 +77,4 @@ class Bot(commands.Bot):
 
     def init(self):
         self.run(token=bot_token, log_handler=logger.handlers[0])
+

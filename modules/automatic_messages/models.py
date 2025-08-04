@@ -25,14 +25,14 @@ class AutomaticMessage:
         # Validaciones post-inicialización más permisivas para datos existentes
         if self.channel_id is None and self.category_id is None:
             raise ValueError("Se debe especificar channel_id o category_id")
-        
+
         if self.channel_id is not None and self.category_id is not None:
             raise ValueError("No se puede especificar tanto channel_id como category_id")
-        
+
         # Configurar valores por defecto para datos antiguos
         if self.schedule_type is None:
             self.schedule_type = "interval"
-        
+
         # Para datos antiguos sin schedule_type específico, inferir el tipo
         if self.schedule_type == "interval":
             # Si no tiene interval/interval_unit, configurar valores por defecto

@@ -1,0 +1,408 @@
+{
+    "instructions": "📖 Instrucciones",
+    "currentConfiguration": "🔧 Configuración actual",
+    "summary": "📋 Resumen",
+    "error": "❌ Error",
+    "success": "✅ Éxito",
+    "cancel": "Cancelar",
+    "confirm": "✅ Confirmar",
+    "text": "📝 Texto",
+    "basicConfiguration": "🔧 Configuración básica",
+    "textConfigurated": "✅ Texto configurado",
+    "textNotConfigurated": "❌ Sin texto",
+    "embedConfigurated": "✅ Embed configurado",
+    "embedNotConfigurated": "❌ Sin embed",
+    "imageConfigurated": "✅ Imagen configurada",
+    "imageNotConfigurated": "❌ Sin imagen",
+    "preview": "👀 Vista previa",
+    "unexpectedError": "❌ Ha habido un error al ejecutar el comando",
+    "commands": {
+        "names": {
+            "automaticMessages": {
+                "commandName": "mensajes_automaticos",
+                "program": "programar",
+                "list": "listar",
+                "delete": "borrar",
+                "edit": "editar"
+            }
+        },
+        "descriptions": {
+            "automaticMessages": {
+                "program": "➕ Programa un nuevo mensaje automático",
+                "list": "📋 Lista los mensajes automáticos configurados",
+                "delete": "🗑️ Elimina un mensaje automático"
+            }
+        }
+    },
+
+    "automaticMessages": {
+        "commandOptions": {
+            "program": {
+                "scheduleType": "Tipo de programación del mensaje",
+                "destination": "Canal o categoría donde se enviará el mensaje",
+                "name": "Nombre descriptivo para el mensaje automático"
+            },
+            "channel": "Filtrar por canal específico",
+            "category": "Filtrar por categoría específica"
+        },
+        "scheduleTypeChoices": {
+            "interval": "⏰ Cada cierto tiempo",
+            "daily": "📅 Todos los días",
+            "weekly": "📆 Días específicos",
+            "on_channel_create": "🆕 Al crear canales"
+        },
+        "errorMessages": {
+            "errorGettingMessages": "❌ Error al obtener los mensajes automáticos",
+            "errorDeletingMessage": "❌ Error al eliminar el mensaje automático",
+            "errorCreatingMessage": "❌ Error al crear el mensaje automático",
+            "nameTooLong": "❌ El nombre no puede exceder {max_length} caracteres",
+            "invalidDestination": "❌ El destino debe ser un canal de texto o una categoría",
+            "categoryRequired": "❌ Para 'Al crear canales' debes seleccionar una categoría, no un canal",
+            "noContentConfigured": "❌ Debes añadir al menos texto, embed o imagen antes de completar",
+            "messageNotFound": "❌ No se ha encontrado el mensaje automático con ID {id}",
+            "updatingMessage": "❌ Error al actualizar el mensaje automático",
+            "invalidInterval": "❌ El intervalo debe ser un número positivo",
+            "invalidTime": "❌ La hora debe estar entre 0-23 y los minutos entre 0-59",
+            "invalidChannelOrCategory": "❌ Debes especificar un canal o una categoría, pero no ambos",
+            "missingRequiredFields": "❌ Faltan campos obligatorios para este tipo de programación",
+            "invalidCron": "❌ Expresión cron inválida",
+            "permissionDenied": "❌ No tienes permisos para usar este comando",
+            "invalidIntervalUnit": "❌ Unidad de intervalo inválida",
+            "hourMinuteInvalid": "❌ Hora o minuto inválidos (0-23 y 0-59)",
+            "selectOneDay": "❌ Debes seleccionar al menos un día de la semana",
+            "configuringEmbed": "❌ Error configurando embed: {error}",
+            "configuringImage": "❌ Error configurando imagen: {error}",
+            "messageNoContent": "❌ El mensaje debe tener al menos texto, embed o imagen",
+            "embedNoContent": "❌ El embed debe tener al menos un título o descripción",
+            "modalSubmit": "❌ Error: {error}",
+            "imageUrlRequired": "❌ La URL de la imagen es requerida",
+            "configuringFullEmbed": "❌ Error configurando embed completo: {error}",
+            "unexpectedError": "❌ Error inesperado"
+        },
+        "successMessages": {
+            "messageCreated": "✅ Mensaje automático creado correctamente",
+            "messageDeleted": "✅ Mensaje automático eliminado correctamente",
+            "messageEdited": "✏️ Mensaje automático editado con éxito",
+            "textConfigured": "✅ Texto configurado correctamente",
+            "embedConfigured": "✅ Embed configurado correctamente",
+            "imageConfigured": "✅ Imagen configurada correctamente"
+        },
+        "noMessagesTitle": "No se han encontrado mensajes automáticos",
+        "noMessagesDescription": "No se han encontrado mensajes automáticos",
+        "messageList": "📋 Lista de mensajes automáticos ({count})",
+        "selectMessageForDetails": "Selecciona un mensaje para ver sus detalles:",
+        "selectMessageToDelete": "Selecciona un mensaje para **eliminar:**",
+        "selectMessageToView": "👁️ Selecciona el mensaje automático que deseas ver:",
+        "confirmDelete": "⚠️ ¿Estás seguro de que quieres eliminar este mensaje automático?",
+        "configureMessageEmbed": {
+            "title": "🎨 Configurar mensaje automático",
+            "description": "Personaliza tu mensaje automático añadiendo contenido:",
+            "destination": "**📍 Destino:** {destination}",
+            "type": "**⏰ Tipo:** {type}",
+            "name": "**📝 Nombre:** {name}",
+            "noName": "Sin nombre",
+            "status": "**Estado:** {status}",
+            "noContent": "Sin contenido configurado",
+            "addText": "Añadir texto",
+            "addEmbed": "Añadir embed",
+            "addImage": "Añadir imagen",
+            "complete": "Completar",
+            "completedTitle": "✅ Configuración completada",
+            "completedDescription": "Tu mensaje automático ha sido configurado correctamente",
+            "configureScheduleTitle": "📅 Configurar programación",
+            "cancelledTitle": "❌ Configuración cancelada",
+            "cancelledDescription": "La configuración del mensaje automático ha sido cancelada",
+            "instructions": {
+                "addText": "**📝 Añadir texto** - Contenido principal del mensaje",
+                "addEmbed": "**🎨 Añadir embed** - Mensaje con formato enriquecido",
+                "addImage": "**🖼️ Añadir imagen** - Imagen independiente como adjunto",
+                "complete": "**✅ Completar** - Finalizar y programar el mensaje",
+                "whenToSend": "Ahora configura cuándo se debe enviar el mensaje:"
+            },
+            "contentStatus": "📊 Estado del Contenido",
+            "textModal": {
+                "title": "📝 Configurar texto del mensaje",
+                "label": "Contenido del mensaje",
+                "placeholder": "Escribe el contenido del mensaje aquí...",
+                "configured": "✅ Texto configurado correctamente"
+            },
+            "embedModal": {
+                "titleInput": {
+                    "label": "Título del Embed (opcional)",
+                    "placeholder": "Título del embed"
+                },
+                "descriptionInput": {
+                    "label": "Descripción del Embed (opcional)",
+                    "placeholder": "Descripción del embed"
+                },
+                "colorInput": {
+                    "label": "Color del Embed (opcional)",
+                    "placeholder": "Ejemplo: #FF5733"
+                },
+                "imageInput": {
+                    "label": "URL de la imagen del embed (opcional)",
+                    "placeholder": "URL de la imagen"
+                },
+                "title": "🎨 Configurar embed del mensaje",
+                "error": "❌ Error al configurar el embed",
+                "success": "✅ Embed configurado correctamente",
+                "contentError": "❌ Debes añadir al menos un título o una descripción al embed"
+            },
+            "imageModal": {
+                "title": "🖼️ Configurar imagen del mensaje",
+                "label": "URL de la imagen (opcional)",
+                "placeholder": "URL de la imagen",
+                "error": "❌ Error al configurar la imagen",
+                "success": "✅ Imagen configurada correctamente"
+            }
+        },
+        "autoSendChannelCreate": "🆕 Se enviará automáticamente en cada canal nuevo creado en la categoría",
+        "scheduleConfig": {
+            "selectTypePlaceholder": "Selecciona el tipo de programación",
+            "intervalLabel": "Por Intervalo",
+            "intervalDesc": "Repetir cada X tiempo",
+            "dailyLabel": "Diario", 
+            "dailyDesc": "Todos los días a una hora específica",
+            "weeklyLabel": "Semanal",
+            "weeklyDesc": "Días específicos de la semana",
+            "channelCreateLabel": "Al crear canal",
+            "channelCreateDesc": "Enviar cuando se cree un canal nuevo",
+            "autoSendChannelCreate": "Se enviará automáticamente cuando se cree un canal nuevo en esta categoría."
+        },
+        "errors": {
+            "creatingMessage": "❌ Error al crear el mensaje automático"
+        },
+        "success": {
+            "messageCreated": "✅ Mensaje automático creado correctamente"
+        },
+        "emoji": {
+            "success": "✅"
+        },
+        "buttons": {
+            "confirmDelete": "✅ Confirmar eliminación",
+            "cancelDelete": "❌ Cancelar",
+            "customInterval": "⚙️ Personalizado",
+            "embedAndImage": "✨ Embed e Imagen"
+        },
+        "messages": {
+            "messageDeletedText": "El mensaje **{name}** ha sido eliminado correctamente.",
+            "operationCancelledTitle": "❌ Operación cancelada",
+            "noMessageDeleted": "No se ha eliminado ningún mensaje.",
+            "autoConfigured": "✅ Mensaje automático configurado correctamente"
+        },
+        "intervalButtons": {
+            "1min": "1 minuto",
+            "5min": "5 minutos", 
+            "10min": "10 minutos",
+            "30min": "30 minutos",
+            "1hour": "1 hora",
+            "custom": "⚙️ Personalizado"
+        },
+        "intervals": {
+            "30seconds": "Cada 30 segundos",
+            "1minute": "Cada minuto",
+            "5minutes": "Cada 5 minutos",
+            "15minutes": "Cada 15 minutos",
+            "30minutes": "Cada 30 minutos",
+            "1hour": "Cada hora",
+            "6hours": "Cada 6 horas",
+            "12hours": "Cada 12 horas",
+            "24hours": "Cada 24 horas"
+        },
+        "placeholders": {
+            "selectToDelete": "Selecciona un mensaje para eliminar...",
+            "selectToView": "Selecciona un mensaje para ver...",
+            "selectType": "Selecciona el tipo de programación...",
+            "selectInterval": "Elige un intervalo común...",
+            "selectUnit": "Selecciona la unidad de tiempo...",
+            "messageText": "Escribe aquí el texto del mensaje automático...",
+            "messageName": "Nombre descriptivo para el mensaje",
+            "intervalExample": "Ej: 5, 30, 120",
+            "hourExample": "Ej: 14 para las 2 PM",
+            "embedTitle": "Ej: ¡Bienvenido al servidor!",
+            "embedDescription": "Escribe aquí la descripción del embed...",
+            "embedColor": "blue, red, green, #FF0000, etc.",
+            "embedImage": "https://ejemplo.com/imagen.png",
+            "imageUrl": "https://ejemplo.com/imagen.png",
+            "intervalNumber": "Ej: 45",
+            "customUnit": "seconds, minutes, hours",
+            "hour": "Ej: 14",
+            "minute": "Ej: 30",
+            "weekdaySelection": "Selecciona los días de la semana..."
+        },
+        "labels": {
+            "messageName": "Nombre del mensaje",
+            "messageText": "Texto del mensaje",
+            "hour": "Hora (0-23)",
+            "minute": "Minuto (0-59)",
+            "intervalNumber": "Número",
+            "intervalUnit": "Unidad",
+            "embedTitle": "Título del embed (opcional)",
+            "embedDescription": "Descripción del embed (opcional)",
+            "embedColor": "Color del embed (opcional)",
+            "embedImage": "URL de la imagen del embed (opcional)",
+            "imageUrl": "URL de la imagen (opcional)"
+        },
+        "status": {
+            "hasText": "📝 **Texto:** {preview}",
+            "hasEmbed": "🎨 **Embed:** {title}{image}",
+            "hasAttachment": "🖼️ **Imagen Attachment:** Configurada",
+            "ready": "¡Listo para programar!",
+            "noContentStatus": "❌ **Sin contenido configurado**",
+            "noTextOnly": "(Sin texto - solo embed/imagen)"
+        },
+        "descriptions": {
+            "configureInterval": "Selecciona cada cuánto tiempo se enviará el mensaje:",
+            "dailyConfig": "Configura a qué hora se enviará el mensaje todos los días:",
+            "weeklyConfig": "Configura la hora y después selecciona los días:",
+            "timeConfigured": "Hora configurada: {hour:02d}:{minute:02d}\n\nAhora selecciona los días:",
+            "confirmDays": "**{days}**\n\nHaz clic en 'Confirmar selección' para continuar."
+        },
+        "formats": {
+            "dailyTime": "📅 Se enviará todos los días a las {hour:02d}:{minute:02d}",
+            "weeklySchedule": "📅 Días: {days}\n🕐 Hora: {hour:02d}:{minute:02d}",
+            "intervalMessage": "⏰ Se enviará cada {interval} {unit}",
+            "dailyMessage": "📅 Se enviará todos los días a las {hour:02d}:{minute:02d}",
+            "weeklyMessage": "📆 Se enviará los {days} a las {hour:02d}:{minute:02d}"
+        },
+        "validation": {
+            "noContentBeforeComplete": "Debes añadir al menos texto, embed o imagen antes de completar",
+            "intervalUnitError": "Unidad inválida. Usa 'seconds', 'minutes' o 'hours'",
+            "daysRequired": "Debes seleccionar al menos un día",
+            "validHour": "La hora debe estar entre 0 y 23",
+            "validMinute": "Los minutos deben estar entre 0 y 59"
+        },
+        "fallback": {
+            "defaultName": "Mensaje {id}",
+            "errorCreating": "Error creando el mensaje: {error}",
+            "noMessagesToDelete": "No se encontraron mensajes automáticos para eliminar",
+            "messagesFoundDelete": "Se encontraron {count} mensajes automáticos",
+            "operationCancelled": "Operación cancelada"
+        },
+        "embed": {
+            "titleMessageId": "📨 Mensaje {name}",
+            "description": "Detalles del mensaje automático",
+            "fieldChannel": "📢 Canal",
+            "fieldCategory": "📁 Categoría",
+            "fieldText": "💬 Texto",
+            "fieldScheduleType": "⏰ Tipo de programación",
+            "fieldInterval": "⏳ Intervalo",
+            "fieldTime": "🕐 Hora",
+            "fieldCron": "⚙️ Expresión cron",
+            "valueNone": "-",
+            "valueInvalid": "inválido",
+            "valueEveryX": "Cada {interval} {unit}",
+            "valueDailyAt": "Todos los días a las {hour:02d}:{minute:02d}",
+            "valueWeeklyAt": "Los {days} a las {hour:02d}:{minute:02d}"
+        },
+        "summary": {
+            "unknownChannel": "Canal desconocido",
+            "unknownCategory": "Categoría desconocida",
+            "categoryPrefix": "Categoría: ",
+            "everyXUnit": "cada {interval} {unit}",
+            "dailyAt": "diario a las {hour:02d}:{minute:02d}",
+            "weekly": "semanal",
+            "onChannelCreate": "al crear canal",
+            "interval": "Intervalo",
+            "daily": "Diario"
+        },
+        "modals": {
+            "customInterval": {
+                "title": "⚙️ Configurar intervalo personalizado"
+            },
+            "dailyConfig": {
+                "title": "📅 Configurar programación diaria"
+            },
+            "weeklyConfig": {
+                "title": "📅 Configurar programación semanal"
+            },
+            "embedConfig": {
+                "title": "🎨 Configurar Embed",
+                "titleLabel": "Título del embed (opcional)",
+                "titlePlaceholder": "Ej: ¡Bienvenido al servidor!",
+                "descriptionLabel": "Descripción del embed",
+                "descriptionPlaceholder": "Escribe aquí la descripción del embed...",
+                "colorLabel": "Color del embed",
+                "colorPlaceholder": "blue, red, green, #FF0000, etc.",
+                "imageLabel": "URL de imagen del embed",
+                "imagePlaceholder": "https://ejemplo.com/imagen.png"
+            },
+            "intervalConfig": {
+                "title": "⏰ Configurar Intervalo",
+                "intervalLabel": "Intervalo (número)",
+                "intervalPlaceholder": "Ej: 5, 30, 120"
+            },
+            "timeConfig": {
+                "title": "🕐 Configurar Hora",
+                "hourLabel": "Hora (0-23)",
+                "minuteLabel": "Minuto (0-59)",
+                "dailyPlaceholder": "Ej: 14 para las 2 PM",
+                "weeklyPlaceholder": "Ej: 18 para las 6 PM",
+                "minutePlaceholder": "Ej: 30"
+            },
+            "messageText": {
+                "title": "📝 Texto del mensaje automático",
+                "textLabel": "Texto del mensaje",
+                "textPlaceholder": "Escribe aquí el texto del mensaje automático..."
+            },
+            "scheduleMessage": {
+                "title": "Programar Mensaje Automático",
+                "nameLabel": "Nombre del mensaje",
+                "namePlaceholder": "Nombre descriptivo para el mensaje",
+                "textLabel": "Texto del mensaje",
+                "textPlaceholder": "Escribe aquí el texto que se enviará...",
+                "completedText": "Modal completado correctamente"
+            }
+        },
+        "intervalConfig": {
+            "selectUnit": "Selecciona la unidad de tiempo:",
+            "selectUnitPlaceholder": "Selecciona la unidad de tiempo...",
+            "unitSeconds": "Segundos",
+            "unitMinutes": "Minutos", 
+            "unitHours": "Horas",
+            "selectQuickInterval": "Elige un intervalo común...",
+            "option30Seconds": "Cada 30 segundos",
+            "option1Minute": "Cada minuto",
+            "option5Minutes": "Cada 5 minutos",
+            "option15Minutes": "Cada 15 minutos",
+            "option30Minutes": "Cada 30 minutos",
+            "option1Hour": "Cada hora",
+            "option2Hours": "Cada 2 horas",
+            "option6Hours": "Cada 6 horas"
+        },
+        "timeConfig": {
+            "configureTimeButton": "🕐 Configurar hora"
+        },
+        "weeklyConfig": {
+            "confirmButton": "✅ Confirmar selección",
+            "daysSelectedTitle": "📅 Días seleccionados",
+            "confirmDaysDesc": "**{days}**\n\nHaz clic en 'Confirmar selección' para continuar.",
+            "selectDaysTitle": "📅 Seleccionar días de la semana",
+            "timeConfiguredDesc": "Hora configurada: {hour:02d}:{minute:02d}\n\nAhora selecciona los días:"
+        },
+        "debug": {
+            "modalWorking": "✅ Modal funcionando!\n**Tipo:** {type}\n**Texto:** {text}..."
+        }
+    },
+    "weekdays": {
+        "monday": "Lunes",
+        "tuesday": "Martes",
+        "wednesday": "Miércoles",
+        "thursday": "Jueves",
+        "friday": "Viernes",
+        "saturday": "Sábado",
+        "sunday": "Domingo"
+    },
+    "intervalUnits": {
+        "seconds": "segundos",
+        "minutes": "minutos",
+        "hours": "horas"
+    },
+    "scheduleTypes": {
+        "interval": "⏰ Por intervalo",
+        "daily": "📅 Diario",
+        "weekly": "📆 Semanal",
+        "custom": "🔧 Personalizado (cron)",
+        "onChannelCreate": "🆕 Al crear canal"
+    }
+}
