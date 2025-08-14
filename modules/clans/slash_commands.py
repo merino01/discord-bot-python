@@ -8,10 +8,8 @@ from modules.core import send_paginated_embeds
 from modules.clan_settings import ClanSettingsService
 from .models import ClanMemberRole, ClanChannel, ChannelType as ClanChannelType
 from .service import ClanService
-from .models import FullClan  # Agregar import para FullClan
 from .utils import create_clan_role, create_clan_channels, setup_clan_roles, logica_salir_del_clan, logica_expulsar_del_clan, crear_canal_adicional, remove_clan_roles_from_member, assign_clan_roles_to_leader, generate_channel_name, demote_leader_to_member, remove_clan_channel
 from .validators import ClanValidator
-from .views import ClanSelectView
 from .views.clan_invite_buttons import ClanInviteView
 from .views.clan_leave_buttons import ClanLeaveView
 from .views.clan_mod_selection import ClanModSelectionView
@@ -29,7 +27,6 @@ class ClanCommands(commands.GroupCog, name="clan"):
         self.clan_settings_service = ClanSettingsService()
         super().__init__()
 
-    lider = Group(name="lider", description="Comandos para líderes de clan")
     mod = Group(name="mod", description="Comandos de moderación de clanes")
 
     #################################
@@ -353,7 +350,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
             )
     @mod.command(name="estadisticas", description="Ver estadísticas generales de los clanes")
     @app_commands.describe(persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)")
-    @app_commands.checks.has_permissions(manage_roles=True)
+    @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
     async def clan_stats(self, interaction: Interaction, persistente: Optional[bool] = False):
         ephemeral = not persistente  # Si persistente=True, ephemeral=False
         clans, error = await self.service.get_all_clans()
@@ -414,7 +411,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
     #####################################
     ### Comandos para líderes de clan ###
     #####################################
-    @lider.command(name="invitar")
+    @app_commands.command(name="invitar")
     @app_commands.describe(miembro="Miembro a invitar al clan")
     async def invite_to_clan(self, interaction: Interaction, miembro: Member):
         clan, error = await self.service.get_clan_by_channel_id(interaction.channel.id)
@@ -448,7 +445,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
         )
         view.message = invite_message
 
-    @lider.command(name="expulsar")
+    @app_commands.command(name="expulsar")
     @app_commands.describe(miembro="Miembro a expulsar del clan")
     async def kick_from_clan(self, interaction: Interaction, miembro: Member):
         # Si el comando se ejecuta desde un canal de clan, usar ese clan
@@ -540,7 +537,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
             ephemeral=True
         )
 
-    @lider.command(name="miembros", description="Ver la lista de miembros del clan")
+    @app_commands.command(name="miembros", description="Ver la lista de miembros del clan")
     @app_commands.describe(persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)")
     async def list_members(self, interaction: Interaction, persistente: Optional[bool] = False):
         ephemeral = not persistente  # Si persistente=True, ephemeral=False
@@ -606,7 +603,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
         await interaction.followup.send(embed=embed, ephemeral=ephemeral)
 
-    @lider.command(name="info", description="Ver información del clan")
+    @app_commands.command(name="info", description="Ver información del clan")
     @app_commands.describe(persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)")
     async def clan_info(self, interaction: Interaction, persistente: Optional[bool] = False):
         ephemeral = not persistente  # Si persistente=True, ephemeral=False

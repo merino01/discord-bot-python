@@ -2,7 +2,7 @@ from uuid import uuid4
 from typing import Optional
 from discord import ButtonStyle, Interaction, Message, Guild, Member
 from discord.ui import View, Button
-from constants import ONE_MINUTE
+from constants import ONE_DAY
 from modules.clans.models import Clan
 from modules.clans.service import ClanService
 from modules.clans.utils import add_member_to_clan
@@ -10,7 +10,7 @@ from modules.clans.utils import add_member_to_clan
 
 class ClanInviteView(View):
     def __init__(self, clan: Clan, guild: Guild, service: ClanService, channel_message: Optional[Message] = None):
-        super().__init__(timeout=ONE_MINUTE * 10)
+        super().__init__(timeout=ONE_DAY)
         self.clan = clan
         self.value = None
         self.invite_id = str(uuid4())
