@@ -167,6 +167,8 @@ TITLE_SELECT_CLAN_REMOVE_LEADER = "👑 Seleccionar clan para quitar líder"
 DESCRIPTION_SELECT_CLAN_REMOVE_LEADER = "Selecciona el clan del que quieres quitar a {member} como líder:"
 TITLE_SELECT_CLAN_REMOVE_CHANNEL = "🗑️ Seleccionar clan para quitar canal"
 DESCRIPTION_SELECT_CLAN_REMOVE_CHANNEL = "Selecciona el clan del que quieres quitar el canal {channel}:"
+TITLE_SELECT_CLAN_VIEW_MEMBERS = "👥 Seleccionar clan para ver miembros"
+DESCRIPTION_SELECT_CLAN_VIEW_MEMBERS = "Selecciona el clan del que quieres ver la lista de miembros:"
 
 # Fields para embeds
 FIELD_ID = "ID"

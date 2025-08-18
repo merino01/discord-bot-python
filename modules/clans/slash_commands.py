@@ -15,6 +15,7 @@ from .views.clan_leave_buttons import ClanLeaveView
 from .views.clan_mod_selection import ClanModSelectionView
 from .views.clan_config_selection import ClanConfigSelectionView
 from .views.clan_delete_buttons import ClanDeleteView
+from .views.clan_selector import ClanSelectorView
 from modules.core import logger
 from . import constants
 
@@ -406,6 +407,162 @@ class ClanCommands(commands.GroupCog, name="clan"):
         )
 
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+
+    ### ? Ver miembros de cualquier clan (para moderadores) ###
+    @mod.command(name="miembros", description="Ver la lista de miembros de cualquier clan")
+    @app_commands.describe(
+        id_clan="ID del clan (opcional - si no se pone se muestra una lista para elegir)",
+        persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)"
+    )
+    @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
+    async def mod_list_members(self, interaction: Interaction, id_clan: Optional[str] = None, persistente: Optional[bool] = False):
+        ephemeral = not persistente  # Si persistente=True, ephemeral=False
+        await interaction.response.defer(ephemeral=True)  # Siempre defer ephemeral para el selector
+        
+        clan = None
+        
+        # Si se especifica ID de clan, usar ese directamente
+        if id_clan:
+            clan, error = await self.service.get_clan_by_id(id_clan)
+            if error or not clan:
+                return await interaction.followup.send(
+                    error or constants.ERROR_CLAN_NOT_FOUND, ephemeral=True
+                )
+        else:
+            # Si no se especifica ID, mostrar lista para elegir
+            clans, error = await self.service.get_all_clans()
+            if error or not clans or len(clans) == 0:
+                return await interaction.followup.send(
+                    error or constants.ERROR_NO_CLANS_AVAILABLE, ephemeral=True
+                )
+            
+            if len(clans) == 1:
+                clan = clans[0]
+            else:
+                # Mostrar selector de clanes
+                view = ClanSelectorView(clans, "view_members", ephemeral=ephemeral)
+                embed = Embed(
+                    title=constants.TITLE_SELECT_CLAN_VIEW_MEMBERS,
+                    description=constants.DESCRIPTION_SELECT_CLAN_VIEW_MEMBERS,
+                    color=Color.blue()
+                )
+                await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+                view.message = await interaction.original_response()
+                return
+        
+        # Si llegamos aquí, tenemos un clan específico
+        if not clan.members:
+            return await interaction.followup.send(
+                constants.ERROR_CLAN_NO_MEMBERS, ephemeral=ephemeral
+            )
+
+        # Separar líderes y miembros (reutilizar la misma lógica)
+        leaders = [m for m in clan.members if m.role == ClanMemberRole.LEADER.value]
+        members = [m for m in clan.members if m.role == ClanMemberRole.MEMBER.value]
+
+        # Preparar listas con un máximo de elementos por embed
+        MAX_MEMBERS_PER_PAGE = 15  # Límite conservador para evitar problemas
+
+        def create_member_pages(member_list, role_type):
+            pages = []
+            for i in range(0, len(member_list), MAX_MEMBERS_PER_PAGE):
+                chunk = member_list[i:i + MAX_MEMBERS_PER_PAGE]
+                member_strings = []
+                
+                for member in chunk:
+                    try:
+                        user = interaction.client.get_user(member.user_id)
+                        if user:
+                            if role_type == "leader":
+                                member_strings.append(f"👑 {user.mention}")
+                            else:
+                                member_strings.append(f"👤 {user.mention}")
+                        else:
+                            # Si no podemos obtener el usuario, usar solo la mención
+                            if role_type == "leader":
+                                member_strings.append(f"👑 <@{member.user_id}>")
+                            else:
+                                member_strings.append(f"👤 <@{member.user_id}>")
+                    except Exception:
+                        # En caso de error, usar solo la mención
+                        if role_type == "leader":
+                            member_strings.append(f"👑 <@{member.user_id}>")
+                        else:
+                            member_strings.append(f"👤 <@{member.user_id}>")
+                
+                pages.append(member_strings)
+            return pages
+
+        # Crear páginas
+        leader_pages = create_member_pages(leaders, "leader") if leaders else []
+        member_pages = create_member_pages(members, "member") if members else []
+
+        # Si todo cabe en una página, usar un solo embed
+        if len(leaders) <= MAX_MEMBERS_PER_PAGE and len(members) <= MAX_MEMBERS_PER_PAGE:
+            embed = Embed(
+                title=constants.EMBED_CLAN_MEMBERS_TITLE.format(clan_name=clan.name),
+                color=Color.green(),
+                description=constants.EMBED_CLAN_MEMBERS_DESCRIPTION.format(member_count=len(clan.members))
+            )
+
+            if leader_pages:
+                embed.add_field(
+                    name=constants.FIELD_LEADERS,
+                    value="\n".join(leader_pages[0]) if leader_pages[0] else "Ninguno",
+                    inline=False
+                )
+
+            if member_pages:
+                embed.add_field(
+                    name=constants.FIELD_MEMBERS,
+                    value="\n".join(member_pages[0]) if member_pages[0] else "Ninguno",
+                    inline=False
+                )
+
+            return await interaction.followup.send(embed=embed, ephemeral=ephemeral)
+
+        # Si necesitamos múltiples páginas
+        embeds = []
+        max_pages = max(len(leader_pages), len(member_pages))
+
+        for page_num in range(max_pages):
+            embed = Embed(
+                title=constants.EMBED_CLAN_MEMBERS_TITLE.format(clan_name=clan.name),
+                color=Color.green(),
+                description=constants.EMBED_CLAN_MEMBERS_DESCRIPTION.format(member_count=len(clan.members))
+            )
+
+            # Añadir información de página
+            embed.set_footer(text=f"Página {page_num + 1} de {max_pages}")
+
+            # Añadir líderes si hay en esta página
+            if page_num < len(leader_pages):
+                field_name = constants.FIELD_LEADERS
+                if len(leader_pages) > 1:
+                    field_name += f" (Página {page_num + 1})"
+                
+                embed.add_field(
+                    name=field_name,
+                    value="\n".join(leader_pages[page_num]),
+                    inline=False
+                )
+
+            # Añadir miembros si hay en esta página
+            if page_num < len(member_pages):
+                field_name = constants.FIELD_MEMBERS
+                if len(member_pages) > 1:
+                    field_name += f" (Página {page_num + 1})"
+                
+                embed.add_field(
+                    name=field_name,
+                    value="\n".join(member_pages[page_num]),
+                    inline=False
+                )
+
+            embeds.append(embed)
+
+        # Enviar con paginación
+        await send_paginated_embeds(interaction=interaction, embeds=embeds, ephemeral=ephemeral)
 
 
     #####################################
