@@ -565,124 +565,109 @@ class ClanCommands(commands.GroupCog, name="clan"):
         leaders = [m for m in clan.members if m.role == ClanMemberRole.LEADER.value]
         members = [m for m in clan.members if m.role == ClanMemberRole.MEMBER.value]
 
-        # Función auxiliar para dividir listas largas en chunks
-        def split_list_by_length(items, max_length=900):
-            chunks = []
-            current_chunk = []
-            current_length = 0
-            
-            for item in items:
-                item_length = len(item) + 1  # +1 por el salto de línea
-                if current_length + item_length > max_length and current_chunk:
-                    chunks.append(current_chunk)
-                    current_chunk = [item]
-                    current_length = item_length
-                else:
-                    current_chunk.append(item)
-                    current_length += item_length
-            
-            if current_chunk:
-                chunks.append(current_chunk)
-            
-            return chunks if chunks else [[]]
+        # Preparar listas con un máximo de elementos por embed
+        MAX_MEMBERS_PER_PAGE = 15  # Límite conservador para evitar problemas
 
-        # Preparar listas de miembros
-        leaders_text = []
-        members_text = []
+        def create_member_pages(member_list, role_type):
+            pages = []
+            for i in range(0, len(member_list), MAX_MEMBERS_PER_PAGE):
+                chunk = member_list[i:i + MAX_MEMBERS_PER_PAGE]
+                member_strings = []
+                
+                for member in chunk:
+                    try:
+                        user = interaction.client.get_user(member.user_id)
+                        if user:
+                            if role_type == "leader":
+                                member_strings.append(f"👑 {user.mention}")
+                            else:
+                                member_strings.append(f"👤 {user.mention}")
+                        else:
+                            # Si no podemos obtener el usuario, usar solo la mención
+                            if role_type == "leader":
+                                member_strings.append(f"👑 <@{member.user_id}>")
+                            else:
+                                member_strings.append(f"� <@{member.user_id}>")
+                    except Exception:
+                        # En caso de error, usar solo la mención
+                        if role_type == "leader":
+                            member_strings.append(f"👑 <@{member.user_id}>")
+                        else:
+                            member_strings.append(f"👤 <@{member.user_id}>")
+                
+                pages.append(member_strings)
+            return pages
 
-        # Preparar líderes
-        for leader in leaders:
-            try:
-                user = await interaction.client.fetch_user(leader.user_id)
-                leaders_text.append(f"👑 {user.mention} ({user.name})")
-            except Exception:
-                leaders_text.append(f"👑 <@{leader.user_id}> (ID: {leader.user_id})")
+        # Crear páginas
+        leader_pages = create_member_pages(leaders, "leader") if leaders else []
+        member_pages = create_member_pages(members, "member") if members else []
 
-        # Preparar miembros
-        for member in members:
-            try:
-                user = await interaction.client.fetch_user(member.user_id)
-                members_text.append(f"👤 {user.mention} ({user.name})")
-            except Exception:
-                members_text.append(f"👤 <@{member.user_id}> (ID: {member.user_id})")
+        # Si todo cabe en una página, usar un solo embed
+        if len(leaders) <= MAX_MEMBERS_PER_PAGE and len(members) <= MAX_MEMBERS_PER_PAGE:
+            embed = Embed(
+                title=constants.EMBED_CLAN_MEMBERS_TITLE.format(clan_name=clan.name),
+                color=Color.green(),
+                description=constants.EMBED_CLAN_MEMBERS_DESCRIPTION.format(member_count=len(clan.members))
+            )
 
-        # Crear el embed principal
-        embed = Embed(
-            title=constants.EMBED_CLAN_MEMBERS_TITLE.format(clan_name=clan.name),
-            color=Color.green(),
-            description=constants.EMBED_CLAN_MEMBERS_DESCRIPTION.format(member_count=len(clan.members))
-        )
-
-        # Verificar si necesitamos dividir las listas
-        leaders_str = "\n".join(leaders_text) if leaders_text else ""
-        members_str = "\n".join(members_text) if members_text else ""
-
-        # Si las listas son cortas, usar un solo embed
-        if len(leaders_str) <= 900 and len(members_str) <= 900:
-            if leaders_text:
+            if leader_pages:
                 embed.add_field(
                     name=constants.FIELD_LEADERS,
-                    value=leaders_str,
+                    value="\n".join(leader_pages[0]) if leader_pages[0] else "Ninguno",
                     inline=False
                 )
 
-            if members_text:
+            if member_pages:
                 embed.add_field(
                     name=constants.FIELD_MEMBERS,
-                    value=members_str,
+                    value="\n".join(member_pages[0]) if member_pages[0] else "Ninguno",
                     inline=False
                 )
 
-            await interaction.followup.send(embed=embed, ephemeral=ephemeral)
-        else:
-            # Si las listas son largas, usar múltiples embeds
-            embeds = []
-            
-            # Dividir líderes si es necesario
-            leaders_chunks = split_list_by_length(leaders_text) if leaders_text else [[]]
-            members_chunks = split_list_by_length(members_text) if members_text else [[]]
-            
-            # Crear embeds para cada combinación
-            max_chunks = max(len(leaders_chunks), len(members_chunks))
-            
-            for i in range(max_chunks):
-                page_embed = Embed(
-                    title=constants.EMBED_CLAN_MEMBERS_TITLE.format(clan_name=clan.name),
-                    color=Color.green(),
-                    description=constants.EMBED_CLAN_MEMBERS_DESCRIPTION.format(member_count=len(clan.members))
+            return await interaction.followup.send(embed=embed, ephemeral=ephemeral)
+
+        # Si necesitamos múltiples páginas
+        embeds = []
+        max_pages = max(len(leader_pages), len(member_pages))
+
+        for page_num in range(max_pages):
+            embed = Embed(
+                title=constants.EMBED_CLAN_MEMBERS_TITLE.format(clan_name=clan.name),
+                color=Color.green(),
+                description=constants.EMBED_CLAN_MEMBERS_DESCRIPTION.format(member_count=len(clan.members))
+            )
+
+            # Añadir información de página
+            embed.set_footer(text=f"Página {page_num + 1} de {max_pages}")
+
+            # Añadir líderes si hay en esta página
+            if page_num < len(leader_pages):
+                field_name = constants.FIELD_LEADERS
+                if len(leader_pages) > 1:
+                    field_name += f" (Página {page_num + 1})"
+                
+                embed.add_field(
+                    name=field_name,
+                    value="\n".join(leader_pages[page_num]),
+                    inline=False
                 )
+
+            # Añadir miembros si hay en esta página
+            if page_num < len(member_pages):
+                field_name = constants.FIELD_MEMBERS
+                if len(member_pages) > 1:
+                    field_name += f" (Página {page_num + 1})"
                 
-                if max_chunks > 1:
-                    page_embed.set_footer(text=f"Página {i + 1} de {max_chunks}")
-                
-                # Añadir líderes si hay en esta página
-                if i < len(leaders_chunks) and leaders_chunks[i]:
-                    field_name = constants.FIELD_LEADERS
-                    if len(leaders_chunks) > 1:
-                        field_name += f" (Parte {i + 1})"
-                    
-                    page_embed.add_field(
-                        name=field_name,
-                        value="\n".join(leaders_chunks[i]),
-                        inline=False
-                    )
-                
-                # Añadir miembros si hay en esta página
-                if i < len(members_chunks) and members_chunks[i]:
-                    field_name = constants.FIELD_MEMBERS
-                    if len(members_chunks) > 1:
-                        field_name += f" (Parte {i + 1})"
-                    
-                    page_embed.add_field(
-                        name=field_name,
-                        value="\n".join(members_chunks[i]),
-                        inline=False
-                    )
-                
-                embeds.append(page_embed)
-            
-            # Usar paginación si hay múltiples embeds
-            await send_paginated_embeds(interaction=interaction, embeds=embeds, ephemeral=ephemeral)
+                embed.add_field(
+                    name=field_name,
+                    value="\n".join(member_pages[page_num]),
+                    inline=False
+                )
+
+            embeds.append(embed)
+
+        # Enviar con paginación
+        await send_paginated_embeds(interaction=interaction, embeds=embeds, ephemeral=ephemeral)
 
     @app_commands.command(name="info", description="Ver información del clan")
     @app_commands.describe(persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)")
