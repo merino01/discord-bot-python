@@ -1,6 +1,5 @@
 import discord
-from discord import Interaction, ButtonStyle, Embed, Color
-from typing import Optional, Union
+from discord import Interaction, ButtonStyle
 from datetime import datetime
 from modules.core import logger
 from modules.clan_settings.service import ClanSettingsService
