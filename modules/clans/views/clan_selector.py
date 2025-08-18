@@ -73,7 +73,7 @@ class ClanSelector(discord.ui.Select):
         # Preparar listas con un máximo de elementos por embed
         MAX_MEMBERS_PER_PAGE = 15  # Límite conservador para evitar problemas
 
-        def create_member_pages(member_list, role_type):
+        async def create_member_pages(member_list, role_type):
             pages = []
             for i in range(0, len(member_list), MAX_MEMBERS_PER_PAGE):
                 chunk = member_list[i:i + MAX_MEMBERS_PER_PAGE]
@@ -81,7 +81,7 @@ class ClanSelector(discord.ui.Select):
                 
                 for member in chunk:
                     try:
-                        user = interaction.client.get_user(member.user_id)
+                        user = await interaction.client.fetch_user(member.user_id)
                         if user:
                             if role_type == "leader":
                                 member_strings.append(f"👑 {user.mention}")
@@ -104,8 +104,8 @@ class ClanSelector(discord.ui.Select):
             return pages
 
         # Crear páginas
-        leader_pages = create_member_pages(leaders, "leader") if leaders else []
-        member_pages = create_member_pages(members, "member") if members else []
+        leader_pages = await create_member_pages(leaders, "leader") if leaders else []
+        member_pages = await create_member_pages(members, "member") if members else []
 
         # Si todo cabe en una página, usar un solo embed
         if len(leaders) <= MAX_MEMBERS_PER_PAGE and len(members) <= MAX_MEMBERS_PER_PAGE:
@@ -171,8 +171,16 @@ class ClanSelector(discord.ui.Select):
 
             embeds.append(embed)
 
-        # Enviar con paginación
-        await send_paginated_embeds(interaction=interaction, embeds=embeds, ephemeral=self.kwargs.get('ephemeral', True))
+        # Si solo hay un embed, enviarlo directamente
+        if len(embeds) == 1:
+            await interaction.followup.send(embed=embeds[0], ephemeral=self.kwargs.get('ephemeral', True))
+        else:
+            # Para múltiples embeds, enviar el primero y luego los demás como followups
+            await interaction.followup.send(embed=embeds[0], ephemeral=self.kwargs.get('ephemeral', True))
+            
+            # Enviar los demás embeds como followups adicionales
+            for embed in embeds[1:]:
+                await interaction.followup.send(embed=embed, ephemeral=self.kwargs.get('ephemeral', True))
 
 
 class ClanSelectorView(discord.ui.View):
