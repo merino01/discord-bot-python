@@ -1,7 +1,10 @@
 """Comandos slash para el módulo Echo"""
 
-from discord import app_commands, Interaction, TextChannel
+import json
+from typing import Optional
+from discord import app_commands, Interaction, TextChannel, Object, Embed, Color
 from discord.ext import commands
+from settings import guild_id
 from modules.core import logger
 from . import constants
 
@@ -15,16 +18,29 @@ class EchoCommands(commands.Cog):
     @app_commands.command(name="echo", description=constants.COMMAND_ECHO_DESC)
     @app_commands.describe(
         texto=constants.PARAM_TEXT_DESC,
-        canal=constants.PARAM_CHANNEL_DESC
+        canal=constants.PARAM_CHANNEL_DESC,
+        enviar_embed=constants.PARAM_EMBED_DESC
     )
     @app_commands.checks.has_permissions(manage_messages=True)
     async def echo(
         self,
         interaction: Interaction,
         texto: str,
-        canal: TextChannel
+        canal: Optional[TextChannel] = None,
+        enviar_embed: bool = False
     ):
         """Envía un mensaje al canal especificado"""
+
+        # Si no se especifica canal, usar el canal actual
+        if canal is None:
+            canal = interaction.channel
+
+        # Verificar que el canal sea un TextChannel
+        if not isinstance(canal, TextChannel):
+            return await interaction.response.send_message(
+                constants.ERROR_INVALID_CHANNEL,
+                ephemeral=True
+            )
 
         # Verificar permisos del usuario en el canal de destino
         member_permissions = canal.permissions_for(interaction.user)
@@ -42,8 +58,8 @@ class EchoCommands(commands.Cog):
                 ephemeral=True
             )
 
-        # Verificar longitud del mensaje
-        if len(texto) > 2000:
+        # Verificar longitud del mensaje (para texto normal)
+        if not enviar_embed and len(texto) > 2000:
             return await interaction.response.send_message(
                 constants.ERROR_MESSAGE_TOO_LONG,
                 ephemeral=True
@@ -51,15 +67,45 @@ class EchoCommands(commands.Cog):
 
         try:
             # Enviar el mensaje al canal especificado
-            await canal.send(texto)
+            if enviar_embed:
+                # Parsear JSON para crear el embed
+                try:
+                    embed_data = json.loads(texto)
+                except json.JSONDecodeError:
+                    return await interaction.response.send_message(
+                        constants.ERROR_INVALID_JSON,
+                        ephemeral=True
+                    )
 
-            # Confirmar al usuario que el mensaje fue enviado
-            await interaction.response.send_message(
-                constants.SUCCESS_MESSAGE_SENT.format(channel=canal.mention),
-                ephemeral=True
-            )
+                try:
+                    # Crear embed desde JSON
+                    embed = Embed.from_dict(embed_data)
+                    await canal.send(embed=embed)
 
-            logger.info(f"Echo comando usado por {interaction.user} en #{canal.name}: {texto[:50]}...")
+                    # Confirmar al usuario que el embed fue enviado
+                    await interaction.response.send_message(
+                        constants.SUCCESS_EMBED_SENT.format(channel=canal.mention),
+                        ephemeral=True
+                    )
+
+                    logger.info(f"Echo embed JSON comando usado por {interaction.user} en #{canal.name}")
+
+                except Exception as e:
+                    return await interaction.response.send_message(
+                        constants.ERROR_EMBED_CREATION.format(error=str(e)),
+                        ephemeral=True
+                    )
+            else:
+                # Enviar mensaje normal
+                await canal.send(texto)
+
+                # Confirmar al usuario que el mensaje fue enviado
+                await interaction.response.send_message(
+                    constants.SUCCESS_MESSAGE_SENT.format(channel=canal.mention),
+                    ephemeral=True
+                )
+
+                logger.info(f"Echo comando usado por {interaction.user} en #{canal.name}: {texto[:50]}...")
 
         except Exception as e:
             logger.error(f"Error en comando echo: {str(e)}")
@@ -85,6 +131,4 @@ class EchoCommands(commands.Cog):
 
 
 async def setup(bot):
-    """Función requerida para cargar el módulo"""
-    await bot.add_cog(EchoCommands(bot))
-    logger.info("Módulo Echo cargado correctamente")
+    await bot.add_cog(EchoCommands(bot), guild=Object(id=guild_id))
