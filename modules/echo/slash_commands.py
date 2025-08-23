@@ -8,6 +8,7 @@ from settings import guild_id
 from modules.core import logger
 from .service import EchoService
 from .views.message_selector import EchoMessageSelectView
+from .modal import EchoTextModal, EchoEditModal
 from .utils import extract_message_info
 from . import constants
 
@@ -23,17 +24,44 @@ class EchoCommands(commands.Cog):
     @app_commands.describe(
         texto=constants.PARAM_TEXT_DESC,
         canal=constants.PARAM_CHANNEL_DESC,
-        enviar_embed=constants.PARAM_EMBED_DESC
+        enviar_embed=constants.PARAM_EMBED_DESC,
+        parrafo=constants.PARAM_PARAGRAPH_DESC
     )
     @app_commands.checks.has_permissions(manage_messages=True)
     async def echo(
         self,
         interaction: Interaction,
-        texto: str,
+        texto: str = None,
         canal: Optional[TextChannel] = None,
-        enviar_embed: bool = False
+        enviar_embed: bool = False,
+        parrafo: bool = False
     ):
         """Envía un mensaje al canal especificado"""
+
+        # Si se especifica párrafo, abrir modal
+        if parrafo:
+            # Si no se especifica canal, usar el canal actual
+            if canal is None:
+                canal = interaction.channel
+
+            # Verificar que el canal sea un TextChannel
+            if not isinstance(canal, TextChannel):
+                return await interaction.response.send_message(
+                    constants.ERROR_INVALID_CHANNEL,
+                    ephemeral=True
+                )
+
+            # Abrir modal para escribir texto
+            modal = EchoTextModal(canal, enviar_embed, self.service)
+            await interaction.response.send_modal(modal)
+            return
+
+        # Si no se usa modal, el texto es obligatorio
+        if not texto:
+            return await interaction.response.send_message(
+                constants.ERROR_TEXT_REQUIRED,
+                ephemeral=True
+            )
 
         # Si no se especifica canal, usar el canal actual
         if canal is None:
@@ -165,17 +193,35 @@ class EchoCommands(commands.Cog):
     @app_commands.describe(
         nuevo_texto=constants.PARAM_NEW_TEXT_DESC,
         enviar_embed=constants.PARAM_NEW_EMBED_DESC,
-        enlace_mensaje=constants.PARAM_MESSAGE_ID_DESC
+        enlace_mensaje=constants.PARAM_MESSAGE_ID_DESC,
+        parrafo=constants.PARAM_NEW_PARAGRAPH_DESC
     )
     @app_commands.checks.has_permissions(manage_messages=True)
     async def echo_edit(
         self,
         interaction: Interaction,
-        nuevo_texto: str,
+        nuevo_texto: str = None,
         enviar_embed: bool = False,
-        enlace_mensaje: Optional[str] = None
+        enlace_mensaje: Optional[str] = None,
+        parrafo: bool = False
     ):
         """Edita un mensaje enviado previamente con echo"""
+        
+        # Si se usa modal para texto largo
+        if parrafo and not enlace_mensaje:
+            await interaction.response.send_message(constants.ERROR_MODAL_REQUIRES_LINK, ephemeral=True)
+            return
+        
+        if parrafo:
+            # Mostrar modal para editar
+            modal = EchoEditModal(enlace_mensaje, enviar_embed, self.service, interaction.client.user.id)
+            await interaction.response.send_modal(modal)
+            return
+        
+        # Validar que se proporcione texto si no se usa modal
+        if not nuevo_texto:
+            await interaction.response.send_message(constants.ERROR_TEXT_REQUIRED, ephemeral=True)
+            return
         
         # Verificar longitud del nuevo texto (para texto normal)
         if not enviar_embed and len(nuevo_texto) > 2000:
