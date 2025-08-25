@@ -44,7 +44,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
         lider: Member,
     ):
         await interaction.response.defer(ephemeral=True)
-        
+
         can_create, error = await self.validator.can_create_clan(nombre, lider)
         if not can_create or error:
             return await interaction.followup.send(error, ephemeral=True)
@@ -122,24 +122,13 @@ class ClanCommands(commands.GroupCog, name="clan"):
     @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
     async def clan_info(self, interaction: Interaction, id_clan: Optional[str] = None, persistente: Optional[bool] = False):
         ephemeral = not persistente  # Si persistente=True, ephemeral=False
-        clans = []
         if id_clan:
             clan, error = await self.service.get_clan_by_id(id_clan)
             if error or not clan:
                 return await interaction.response.send_message(
                     error or constants.ERROR_CLAN_NOT_FOUND, ephemeral=ephemeral
                 )
-            clans.append(clan)
-
-        else:
-            clans, error = await self.service.get_all_clans()
-            if error or not clans or len(clans) == 0:
-                return await interaction.response.send_message(
-                    error or constants.ERROR_NO_CLANS, ephemeral=ephemeral
-                )
-
-        embeds = []
-        for clan in clans:
+            # Mostrar info del clan directamente
             embed = Embed(
                 title=constants.EMBED_CLAN_INFO_TITLE.format(clan_name=clan.name),
                 description=constants.EMBED_CLAN_INFO_DESCRIPTION.format(clan_name=clan.name),
@@ -178,9 +167,21 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 inline=True
             )
             embed.add_field(name=constants.FIELD_CREATION_DATE, value=clan.created_at, inline=False)
-
-            embeds.append(embed)
-        await send_paginated_embeds(interaction=interaction, embeds=embeds, ephemeral=ephemeral)
+            return await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+        else:
+            clans, error = await self.service.get_all_clans()
+            if error or not clans or len(clans) == 0:
+                return await interaction.response.send_message(
+                    error or constants.ERROR_NO_CLANS, ephemeral=ephemeral
+                )
+            # Mostrar selector de clanes
+            view = ClanSelectorView(clans, "info", ephemeral=ephemeral)
+            embed = Embed(
+                title="Selecciona un clan para ver su información",
+                description="Usa el menú desplegable para elegir un clan.",
+                color=Color.blue()
+            )
+            await interaction.response.send_message(embed=embed, view=view, ephemeral=ephemeral)
 
     ### ? Eliminar clan ###
     @mod.command(name="eliminar", description="Eliminar un clan")
@@ -188,7 +189,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
     @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
     async def clan_delete(self, interaction: Interaction, id_clan: Optional[str] = None):
         await interaction.response.defer(ephemeral=True)
-        
+
         if id_clan:
             # Si se proporciona ID, eliminar directamente
             clan, error = await self.service.get_clan_by_id(id_clan)
@@ -349,6 +350,52 @@ class ClanCommands(commands.GroupCog, name="clan"):
             await interaction.followup.send(
                 constants.ERROR_UNEXPECTED_MIGRATION.format(error=str(e)), ephemeral=True
             )
+
+    @mod.command(name="usuario_clanes", description="Ver los clanes a los que pertenece un usuario y si es líder")
+    @app_commands.describe(
+        usuario="Usuario a consultar",
+        persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)"
+    )
+    @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
+    async def mod_user_clans(self, interaction: Interaction, usuario: Member, persistente: Optional[bool] = False):
+        ephemeral = not persistente
+        await interaction.response.defer(ephemeral=ephemeral)
+        clans, error = await self.service.get_member_clans(usuario.id)
+        if error or not clans:
+            return await interaction.followup.send(
+                f"{usuario.mention} no pertenece a ningún clan.", ephemeral=ephemeral
+            )
+
+        # Buscar si es líder en cada clan y desde cuándo
+        embed = Embed(
+            title=f"Clanes de {usuario.display_name}",
+            color=Color.purple(),
+            timestamp=datetime.now()
+        )
+        embed.set_author(name=interaction.user.display_name, icon_url=interaction.user.display_avatar.url)
+        embed.set_thumbnail(url=usuario.display_avatar.url)
+        for clan in clans:
+            # Buscar info de miembro en el clan
+            sql = "SELECT * FROM clan_members WHERE user_id = ? AND clan_id = ?"
+            member_row = self.service.db.single(sql, (usuario.id, clan.id))
+            if not member_row:
+                continue
+            rol = member_row["role"]
+            joined = member_row["joined_at"]
+            try:
+                fecha = datetime.fromisoformat(joined) if isinstance(joined, str) else joined
+                fecha_str = fecha.strftime('%d/%m/%Y')
+            except Exception:
+                fecha_str = str(joined)
+            es_lider = rol == ClanMemberRole.LEADER.value
+            nombre_rol = "👑 Líder" if es_lider else "👤 Miembro"
+            embed.add_field(
+                name=f"{clan.name}",
+                value=f"{nombre_rol}\nDesde: {fecha_str}",
+                inline=False
+            )
+        await interaction.followup.send(embed=embed, ephemeral=ephemeral)
+
     @mod.command(name="estadisticas", description="Ver estadísticas generales de los clanes")
     @app_commands.describe(persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)")
     @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
