@@ -57,6 +57,48 @@ class ClanSelector(discord.ui.Select):
             # Ejecutar la acción según el tipo
             if self.action_type == "view_members":
                 await self._handle_view_members(interaction, selected_clan)
+            elif self.action_type == "info":
+                # Mostrar embed de info de clan igual que el comando info
+                embed = Embed(
+                    title=constants.EMBED_CLAN_INFO_TITLE.format(clan_name=selected_clan.name),
+                    description=constants.EMBED_CLAN_INFO_DESCRIPTION.format(clan_name=selected_clan.name),
+                    color=Color.blue(),
+                    timestamp=discord.utils.utcnow(),
+                )
+                guild = interaction.guild
+                embed.set_thumbnail(url=guild.icon.url if guild and guild.icon else None)
+                embed.set_author(
+                    name=interaction.user.display_name, icon_url=interaction.user.display_avatar.url
+                )
+                embed.set_footer(
+                    text=f"{guild.name}" if guild else "",
+                    icon_url=guild.icon.url if guild and guild.icon else None,
+                )
+                embed.add_field(name=constants.FIELD_ID, value=selected_clan.id, inline=True)
+                embed.add_field(name=constants.FIELD_NAME, value=selected_clan.name, inline=True)
+                leaders = [f"<@{member.user_id}>" for member in selected_clan.members if member.role == "leader"]
+                embed.add_field(name=constants.FIELD_LEADERS, value=", ".join(leaders) if leaders else "Ninguno", inline=True)
+                embed.add_field(name=constants.FIELD_MEMBERS, value=len(selected_clan.members), inline=True)
+                embed.add_field(name=constants.FIELD_MEMBER_LIMIT, value=selected_clan.max_members, inline=True)
+                embed.add_field(name=constants.FIELD_ROLE, value=f"<@&{selected_clan.role_id}>", inline=True)
+                text_channels = [
+                    f"<#{channel.channel_id}>" for channel in selected_clan.channels if channel.type == "text"
+                ]
+                voice_channels = [
+                    f"<#{channel.channel_id}>" for channel in selected_clan.channels if channel.type == "voice"
+                ]
+                embed.add_field(
+                    name=constants.FIELD_TEXT_CHANNELS,
+                    value=f"{', '.join(text_channels) if text_channels else constants.VALUE_NONE} ({len(text_channels)}/{selected_clan.max_text_channels})",
+                    inline=True
+                )
+                embed.add_field(
+                    name=constants.FIELD_VOICE_CHANNELS,
+                    value=f"{', '.join(voice_channels) if voice_channels else constants.VALUE_NONE} ({len(voice_channels)}/{selected_clan.max_voice_channels})",
+                    inline=True
+                )
+                embed.add_field(name=constants.FIELD_CREATION_DATE, value=selected_clan.created_at, inline=False)
+                await interaction.response.send_message(embed=embed, ephemeral=self.kwargs.get('ephemeral', True))
             else:
                 await interaction.response.send_message(
                     f"❌ Acción no reconocida: {self.action_type}", ephemeral=True
