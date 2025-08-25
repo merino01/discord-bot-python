@@ -351,7 +351,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 constants.ERROR_UNEXPECTED_MIGRATION.format(error=str(e)), ephemeral=True
             )
 
-    @mod.command(name="usuario_clanes", description="Ver los clanes a los que pertenece un usuario y si es líder")
+    @mod.command(name="usuario", description="Ver los clanes a los que pertenece un usuario y si es líder")
     @app_commands.describe(
         usuario="Usuario a consultar",
         persistente="Si la respuesta debe ser visible para todos (opcional, por defecto falso)"
