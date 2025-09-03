@@ -1,10 +1,10 @@
 """Constantes para el módulo Echo"""
 
 # Descripciones de comandos
-COMMAND_ECHO_DESC = "Envía un mensaje a un canal específico o al canal actual"
+COMMAND_ECHO_DESC = "Envía un mensaje a un canal o hilo específico, o al canal/hilo actual"
 COMMAND_EDIT_DESC = "Edita un mensaje enviado previamente con echo"
 PARAM_TEXT_DESC = "El texto que se enviará al canal (o JSON del embed si enviar_embed=True)"
-PARAM_CHANNEL_DESC = "El canal donde se enviará el mensaje (opcional, por defecto el canal actual)"
+PARAM_CHANNEL_DESC = "El canal o hilo donde se enviará el mensaje (opcional, por defecto el canal/thread actual)"
 PARAM_EMBED_DESC = "Si el mensaje se enviará como un embed usando JSON (opcional)"
 PARAM_PARAGRAPH_DESC = "Abrir una ventana para escribir texto largo cómodamente (opcional)"
 PARAM_MESSAGE_ID_DESC = "Enlace del mensaje a editar (opcional, si no se proporciona se mostrará un selector)"

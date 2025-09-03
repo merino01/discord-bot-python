@@ -1,8 +1,8 @@
 """Comandos slash para el módulo Echo"""
 
 import json
-from typing import Optional
-from discord import app_commands, Interaction, TextChannel, Object, Embed, Color
+from typing import Optional, Union
+from discord import app_commands, Interaction, TextChannel, Thread, Object, Embed, Color
 from discord.ext import commands
 from settings import guild_id
 from modules.core import logger
@@ -32,7 +32,7 @@ class EchoCommands(commands.Cog):
         self,
         interaction: Interaction,
         texto: str = None,
-        canal: Optional[TextChannel] = None,
+        canal: Optional[Union[TextChannel, Thread]] = None,
         enviar_embed: bool = False,
         parrafo: bool = False
     ):
@@ -44,8 +44,8 @@ class EchoCommands(commands.Cog):
             if canal is None:
                 canal = interaction.channel
 
-            # Verificar que el canal sea un TextChannel
-            if not isinstance(canal, TextChannel):
+            # Verificar que el canal sea un TextChannel o Thread
+            if not isinstance(canal, (TextChannel, Thread)):
                 return await interaction.response.send_message(
                     constants.ERROR_INVALID_CHANNEL,
                     ephemeral=True
@@ -67,8 +67,8 @@ class EchoCommands(commands.Cog):
         if canal is None:
             canal = interaction.channel
 
-        # Verificar que el canal sea un TextChannel
-        if not isinstance(canal, TextChannel):
+        # Verificar que el canal sea un TextChannel o Thread
+        if not isinstance(canal, (TextChannel, Thread)):
             return await interaction.response.send_message(
                 constants.ERROR_INVALID_CHANNEL,
                 ephemeral=True
@@ -253,8 +253,8 @@ class EchoCommands(commands.Cog):
                         ephemeral=True
                     )
             
-            # Verificar que es un TextChannel
-            if not isinstance(target_channel, TextChannel):
+            # Verificar que es un TextChannel o Thread
+            if not isinstance(target_channel, (TextChannel, Thread)):
                 return await interaction.response.send_message(
                     constants.ERROR_INVALID_CHANNEL,
                     ephemeral=True
