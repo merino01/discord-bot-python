@@ -22,7 +22,10 @@ class GuildEvents(commands.Cog):
         # Remover al usuario de los clanes si pertenece a alguno
         try:
             clans, error = await self.clan_service.get_member_clans(member.id)
-            if clans and not error:
+            if error and error != self.clan_service.CLAN_NOT_FOUND_MSG:
+                # Log error if it's not just "member not found in any clan"
+                logger.error(f"Error al verificar clanes del usuario {member.id}: {error}")
+            elif clans:
                 for clan in clans:
                     removal_error = await self.clan_service.kick_member_from_clan(
                         member.id, clan.id
