@@ -5,7 +5,7 @@ from modules.core import logger
 from .service import ChannelFormatsService
 from .models import ChannelFormat
 from .views import ChannelFormatSelectView, create_channel_format_selection_embed
-from . import constants
+from translator import __
 
 
 async def check_channel_format(message: Message):
@@ -53,7 +53,7 @@ async def show_channel_format_selection_for_delete(interaction: Interaction):
     
     if not channel_formats:
         await interaction.response.send_message(
-            constants.NO_FORMATS_FOUND, 
+            __("channelFormats.messages.noFormatsFound"), 
             ephemeral=True
         )
         return
@@ -95,7 +95,7 @@ async def show_channel_format_selection_for_edit(interaction: Interaction, canal
     
     if not channel_formats:
         await interaction.response.send_message(
-            constants.NO_FORMATS_FOUND, 
+            __("channelFormats.messages.noFormatsFound"), 
             ephemeral=True
         )
         return
@@ -143,7 +143,7 @@ def _edit_channel_format_internal(format_id: str, canal: Optional[TextChannel], 
         except re_error:
             return {
                 'success': False, 
-                'error': constants.ERROR_INVALID_REGEX
+                'error': __("channelFormats.errorMessages.invalidRegex")
             }
     
     # Obtener formato existente
@@ -154,7 +154,7 @@ def _edit_channel_format_internal(format_id: str, canal: Optional[TextChannel], 
     if not channel_format:
         return {
             'success': False, 
-            'error': constants.ERROR_FORMAT_NOT_FOUND.format(id=format_id)
+            'error': __("channelFormats.errorMessages.formatNotFound", id=format_id)
         }
     
     # Aplicar cambios

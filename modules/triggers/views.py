@@ -5,7 +5,7 @@ Views para la selección interactiva de triggers
 from typing import List, Callable, Any
 from discord import Interaction, ui, ButtonStyle, Embed, Color
 from .models import Trigger
-from . import constants
+from translator import __
 
 
 class TriggerSelectView(ui.View):

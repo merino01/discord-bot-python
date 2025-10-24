@@ -8,7 +8,7 @@ from modules.core import send_paginated_embeds
 from .service import ChannelFormatsService
 from .models import ChannelFormat
 from .utils import show_channel_format_selection_for_delete, show_channel_format_selection_for_edit, edit_channel_format_by_id
-from . import constants
+from translator import __
 
 
 class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
@@ -32,7 +32,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
             compile_regex(formato)
         except re_error:
             await interaction.response.send_message(
-                constants.ERROR_INVALID_REGEX,
+                __("channelFormats.errorMessages.invalidRegex"),
                 ephemeral=True,
             )
             return
@@ -44,7 +44,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_FORMAT_ADDED.format(channel=canal.mention, format=formato), ephemeral=True
+            __("channelFormats.successMessages.formatAdded", channel=canal.mention, format=formato), ephemeral=True
         )
 
     #########################################################
@@ -72,7 +72,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
                 return
             if not channel_format:
                 await interaction.response.send_message(
-                    constants.ERROR_FORMAT_NOT_FOUND.format(id=id_formato),
+                    __("channelFormats.errorMessages.formatNotFound", id=id_formato),
                     ephemeral=True,
                 )
                 return
@@ -90,7 +90,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
 
         if not channel_formats or len(channel_formats) == 0:
             await interaction.response.send_message(
-                constants.NO_FORMATS_FOUND, ephemeral=True
+                __("channelFormats.messages.noFormatsFound"), ephemeral=True
             )
             return
 
@@ -104,7 +104,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
             interaction=interaction,
             embeds=embeds,
             ephemeral=not persistente,
-            message=constants.SHOWING_FORMATS.format(count=len(channel_formats)),
+            message=__("channelFormats.messages.showingFormats", count=len(channel_formats)),
         )
 
     ###################################################
@@ -127,7 +127,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
 
         if not channel_format:
             await interaction.response.send_message(
-                constants.ERROR_FORMAT_NOT_FOUND.format(id=id_formato),
+                __("channelFormats.errorMessages.formatNotFound", id=id_formato),
                 ephemeral=True,
             )
             return
@@ -137,7 +137,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
             await interaction.response.send_message(content=error, ephemeral=True)
             return
         await interaction.response.send_message(
-            constants.SUCCESS_FORMAT_DELETED.format(id=channel_format.id), ephemeral=True
+            __("channelFormats.successMessages.formatDeleted", id=channel_format.id), ephemeral=True
         )
 
     ###############################################
@@ -166,7 +166,7 @@ class ChannelFormatsCommands(commands.GroupCog, name="formato_canales"):
         result = edit_channel_format_by_id(id_formato, canal, formato)
         
         if result['success']:
-            await interaction.response.send_message(constants.SUCCESS_FORMAT_EDITED, ephemeral=True)
+            await interaction.response.send_message(__("channelFormats.successMessages.formatEdited"), ephemeral=True)
         else:
             await interaction.response.send_message(content=result['error'], ephemeral=True)
 

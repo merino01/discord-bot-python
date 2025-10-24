@@ -7,7 +7,7 @@ from modules.core import send_paginated_embeds
 from .service import TriggersService
 from .models import Trigger, TriggerTextPosition, TriggerPosition
 from .utils import show_trigger_selection_for_delete, show_trigger_selection_for_edit, edit_trigger_by_id
-from . import constants
+from translator import __
 
 
 class TriggersCommands(commands.GroupCog, name="triggers"):
@@ -30,27 +30,27 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
     @app_commands.choices(
         posicion=[
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.CONTAINS.value],
+                name=__("triggers.positions")[TriggerPosition.CONTAINS.value],
                 value=TriggerPosition.CONTAINS.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.STARTS_WITH.value],
+                name=__("triggers.positions")[TriggerPosition.STARTS_WITH.value],
                 value=TriggerPosition.STARTS_WITH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.ENDS_WITH.value],
+                name=__("triggers.positions")[TriggerPosition.ENDS_WITH.value],
                 value=TriggerPosition.ENDS_WITH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.EXACT_MATCH.value],
+                name=__("triggers.positions")[TriggerPosition.EXACT_MATCH.value],
                 value=TriggerPosition.EXACT_MATCH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.TEXT_BETWEEN.value],
+                name=__("triggers.positions")[TriggerPosition.TEXT_BETWEEN.value],
                 value=TriggerPosition.TEXT_BETWEEN.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.REGEX.value],
+                name=__("triggers.positions")[TriggerPosition.REGEX.value],
                 value=TriggerPosition.REGEX.value,
             ),
         ]
@@ -79,7 +79,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
-        await interaction.response.send_message(constants.SUCCESS_TRIGGER_CREATED, ephemeral=True)
+        await interaction.response.send_message(__("triggers.successMessages.triggerCreated"), ephemeral=True)
 
     ##################################################
     ### Comando para ver una lista de los triggers ###
@@ -106,7 +106,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
                 return
             if not trigger:
                 await interaction.response.send_message(
-                    content=constants.ERROR_TRIGGER_NOT_FOUND.format(id=id_trigger),
+                    content=__("triggers.errorMessages.triggerNotFound", id=id_trigger),
                     ephemeral=True,
                 )
                 return
@@ -123,7 +123,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
                 return
 
         if not triggers or len(triggers) == 0:
-            await interaction.response.send_message(constants.NO_TRIGGERS_FOUND, ephemeral=True)
+            await interaction.response.send_message(__("triggers.messages.noTriggersFound"), ephemeral=True)
             return
 
         embeds = []
@@ -162,7 +162,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
             interaction=interaction,
             embeds=embeds,
             ephemeral=not persistente,
-            message=constants.SHOWING_TRIGGERS.format(count=len(triggers)),
+            message=__("triggers.messages.showingTriggers", count=len(triggers)),
         )
 
     ########################################
@@ -179,7 +179,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
-            await interaction.response.send_message(content=constants.SUCCESS_TRIGGER_DELETED, ephemeral=True)
+            await interaction.response.send_message(content=__("triggers.successMessages.triggerDeleted"), ephemeral=True)
         else:
             # Si no se proporciona ID, mostrar vista de selección
             await show_trigger_selection_for_delete(interaction, self.service)
@@ -200,27 +200,27 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
     @app_commands.choices(
         posicion=[
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.CONTAINS.value],
+                name=__("triggers.positions")[TriggerPosition.CONTAINS.value],
                 value=TriggerPosition.CONTAINS.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.STARTS_WITH.value],
+                name=__("triggers.positions")[TriggerPosition.STARTS_WITH.value],
                 value=TriggerPosition.STARTS_WITH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.ENDS_WITH.value],
+                name=__("triggers.positions")[TriggerPosition.ENDS_WITH.value],
                 value=TriggerPosition.ENDS_WITH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.EXACT_MATCH.value],
+                name=__("triggers.positions")[TriggerPosition.EXACT_MATCH.value],
                 value=TriggerPosition.EXACT_MATCH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.TEXT_BETWEEN.value],
+                name=__("triggers.positions")[TriggerPosition.TEXT_BETWEEN.value],
                 value=TriggerPosition.TEXT_BETWEEN.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.REGEX.value],
+                name=__("triggers.positions")[TriggerPosition.REGEX.value],
                 value=TriggerPosition.REGEX.value,
             ),
         ]

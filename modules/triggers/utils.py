@@ -7,8 +7,8 @@ from discord import Forbidden, Embed, Color
 from modules.core import logger
 from .service import TriggersService
 from .models import TriggerPosition, Trigger
-from . import constants
 from .views import TriggerSelectView, create_trigger_selection_embed
+from translator import __
 
 
 def _find_trigger(channel_id: int, text: str) -> Optional[Trigger]:
@@ -133,7 +133,7 @@ async def show_trigger_selection_for_delete(interaction, service: TriggersServic
         # Crear embed de confirmación
         success_embed = Embed(
             title=constants.CONFIRMATION_TRIGGER_DELETED,
-            description=constants.SUCCESS_TRIGGER_DELETED,
+            description=__("triggers.successMessages.triggerDeleted"),
             color=Color.green()
         )
         
@@ -207,7 +207,7 @@ def _edit_trigger_internal(service: TriggersService, id_trigger: str, **edit_par
     if not trigger:
         return {
             "success": False, 
-            "error": constants.ERROR_TRIGGER_NOT_FOUND.format(id=id_trigger)
+            "error": __("triggers.errorMessages.triggerNotFound", id=id_trigger)
         }
 
     # Actualizamos los campos que se han pasado como parámetros
@@ -235,4 +235,4 @@ def _edit_trigger_internal(service: TriggersService, id_trigger: str, **edit_par
     if error:
         return {"success": False, "error": error}
 
-    return {"success": True, "message": constants.SUCCESS_TRIGGER_EDITED}
+    return {"success": True, "message": __("triggers.successMessages.triggerEdited")}

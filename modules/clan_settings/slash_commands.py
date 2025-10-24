@@ -4,7 +4,7 @@ from discord.ext import commands
 from settings import guild_id
 from .service import ClanSettingsService
 from modules.clans.service import ClanService
-from . import constants
+from translator import __
 
 
 class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
@@ -59,7 +59,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
                 settings.default_role_color = int(color_roles, 16)
             except ValueError:
                 await interaction.response.send_message(
-                    constants.ERROR_INVALID_COLOR, ephemeral=True
+                    __("clanSettings.errorMessages.invalidColor"), ephemeral=True
                 )
                 return
         if varios_clanes is not None:
@@ -78,7 +78,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_CONFIG_UPDATED, ephemeral=True
+            __("clanSettings.successMessages.configUpdated"), ephemeral=True
         )
 
     @app_commands.command(name="info", description=constants.COMMAND_INFO_DESC)
@@ -163,7 +163,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if rol.id in settings.additional_roles:
             await interaction.response.send_message(
-                constants.ERROR_ROLE_ALREADY_EXISTS.format(role=rol.mention), 
+                __("clanSettings.errorMessages.roleAlreadyExists", role=rol.mention), 
                 ephemeral=True
             )
             return
@@ -175,7 +175,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_ADDITIONAL_ROLE_ADDED.format(role=rol.mention),
+            __("clanSettings.successMessages.additionalRoleAdded", role=rol.mention),
             ephemeral=True
         )
 
@@ -192,7 +192,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if rol.id not in settings.additional_roles:
             await interaction.response.send_message(
-                constants.ERROR_ROLE_NOT_IN_LIST.format(role=rol.mention), 
+                __("clanSettings.errorMessages.roleNotInList", role=rol.mention), 
                 ephemeral=True
             )
             return
@@ -204,7 +204,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_ADDITIONAL_ROLE_REMOVED.format(role=rol.mention),
+            __("clanSettings.successMessages.additionalRoleRemoved", role=rol.mention),
             ephemeral=True
         )
 
@@ -220,7 +220,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if not settings.additional_roles:
             await interaction.response.send_message(
-                constants.NO_ADDITIONAL_ROLES_CONFIGURED, 
+                __("clanSettings.messages.noAdditionalRolesConfigured"), 
                 ephemeral=True
             )
             return
@@ -232,7 +232,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_ALL_ADDITIONAL_ROLES_CLEARED,
+            __("clanSettings.successMessages.allAdditionalRolesCleared"),
             ephemeral=True
         )
 
@@ -250,7 +250,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if not settings.additional_roles:
             await interaction.followup.send(
-                constants.NO_ADDITIONAL_ROLES_CONFIGURED, 
+                __("clanSettings.messages.noAdditionalRolesConfigured"), 
                 ephemeral=True
             )
             return
@@ -261,7 +261,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
         clans, error = await clan_service.get_all_clans()
         if error or not clans:
             await interaction.followup.send(
-                error or constants.ERROR_NO_CLANS_TO_PROCESS, 
+                error or __("clanSettings.errorMessages.noClansToProcess"), 
                 ephemeral=True
             )
             return
@@ -278,7 +278,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if not additional_roles:
             await interaction.followup.send(
-                constants.ERROR_NO_VALID_ADDITIONAL_ROLES, 
+                __("clanSettings.errorMessages.noValidAdditionalRoles"), 
                 ephemeral=True
             )
             return
@@ -302,7 +302,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
                     continue  # Continuar con el siguiente miembro si hay error
 
         await interaction.followup.send(
-            constants.SUCCESS_ROLES_APPLIED.format(
+            __("clanSettings.successMessages.rolesApplied", 
                 total_members=total_members,
                 successful_members=successful_assignments
             ),

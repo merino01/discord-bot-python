@@ -6,7 +6,7 @@ import discord
 from discord import Interaction, Embed, Color
 from typing import List, Callable, Any
 from .models import ChannelFormat
-from . import constants
+from translator import __
 
 
 class ChannelFormatSelectView(discord.ui.View):
