@@ -1,0 +1,871 @@
+{
+    "instructions": "📖 Instructions",
+    "currentConfiguration": "🔧 Current configuration",
+    "summary": "📋 Summary",
+    "cancel": "❌ Cancel",
+    "confirm": "✅ Confirm",
+    "text": "📝 Text",
+    "commands": {
+        "names": {
+            "automaticMessages": {
+                "commandName": "crones",
+                "program": "schedule",
+                "list": "list",
+                "delete": "delete"
+            }
+        },
+        "descriptions": {
+            "automaticMessages": {
+                "program": "➕ Schedule a new automatic message",
+                "list": "📋 List configured automatic messages",
+                "delete": "🗑️ Delete an automatic message"
+            }
+        }
+    },
+    "automaticMessages": {
+        "commandOptions": {
+            "program": {
+                "scheduleType": "Type of message scheduling",
+                "destination": "Channel or category where the message will be sent",
+                "name": "Descriptive name for the automatic message"
+            },
+            "channel": "Filter by specific channel",
+            "category": "Filter by specific category"
+        },
+        "scheduleTypeChoices": {
+            "interval": "⏰ At intervals",
+            "daily": "📅 Every day",
+            "weekly": "📆 Specific days",
+            "on_channel_create": "🆕 When channels are created"
+        },
+        "errorMessages": {
+            "errorGettingMessages": "❌ Error getting automatic messages",
+            "errorDeletingMessage": "❌ Error deleting the automatic message",
+            "errorCreatingMessage": "❌ Error creating the automatic message",
+            "nameTooLong": "❌ The name cannot exceed {max_length} characters",
+            "invalidDestination": "❌ The destination must be a text channel or a category",
+            "categoryRequired": "❌ For 'When channels are created' you must select a category, not a channel",
+            "noContentConfigured": "❌ You must add at least text, embed or image before completing",
+            "messageNotFound": "❌ Automatic message with ID {id} not found",
+            "updatingMessage": "❌ Error updating the automatic message",
+            "invalidInterval": "❌ Interval must be a positive number",
+            "invalidTime": "❌ Time must be between 0-23 and minutes between 0-59",
+            "invalidChannelOrCategory": "❌ You must specify a channel or category, but not both",
+            "missingRequiredFields": "❌ Missing required fields for this scheduling type",
+            "invalidCron": "❌ Invalid cron expression",
+            "permissionDenied": "❌ You don't have permission to use this command",
+            "invalidIntervalUnit": "❌ Invalid interval unit",
+            "hourMinuteInvalid": "❌ Invalid hour or minute (0-23 and 0-59)",
+            "selectOneDay": "❌ You must select at least one day of the week",
+            "configuringEmbed": "❌ Error configuring embed: {error}",
+            "configuringImage": "❌ Error configuring image: {error}",
+            "imageUrlRequired": "❌ Image URL is required",
+            "configuringFullEmbed": "❌ Error configuring full embed: {error}",
+            "unexpectedError": "❌ Unexpected error"
+        },
+        "successMessages": {
+            "messageCreated": "✅ Automatic message created successfully",
+            "messageDeleted": "🗑️ Automatic message deleted successfully",
+            "messageEdited": "✏️ Automatic message edited successfully",
+            "textConfigured": "✅ Text configured successfully",
+            "embedConfigured": "✅ Embed configured successfully",
+            "imageConfigured": "✅ Image configured successfully"
+        },
+        "noMessagesTitle": "No automatic messages found",
+        "noMessagesDescription": "No automatic messages found",
+        "messageList": "📋 Automatic messages list ({count})",
+        "selectMessageForDetails": "Select a message to view its details:",
+        "selectMessageToDelete": "Select a message to **delete:**",
+        "selectMessageToView": "👁️ Select the automatic message you want to view:",
+        "confirmDelete": "⚠️ Are you sure you want to delete this automatic message?",
+        "configureMessageEmbed": {
+            "title": "🎨 Configure automatic message",
+            "description": "Customize your automatic message by adding content:",
+            "destination": "**📍 Destination:** {destination}",
+            "type": "**⏰ Type:** {type}",
+            "name": "**📝 Name:** {name}",
+            "noName": "No name",
+            "status": "**Status:** {status}",
+            "noContent": "No content configured",
+            "addText": "📝 Add text",
+            "addEmbed": "🎨 Add embed",
+            "addImage": "🖼️ Add image",
+            "complete": "✅ Complete",
+            "completedTitle": "✅ Configuration completed",
+            "completedDescription": "Your automatic message has been configured successfully",
+            "configureScheduleTitle": "📅 Configure scheduling",
+            "cancelledTitle": "❌ Configuration cancelled",
+            "cancelledDescription": "The automatic message configuration has been cancelled",
+            "instructions": {
+                "addText": "**📝 Add text** - Main content of the message",
+                "addEmbed": "**🎨 Add embed** - Message with rich formatting",
+                "addImage": "**🖼️ Add image** - Standalone image as attachment",
+                "complete": "**✅ Complete** - Finish and schedule the message",
+                "whenToSend": "Now configure when the message should be sent:"
+            },
+            "contentStatus": "📊 Content Status",
+            "textModal": {
+                "title": "📝 Configure message text",
+                "label": "Message content",
+                "placeholder": "Write the message content here...",
+                "configured": "✅ Text configured successfully"
+            },
+            "embedModal": {
+                "titleInput": {
+                    "label": "Embed Title (optional)",
+                    "placeholder": "Embed title"
+                },
+                "descriptionInput": {
+                    "label": "Embed Description (optional)",
+                    "placeholder": "Embed description"
+                },
+                "colorInput": {
+                    "label": "Embed Color (optional)",
+                    "placeholder": "Example: #FF5733"
+                },
+                "imageInput": {
+                    "label": "Embed image URL (optional)",
+                    "placeholder": "Image URL"
+                },
+                "title": "🎨 Configure message embed",
+                "error": "❌ Error configuring embed",
+                "success": "✅ Embed configured successfully",
+                "contentError": "❌ You must add at least a title or description to the embed"
+            },
+            "imageModal": {
+                "title": "🖼️ Configure message image",
+                "label": "Image URL (optional)",
+                "placeholder": "Image URL",
+                "error": "❌ Error configuring image",
+                "success": "✅ Image configured successfully"
+            }
+        },
+        "autoSendChannelCreate": "🆕 Will be sent automatically in each new channel created in the category",
+        "scheduleConfig": {
+            "selectTypePlaceholder": "Select schedule type",
+            "intervalLabel": "By Interval",
+            "intervalDesc": "Repeat every X time",
+            "dailyLabel": "Daily",
+            "dailyDesc": "Every day at a specific time",
+            "weeklyLabel": "Weekly",
+            "weeklyDesc": "Specific days of the week",
+            "channelCreateLabel": "On channel create",
+            "channelCreateDesc": "Send when a new channel is created",
+            "autoSendChannelCreate": "Will be sent automatically when a new channel is created in this category."
+        },
+        "errors": {
+            "creatingMessage": "❌ Error creating automatic message"
+        },
+        "success": {
+            "messageCreated": "✅ Automatic message created successfully"
+        },
+        "emoji": {
+            "success": "✅"
+        },
+        "buttons": {
+            "confirmDelete": "✅ Confirm deletion",
+            "cancelDelete": "❌ Cancel",
+            "customInterval": "⚙️ Custom",
+            "embedAndImage": "✨ Embed & Image"
+        },
+        "messages": {
+            "messageDeletedText": "The message **{name}** has been deleted successfully.",
+            "operationCancelledTitle": "❌ Operation cancelled",
+            "noMessageDeleted": "No message has been deleted.",
+            "autoConfigured": "✅ Automatic message configured successfully"
+        },
+        "intervalButtons": {
+            "1min": "1 minute",
+            "5min": "5 minutes",
+            "10min": "10 minutes",
+            "30min": "30 minutes",
+            "1hour": "1 hour",
+            "custom": "⚙️ Custom"
+        },
+        "intervals": {
+            "30seconds": "Every 30 seconds",
+            "1minute": "Every minute",
+            "5minutes": "Every 5 minutes",
+            "15minutes": "Every 15 minutes",
+            "30minutes": "Every 30 minutes",
+            "1hour": "Every hour",
+            "6hours": "Every 6 hours",
+            "12hours": "Every 12 hours",
+            "24hours": "Every 24 hours"
+        },
+        "placeholders": {
+            "selectToDelete": "Select a message to delete...",
+            "selectToView": "Select a message to view...",
+            "selectType": "Select schedule type...",
+            "selectInterval": "Choose a common interval...",
+            "selectUnit": "Select time unit...",
+            "messageText": "Write the automatic message text here...",
+            "messageName": "Descriptive name for the message",
+            "intervalExample": "Ex: 5, 30, 120",
+            "hourExample": "Ex: 14 for 2 PM",
+            "embedTitle": "Ex: Welcome to the server!",
+            "embedDescription": "Write the embed description here...",
+            "embedColor": "blue, red, green, #FF0000, etc.",
+            "embedImage": "https://example.com/image.png",
+            "imageUrl": "https://example.com/image.png",
+            "intervalNumber": "Ex: 45",
+            "customUnit": "seconds, minutes, hours",
+            "hour": "Ex: 14",
+            "minute": "Ex: 30",
+            "weekdaySelection": "Select weekdays..."
+        },
+        "labels": {
+            "messageName": "Message name",
+            "messageText": "Message text",
+            "hour": "Hour (0-23)",
+            "minute": "Minute (0-59)",
+            "intervalNumber": "Number",
+            "intervalUnit": "Unit",
+            "embedTitle": "Embed title (optional)",
+            "embedDescription": "Embed description (optional)",
+            "embedColor": "Embed color (optional)",
+            "embedImage": "Embed image URL (optional)",
+            "imageUrl": "Image URL (optional)"
+        },
+        "status": {
+            "hasText": "📝 **Text:** {preview}",
+            "hasEmbed": "🎨 **Embed:** {title}{image}",
+            "hasAttachment": "🖼️ **Image Attachment:** Configured",
+            "ready": "Ready to schedule!",
+            "noContentStatus": "❌ **No content configured**",
+            "noTextOnly": "(No text - embed/image only)"
+        },
+        "descriptions": {
+            "configureInterval": "Select how often the message will be sent:",
+            "dailyConfig": "Configure what time the message will be sent every day:",
+            "weeklyConfig": "Configure the time and then select the days:",
+            "timeConfigured": "Time configured: {hour:02d}:{minute:02d}\n\nNow select the days:",
+            "confirmDays": "**{days}**\n\nClick 'Confirm selection' to continue."
+        },
+        "formats": {
+            "dailyTime": "📅 Will be sent every day at {hour:02d}:{minute:02d}",
+            "weeklySchedule": "📅 Days: {days}\n🕐 Time: {hour:02d}:{minute:02d}",
+            "intervalMessage": "⏰ Will be sent every {interval} {unit}",
+            "dailyMessage": "📅 Will be sent every day at {hour:02d}:{minute:02d}",
+            "weeklyMessage": "📆 Will be sent on {days} at {hour:02d}:{minute:02d}"
+        },
+        "validation": {
+            "noContentBeforeComplete": "You must add at least text, embed or image before completing",
+            "intervalUnitError": "Invalid unit. Use 'seconds', 'minutes' or 'hours'",
+            "daysRequired": "You must select at least one day",
+            "validHour": "Hour must be between 0 and 23",
+            "validMinute": "Minutes must be between 0 and 59"
+        },
+        "fallback": {
+            "defaultName": "Message {id}",
+            "errorCreating": "Error creating message: {error}",
+            "noMessagesToDelete": "No automatic messages found to delete",
+            "messagesFoundDelete": "Found {count} automatic messages",
+            "operationCancelled": "Operation cancelled"
+        },
+        "embed": {
+            "titleMessageId": "📨 Message {name}",
+            "description": "Automatic message details",
+            "fieldChannel": "📢 Channel",
+            "fieldCategory": "📁 Category",
+            "fieldText": "💬 Text",
+            "fieldScheduleType": "⏰ Schedule type",
+            "fieldInterval": "⏳ Interval",
+            "fieldTime": "🕐 Time",
+            "fieldCron": "⚙️ Cron expression",
+            "valueNone": "-",
+            "valueInvalid": "invalid",
+            "valueEveryX": "Every {interval} {unit}",
+            "valueDailyAt": "Every day at {hour:02d}:{minute:02d}",
+            "valueWeeklyAt": "On {days} at {hour:02d}:{minute:02d}"
+        },
+        "summary": {
+            "unknownChannel": "Unknown channel",
+            "unknownCategory": "Unknown category",
+            "categoryPrefix": "Category: ",
+            "everyXUnit": "every {interval} {unit}",
+            "dailyAt": "daily at {hour:02d}:{minute:02d}",
+            "weekly": "weekly",
+            "onChannelCreate": "on channel create",
+            "interval": "Interval",
+            "daily": "Daily"
+        },
+        "modals": {
+            "customInterval": {
+                "title": "⚙️ Configure custom interval"
+            },
+            "dailyConfig": {
+                "title": "📅 Configure daily schedule"
+            },
+            "weeklyConfig": {
+                "title": "📅 Configure weekly schedule"
+            },
+            "embedConfig": {
+                "title": "🎨 Configure Embed",
+                "titleLabel": "Embed title (optional)",
+                "titlePlaceholder": "Ex: Welcome to the server!",
+                "descriptionLabel": "Embed description",
+                "descriptionPlaceholder": "Write the embed description here...",
+                "colorLabel": "Embed color",
+                "colorPlaceholder": "blue, red, green, #FF0000, etc.",
+                "imageLabel": "Embed image URL",
+                "imagePlaceholder": "https://example.com/image.png"
+            },
+            "intervalConfig": {
+                "title": "⏰ Configure Interval",
+                "intervalLabel": "Interval (number)",
+                "intervalPlaceholder": "Ex: 5, 30, 120"
+            },
+            "timeConfig": {
+                "title": "🕐 Configure Time",
+                "hourLabel": "Hour (0-23)",
+                "minuteLabel": "Minute (0-59)",
+                "dailyPlaceholder": "Ex: 14 for 2 PM",
+                "weeklyPlaceholder": "Ex: 18 for 6 PM",
+                "minutePlaceholder": "Ex: 30"
+            },
+            "messageText": {
+                "title": "📝 Automatic message text",
+                "textLabel": "Message text",
+                "textPlaceholder": "Write the automatic message text here..."
+            },
+            "scheduleMessage": {
+                "title": "Schedule Automatic Message",
+                "nameLabel": "Message name",
+                "namePlaceholder": "Descriptive name for the message",
+                "textLabel": "Message text",
+                "textPlaceholder": "Write the text to be sent here...",
+                "completedText": "Modal completed successfully"
+            }
+        },
+        "intervalConfig": {
+            "selectUnit": "Select time unit:",
+            "selectUnitPlaceholder": "Select time unit...",
+            "unitSeconds": "Seconds",
+            "unitMinutes": "Minutes",
+            "unitHours": "Hours",
+            "selectQuickInterval": "Choose a common interval...",
+            "option30Seconds": "Every 30 seconds",
+            "option1Minute": "Every minute",
+            "option5Minutes": "Every 5 minutes",
+            "option15Minutes": "Every 15 minutes",
+            "option30Minutes": "Every 30 minutes",
+            "option1Hour": "Every hour",
+            "option2Hours": "Every 2 hours",
+            "option6Hours": "Every 6 hours"
+        },
+        "timeConfig": {
+            "configureTimeButton": "🕐 Configure time"
+        },
+        "weeklyConfig": {
+            "confirmButton": "✅ Confirm selection",
+            "daysSelectedTitle": "📅 Days selected",
+            "confirmDaysDesc": "**{days}**\n\nClick 'Confirm selection' to continue.",
+            "selectDaysTitle": "📅 Select weekdays",
+            "timeConfiguredDesc": "Time configured: {hour:02d}:{minute:02d}\n\nNow select the days:"
+        },
+        "debug": {
+            "modalWorking": "✅ Modal working!\n**Type:** {type}\n**Text:** {text}..."
+        }
+    },
+    "weekdays": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+    },
+    "intervalUnits": {
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours"
+    },
+    "scheduleTypes": {
+        "interval": "⏰ By interval",
+        "daily": "📅 Daily",
+        "weekly": "📆 Weekly",
+        "custom": "🔧 Custom (cron)",
+        "onChannelCreate": "🆕 On channel create"
+    },
+    "clans": {
+        "errorMessages": {
+            "errorCreatingRole": "❌ Error creating the role.",
+            "errorCreatingChannels": "❌ Error creating the channels.",
+            "clanNotFound": "❌ Clan not found.",
+            "noClans": "📭 No clans.",
+            "noClansAvailable": "📭 No clans available.",
+            "deletingClan": "❌ Could not delete the clan: {error}",
+            "noClansToDelete": "📭 No clans to delete.",
+            "roleAlreadyRegistered": "❌ The role {role_name} is already registered as a clan.",
+            "noMembersWithRole": "❌ No members found with the role {role_name}.",
+            "memberNoRole": "❌ Member {member} does not have the role {role_name}.",
+            "creatingMigratedClan": "❌ Error creating clan {clan_name}: {error}",
+            "gettingClanAfterCreate": "❌ Error: Could not get the clan after creating it.",
+            "unexpectedMigration": "❌ Unexpected error during migration: {error}",
+            "noClansStats": "📊 No clans created.",
+            "unexpected": "❌ Unexpected error: {error}",
+            "channelNotClan": "❌ This channel does not belong to any clan.",
+            "noInvitePermissions": "❌ You don't have permissions to invite members to this clan.",
+            "noKickPermissions": "❌ You don't have permissions to kick members from this clan.",
+            "noViewMembersPermissions": "❌ You don't have permissions to view the member list.",
+            "clanNoMembers": "👥 The clan has no members.",
+            "userAlreadyInClan": "❌ The user already belongs to a clan.",
+            "notClanLeader": "❌ You are not the leader of this clan.",
+            "cantKickSelf": "❌ You cannot kick yourself from the clan.",
+            "userNotInClan": "❌ The user is not in your clan.",
+            "cantKickLeader": "❌ You cannot kick another leader from the clan.",
+            "userNotClanMember": "❌ The user is not a member of this clan.",
+            "kickingMember": "❌ Error kicking the member: {error}",
+            "leavingClan": "❌ Error leaving the clan: {error}",
+            "sendingMessage": "❌ Error sending the message: {error}",
+            "timeoutClanSelection": "⏰ Time ran out for selecting a clan",
+            "maxChannelsReached": "❌ The clan **{clan_name}** already has the maximum number of {type} channels ({max_channels}).",
+            "gettingSettings": "❌ Error getting settings: {error}",
+            "clanRoleNotFound": "❌ Error: Clan role not found.",
+            "savingChannel": "❌ Error saving the channel: {error}",
+            "memberNotInClan": "{member} is not a member of clan **{clan_name}**.",
+            "memberAlreadyLeader": "{member} is already a leader of clan **{clan_name}**.",
+            "memberNotLeader": "{member} is not a leader of clan **{clan_name}**.",
+            "channelNotInClan": "Channel {channel} does not belong to clan **{clan_name}**.",
+            "lastLeaderCannotBeDemoted": "Cannot demote the only leader of the clan.",
+            "mustHaveAtLeastOneLeader": "The clan must have at least one leader.",
+            "userNotInAnyClan": "You don't belong to any clan.",
+            "noPermissionsConfig": "❌ You don't have permissions to use this command.",
+            "noParamsProvided": "❌ You must provide at least one parameter to configure.",
+            "paramMustBePositive": "❌ {param_name} must be greater than 0.",
+            "gettingClansConfig": "❌ Error getting clans: {error}",
+            "noClansToConfig": "❌ No clans available to configure.",
+            "executingAction": "❌ Error executing the action: {error}",
+            "timeoutAction": "⏰ **Timeout** - Clan selection cancelled.",
+            "promotingMember": "❌ Error promoting member: {error}",
+            "memberNotFound": "❌ The specified member was not found on the server.",
+            "demotingLeader": "❌ Error demoting leader: {error}",
+            "channelNotFound": "❌ Channel not found.",
+            "deletingChannel": "❌ Error deleting channel: {error}"
+        },
+        "successMessages": {
+            "clanCreated": "✅ Clan {nombre} created successfully in categories 📝 Text: <#{text_category}> | 🔊 Voice: <#{voice_category}> with 👥 {max_members} maximum members.",
+            "clanDeleted": "🗑️ Clan deleted successfully.",
+            "invitationSent": "📩 Invitation sent to {member}.",
+            "memberKicked": "🦶 **{member_name}** has been kicked from clan **{clan_name}**.",
+            "leftClan": "🚪 You have left clan **{clan_name}** successfully.",
+            "joinedClan": "🎉 You have joined clan **{clan_name}** successfully!",
+            "channelAdded": "✅ Channel **{channel_name}** ({type}) added successfully to clan **{clan_name}**. Channel: {channel_mention}",
+            "memberPromoted": "✅ {member} has been promoted to leader of clan **{clan_name}** successfully.",
+            "memberPromotedWithRoleWarning": "⚠️ {member} has been promoted to leader of clan **{clan_name}** in the database, but there was a problem with roles: {role_error}",
+            "leaderDemoted": "✅ {member} has been demoted from leader to member of clan **{clan_name}** successfully.",
+            "leaderDemotedWithRoleWarning": "⚠️ {member} has been demoted from leader to member of clan **{clan_name}** in the database, but there was a problem with roles: {role_error}",
+            "channelDeleted": "✅ Channel **{channel_name}** deleted successfully from clan **{clan_name}**.",
+            "leftClanMessage": "You have left clan **{clan_name}** successfully."
+        },
+        "messages": {
+            "clanInvitation": "📩 You have been invited to join clan **{clan_name}**.",
+            "useCleanLeave": "❌ You cannot kick yourself. Use the `/clan leave` command instead.",
+            "useSpecificChannel": "📢 Execute this command from the specific clan channel you want to kick the member from.",
+            "selectClanToLeave": "Select the clan you want to leave:",
+            "invitationSentToUser": "The clan invitation has been sent to **{user_name}**",
+            "kickRequestSent": "The kick request has been sent to **{user_name}**",
+            "userAcceptedInvitation": "**{user_name}** has accepted the invitation",
+            "userRejectedInvitation": "**{user_name}** has rejected the invitation",
+            "userRejectedKick": "**{user_name}** has rejected the kick request.",
+            "userJoinedClan": "{user} has joined clan **{clan_name}**.",
+            "userRejectedClan": "You have rejected the invitation to clan **{clan_name}**.",
+            "leaveRequest": "You have requested to leave clan **{clan_name}**. Do you want to continue?",
+            "kickRequest": "You have requested to kick member **{member_name}** from clan **{clan_name}**. Do you want to continue?",
+            "directMessageError": "Error sending message to user. Make sure they have direct messages enabled.",
+            "invitationMessage": "You have been invited to clan **{clan_name}**",
+            "invitationClanMessage": "You have been invited to join clan **{clan_name}**.",
+            "configureClanTitle": "**🔧 Configure Clan**\n\nSelect the clan you want to configure:"
+        },
+        "embeds": {
+            "titles": {
+                "clanInfo": "🏰 Clan **{clan_name}** information",
+                "clanDescription": "📋 **Clan {clan_name} information**.",
+                "migrationSuccess": "✅ Clan migrated successfully",
+                "migrationDescription": "🔄 Clan **{clan_name}** has been migrated to the database system.",
+                "clanStats": "📊 Clan Statistics",
+                "clanStatsDescription": "📈 General clan system summary",
+                "deleteClanSelect": "🗑️ Select clan to delete",
+                "deleteClanDescription": "⚠️ Select the clan you want to delete. **This action cannot be undone.**",
+                "clanMembers": "👥 Members of {clan_name}",
+                "clanMembersDescription": "📊 Total: {member_count} members",
+                "selectClanAddChannel": "🔧 Select clan to add channel",
+                "selectClanAddChannelDescription": "Select the clan you want to add the channel to:",
+                "selectClanAddLeader": "👑 Select clan to add leader",
+                "selectClanAddLeaderDescription": "Select the clan you want to add {member} as leader to:",
+                "selectClanRemoveLeader": "👑 Select clan to remove leader",
+                "selectClanRemoveLeaderDescription": "Select the clan you want to remove {member} as leader from:",
+                "selectClanRemoveChannel": "🗑️ Select clan to remove channel",
+                "selectClanRemoveChannelDescription": "Select the clan you want to remove channel {channel} from:"
+            },
+            "fields": {
+                "id": "🆔 ID",
+                "name": "🏷️ Name",
+                "leaders": "👑 Leaders",
+                "members": "👥 Members",
+                "memberLimit": "📊 Member limit",
+                "role": "🎭 Role",
+                "textChannels": "📝 Text channels",
+                "voiceChannels": "🔊 Voice channels",
+                "creationDate": "📅 Creation date",
+                "totalClans": "📊 Total clans",
+                "leader": "👑 Leader",
+                "totalMembers": "👥 Total members",
+                "addedMembers": "🔧 Added members",
+                "clanRole": "🎭 Role",
+                "textChannel": "💬 Text channel",
+                "voiceChannel": "🔊 Voice channel",
+                "generalNumbers": "📈 General Numbers",
+                "largestClan": "🏆 Largest Clan",
+                "averages": "📊 Averages"
+            },
+            "values": {
+                "none": "⚪ None",
+                "totalClansAvailable": "📊 {count} clans available",
+                "textChannelsCount": "{channels} ({current}/{max})",
+                "voiceChannelsCount": "{channels} ({current}/{max})",
+                "generalStats": "**📊 Total clans:** {total_clans}\n**👥 Total members:** {total_members}\n**👑 Total leaders:** {total_leaders}\n**📢 Total channels:** {total_channels}",
+                "largestClanInfo": "**🏰 {clan_name}**\n👥 {member_count} members\n📢 {channel_count} channels",
+                "averagesInfo": "**👥 Members per clan:** {avg_members:.1f}\n**📢 Channels per clan:** {avg_channels:.1f}"
+            }
+        },
+        "commands": {
+            "descriptions": {
+                "createClan": "🏗️ Create a new clan",
+                "infoClan": "ℹ️ Clan information",
+                "deleteClan": "🗑️ Delete a clan",
+                "migrateClan": "🔄 Migrate an existing clan to the database system",
+                "statsClan": "📊 View general clan statistics",
+                "invite": "📩 Invite a member to the clan",
+                "kick": "🦶 Kick a member from the clan",
+                "leave": "🚪 Leave the clan",
+                "join": "🎯 Join a clan",
+                "members": "👥 View clan member list",
+                "clanInfo": "ℹ️ View clan information",
+                "config": "⚙️ Configure clan options",
+                "addChannel": "➕ Add additional channel to clan",
+                "addLeader": "👑 Promote member to leader",
+                "removeLeader": "⬇️ Demote leader to member",
+                "removeChannel": "🗑️ Remove channel from clan"
+            },
+            "parameters": {
+                "clanName": "🏷️ Clan name",
+                "leader": "👑 Clan leader",
+                "clanId": "🆔 Clan ID",
+                "clanIdOptional": "🆔 Clan ID (optional - if not specified, a list will be shown)",
+                "persistent": "📌 Whether the response should be visible to everyone (optional, default false)",
+                "role": "🎭 Clan role to migrate",
+                "textChannel": "📝 Clan text channel",
+                "voiceChannel": "🔊 Clan voice channel",
+                "leaderOptional": "👑 Clan leader (if not specified, the first member with the role is taken)",
+                "member": "👤 Member to invite to the clan",
+                "memberKick": "🦶 Member to kick from the clan",
+                "clanNameJoin": "🏷️ Name of the clan you want to join"
+            },
+            "groups": {
+                "leader": "leader",
+                "leaderDesc": "👑 Clan leader commands",
+                "mod": "mod",
+                "modDesc": "🛡️ Clan moderation commands"
+            }
+        },
+        "confirmations": {
+            "leaveClan": "❓ Are you sure you want to leave clan **{clan_name}**?",
+            "kickMember": "❓ Are you sure you want to kick **{member_name}** from clan **{clan_name}**?"
+        }
+    },
+    "logsConfig": {
+        "errorMessages": {
+            "noChannelForActivation": "❌ You cannot activate logs without specifying a channel",
+            "updatingLogConfig": "❌ Error updating log configuration",
+            "gettingLogConfigs": "❌ Error getting log configuration",
+            "activatingLog": "❌ There was an error activating the {log_type}log"
+        },
+        "successMessages": {
+            "logActivated": "✅ {log_type}log activated in channel <#{channel_id}>",
+            "logDeactivated": "🔇 {log_type}log deactivated successfully"
+        },
+        "messages": {
+            "noLogsConfigured": "📭 No logs configured"
+        },
+        "embeds": {
+            "titles": {
+                "logType": "📊 {log_type}log"
+            },
+            "fields": {
+                "channel": "📢 Channel",
+                "status": "🔄 Status"
+            },
+            "values": {
+                "enabled": "🟢 enabled",
+                "disabled": "🔴 disabled"
+            }
+        },
+        "commands": {
+            "descriptions": {
+                "config": "⚙️ Configure server logs",
+                "list": "📋 Show log configuration"
+            },
+            "parameters": {
+                "logType": "📊 Type of log to configure",
+                "activate": "🔄 Activate or deactivate logs",
+                "channel": "📢 Channel where logs will be sent",
+                "persistent": "📌 Make the response persistent"
+            },
+            "choices": {
+                "chat": "💬 Messages",
+                "voice": "🔊 Voice",
+                "members": "👥 Members",
+                "joinLeave": "🚪 Joins/Leaves"
+            }
+        },
+        "logTypes": {
+            "chat": "💬 chat",
+            "voice": "🔊 voice",
+            "members": "👥 members",
+            "joinLeave": "🚪 join_leave"
+        }
+    },
+    "core": {
+        "errorMessages": {
+            "noPermissionsSend": "I don't have permissions to send messages in {channel_name}",
+            "sendingMessage": "Error sending message to {channel_name}. Error: {error}",
+            "sendingToAdmin": "Error sending message to admin: {error}",
+            "noAdminPermissions": "I don't have permissions to send messages to admin",
+            "adminNotFound": "Could not find admin with ID {admin_id}",
+            "sendingPaginated": "Error sending message: {error}",
+            "couldNotSend": "Could not send the message.",
+            "errorPrefix": "Error: {error}"
+        },
+        "messages": {
+            "noInformation": "No information to display.",
+            "messageSentToAdmin": "Message sent to admin: {message}",
+            "noSendToAdminWarning": "I don't have permissions to send messages in {channel_name}"
+        }
+    },
+    "clanSettings": {
+        "errorMessages": {
+            "invalidColor": "❌ The role color must be a valid hexadecimal value.",
+            "gettingSettings": "❌ Error getting settings",
+            "savingSettings": "❌ Error saving settings",
+            "roleAlreadyExists": "❌ The role {role} is already in the additional roles list.",
+            "roleNotInList": "❌ The role {role} is not in the additional roles list.",
+            "noClansToProcess": "❌ No clans to process.",
+            "noValidAdditionalRoles": "❌ No valid additional roles found on the server."
+        },
+        "successMessages": {
+            "configUpdated": "✅ Configuration updated successfully.",
+            "additionalRoleAdded": "✅ Additional role {role} added successfully. It will be automatically assigned to all new clan members.",
+            "additionalRoleRemoved": "🗑️ Additional role {role} removed successfully. It will no longer be assigned to new clan members.",
+            "allAdditionalRolesCleared": "🧹 All additional roles have been removed.",
+            "rolesApplied": "✅ Process completed. Processed {total_members} members. Successfully assigned additional roles to {successful_members} members."
+        },
+        "messages": {
+            "noAdditionalRolesConfigured": "📭 No additional roles configured."
+        },
+        "embeds": {
+            "titles": {
+                "clanConfig": "⚙️ Clan Configuration"
+            },
+            "fields": {
+                "categories": "📂 Categories",
+                "maxChannels": "📊 Max. Channels",
+                "additionalRoles": "🎭 Additional Roles",
+                "leaderRole": "👑 Leader Role",
+                "roleColor": "🎨 Role Color",
+                "limits": "📏 Limits"
+            },
+            "values": {
+                "notConfigured": "⚪ Not configured",
+                "noAdditionalRoles": "📭 Not configured",
+                "categoriesFormat": "📝 Text: <#{text_category}>\n🔊 Voice: <#{voice_category}>",
+                "maxChannelsFormat": "📝 Text: {max_text}\n🔊 Voice: {max_voice}",
+                "limitsFormat": "👥 Max. Members: {max_members}\n🔄 Multiple Clans: {multiple_clans}\n👑 Multiple Leaders: {multiple_leaders}",
+                "yes": "✅ Yes",
+                "no": "❌ No"
+            },
+            "description": "⚙️ Current clan configuration"
+        },
+        "commands": {
+            "descriptions": {
+                "config": "⚙️ Configure general clan settings",
+                "info": "ℹ️ View current clan configuration",
+                "addRole": "➕ Add additional role for clan members",
+                "removeRole": "🗑️ Remove additional role",
+                "clearRoles": "🧹 Clear all additional roles",
+                "applyRoles": "🔄 Apply additional roles to existing members"
+            },
+            "parameters": {
+                "textCategory": "📝 Category for clan text channels",
+                "voiceCategory": "🔊 Category for clan voice channels",
+                "maxMembers": "👥 Maximum members per clan",
+                "leaderRole": "👑 Role assigned to clan leaders",
+                "roleColor": "🎨 Hexadecimal color for clan roles",
+                "multipleClans": "🔄 Allow users to be in multiple clans",
+                "multipleLeaders": "👑 Allow multiple leaders per clan",
+                "maxText": "📝 Maximum text channels per clan",
+                "maxVoice": "🔊 Maximum voice channels per clan",
+                "additionalRole": "🎭 Additional role to assign to all clan members",
+                "removeRole": "🗑️ Additional role to remove from the list"
+            }
+        }
+    },
+    "channelFormats": {
+        "errorMessages": {
+            "invalidRegex": "❌ Invalid format. Make sure it's a valid regular expression",
+            "formatNotFound": "❌ Channel format with ID {id} not found",
+            "gettingFormats": "❌ Error getting channel formats",
+            "deletingFormat": "❌ Error deleting channel format",
+            "updatingFormat": "❌ Error updating channel format"
+        },
+        "successMessages": {
+            "formatAdded": "✅ Channel format added: {channel} - `{format}`",
+            "formatDeleted": "🗑️ Channel format deleted: `{id}`",
+            "formatEdited": "✏️ Channel format edited successfully"
+        },
+        "messages": {
+            "noFormatsFound": "📭 No channel formats configured",
+            "showingFormats": "📋 Showing {count} channel formats"
+        },
+        "embeds": {
+            "titles": {
+                "formatId": "📝 Channel format {id}"
+            },
+            "fields": {
+                "channel": "📢 Channel",
+                "format": "🔧 Format"
+            }
+        },
+        "commands": {
+            "descriptions": {
+                "create": "➕ Add a new channel format",
+                "list": "📋 List all channel formats",
+                "delete": "🗑️ Delete a channel format",
+                "edit": "✏️ Edit a channel format"
+            },
+            "parameters": {
+                "channel": "📢 Channel where the format will be applied",
+                "format": "🔧 Format to be applied to the channel",
+                "formatId": "🆔 Channel format ID (optional - list will be shown if not provided)",
+                "listChannel": "📢 List formats by channel",
+                "persistent": "📌 Make persistent"
+            }
+        },
+        "views": {
+            "selectFormatTitle": "🎯 Select Channel Format",
+            "selectFormatDesc": "👆 Select the channel format you want to manage:"
+        },
+        "confirmations": {
+            "deleteTitle": "✅ Format Deleted",
+            "deleteDesc": "🗑️ Channel format **{id}** has been deleted successfully.",
+            "editTitle": "✅ Format Edited",
+            "editDesc": "✏️ Channel format **{id}** has been edited successfully."
+        },
+        "pagination": {
+            "previous": "◀️ Previous",
+            "next": "Next ▶️",
+            "indicator": "�� Page {current}/{total}",
+            "info": "📊 Page {current} of {total} | Showing {showing} of {total_items} formats"
+        }
+    },
+    "triggers": {
+        "errorMessages": {
+            "creatingTrigger": "❌ Error creating trigger",
+            "gettingTriggers": "❌ Error getting triggers",
+            "triggerNotFound": "❌ Trigger with ID {id} not found.",
+            "deletingTrigger": "❌ Error deleting trigger",
+            "updatingTrigger": "❌ Error updating trigger"
+        },
+        "successMessages": {
+            "triggerCreated": "✅ Trigger created successfully",
+            "triggerDeleted": "🗑️ Trigger deleted successfully",
+            "triggerEdited": "✏️ Trigger edited successfully"
+        },
+        "messages": {
+            "noTriggersFound": "📭 No triggers configured.",
+            "showingTriggers": "📋 Triggers list ({count})",
+            "selectTriggerToDelete": "🗑️ Select trigger to delete",
+            "selectTriggerToEdit": "✏️ Select trigger to edit",
+            "noTriggersToSelect": "📭 No triggers available to select.",
+            "triggerSelectionExpired": "⏰ Trigger selection has expired."
+        },
+        "positions": {
+            "contains": "🔍 Contains",
+            "startsWidth": "▶️ Starts with",
+            "endsWidth": "◀️ Ends with",
+            "equal": "🎯 Equal to",
+            "textBetween": "↔️ Text between",
+            "regex": "🔧 Regular expression"
+        },
+        "embeds": {
+            "titles": {
+                "triggerId": "🎯 Trigger {id}"
+            },
+            "fields": {
+                "channel": "📢 Channel",
+                "deleteMessage": "🗑️ Delete message",
+                "response": "💬 Response",
+                "keyword": "🔑 Keyword",
+                "position": "📍 Position",
+                "timeout": "⏱️ Timeout"
+            },
+            "values": {
+                "yes": "Yes",
+                "no": "No",
+                "none": "-",
+                "invalid": "invalid",
+                "timeoutSeconds": "{timeout} seconds"
+            },
+            "description": "Trigger details"
+        },
+        "commands": {
+            "descriptions": {
+                "create": "➕ Add a trigger",
+                "list": "📋 List triggers",
+                "delete": "🗑️ Delete a trigger",
+                "edit": "✏️ Edit a trigger"
+            },
+            "parameters": {
+                "channel": "Channel where the trigger will be verified",
+                "deleteMessage": "Configure whether to delete the message that activates the trigger",
+                "response": "Bot response to the trigger",
+                "keyword": "Keyword that activates the trigger",
+                "position": "Position of the keyword in the message",
+                "timeout": "Timeout for the bot response",
+                "triggerId": "Trigger ID (optional - if not provided, a list will be shown)",
+                "triggerDeleteId": "Trigger ID (optional - if not provided, a list will be shown)",
+                "listChannel": "List triggers by channel",
+                "persistent": "Make the list persistent"
+            },
+            "choices": {
+                "contains": "🔍 Contains",
+                "startsWidth": "▶️ Starts with",
+                "endsWidth": "◀️ Ends with",
+                "exactMatch": "🎯 Equal to",
+                "textBetween": "↔️ Text between",
+                "regex": "🔧 Regular expression"
+            }
+        },
+        "pagination": {
+            "indicator": "📄 Page {current}/{total}",
+            "info": "📊 Page {current} of {total} | Total: {count} triggers"
+        },
+        "views": {
+            "selectionDescription": "👆 Click on one of the buttons to select a trigger:",
+            "summaryTitle": "📊 Summary",
+            "summaryText": "**Total triggers:** {total}\n**On this page:** {in_page}",
+            "paginationTitle": "📄 Pagination",
+            "instructionsTitle": "ℹ️ Instructions",
+            "instructionsText": "• Use the **◀️Previous/Next▶️** buttons to navigate\n• 👆 Click on any trigger to select it",
+            "buttonPrevious": "◀️ Previous",
+            "buttonNext": "Next ▶️",
+            "pageTitle": "{action} - 📄 Page {current}/{total}"
+        },
+        "confirmations": {
+            "triggerDeleted": "✅ Trigger Deleted",
+            "triggerEdited": "✅ Trigger Edited"
+        }
+    }
+}
