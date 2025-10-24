@@ -234,7 +234,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
             clans, error = await self.service.get_all_clans()
             if error or not clans or len(clans) == 0:
                 return await interaction.followup.send(
-                    error or __("clans.errorMessages.noClans")_TO_DELETE, ephemeral=True
+                    error or __("clans.errorMessages.noClansToDelete"), ephemeral=True
                 )
             
             # Crear embed con lista de clanes
@@ -359,7 +359,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
         clans, error = await self.service.get_all_clans()
         if error or not clans:
             return await interaction.response.send_message(
-                error or __("clans.errorMessages.noClans")_STATS, ephemeral=ephemeral
+                error or __("clans.errorMessages.noClansStats"), ephemeral=ephemeral
             )
 
         # Calcular estadísticas
@@ -690,7 +690,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 clans, error = await self.service.get_all_clans()
                 if error or not clans or len(clans) == 0:
                     return await interaction.followup.send(
-                        error or __("clans.errorMessages.noClans")_AVAILABLE, ephemeral=True
+                        error or __("clans.errorMessages.noClansAvailable"), ephemeral=True
                     )
                 
                 if len(clans) == 1:
@@ -834,7 +834,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 clans, error = await self.service.get_all_clans()
                 if error or not clans or len(clans) == 0:
                     return await interaction.followup.send(
-                        error or __("clans.errorMessages.noClans")_AVAILABLE, ephemeral=True
+                        error or __("clans.errorMessages.noClansAvailable"), ephemeral=True
                     )
                 
                 if len(clans) == 1:
@@ -883,7 +883,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 )
             else:
                 await interaction.followup.send(
-                    __("clans.successMessages.memberPromoted")_WITH_ROLE_WARNING.format(
+                    __("clans.successMessages.memberPromotedWithRoleWarning").format(
                         member=miembro.mention, 
                         clan_name=clan.name, 
                         role_error=role_error
@@ -925,7 +925,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 clans, error = await self.service.get_all_clans()
                 if error or not clans or len(clans) == 0:
                     return await interaction.followup.send(
-                        error or __("clans.errorMessages.noClans")_AVAILABLE, ephemeral=True
+                        error or __("clans.errorMessages.noClansAvailable"), ephemeral=True
                     )
                 
                 if len(clans) == 1:
@@ -991,7 +991,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 clans, error = await self.service.get_all_clans()
                 if error or not clans or len(clans) == 0:
                     return await interaction.followup.send(
-                        error or __("clans.errorMessages.noClans")_AVAILABLE, ephemeral=True
+                        error or __("clans.errorMessages.noClansAvailable"), ephemeral=True
                     )
                 
                 if len(clans) == 1:
@@ -1062,7 +1062,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                         __("clans.errorMessages.leavingClan", error=error), ephemeral=True
                     )
                 return await interaction.response.send_message(
-                    __("clans.successMessages.leftClan")_MESSAGE.format(clan_name=clan_del_canal.name), ephemeral=True
+                    __("clans.successMessages.leftClanMessage").format(clan_name=clan_del_canal.name), ephemeral=True
                 )
         
         # Si no se ejecuta desde un canal de clan o el usuario no está en ese clan,
@@ -1082,7 +1082,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                     __("clans.errorMessages.leavingClan", error=error), ephemeral=True
                 )
             return await interaction.response.send_message(
-                __("clans.successMessages.leftClan")_MESSAGE.format(clan_name=clan.name), ephemeral=True
+                __("clans.successMessages.leftClanMessage").format(clan_name=clan.name), ephemeral=True
             )
         
         # Si está en múltiples clanes, mostrar botones para elegir
@@ -1141,7 +1141,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
         if not clans:
             return await interaction.followup.send(
-                __("clans.errorMessages.noClans")_TO_CONFIGURE, ephemeral=True
+                __("clans.errorMessages.noClansToConfig"), ephemeral=True
             )
 
         # Mostrar vista de selección de clan

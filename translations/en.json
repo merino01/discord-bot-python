@@ -867,5 +867,16 @@
             "triggerDeleted": "✅ Trigger Deleted",
             "triggerEdited": "✅ Trigger Edited"
         }
-    }
+    },
+    "error": "❌ Error",
+    "success": "✅ Success",
+    "basicConfiguration": "🔧 Basic configuration",
+    "textConfigurated": "✅ Text configured",
+    "textNotConfigurated": "❌ No text",
+    "embedConfigurated": "✅ Embed configured",
+    "embedNotConfigurated": "❌ No embed",
+    "imageConfigurated": "✅ Image configured",
+    "imageNotConfigurated": "❌ No image",
+    "preview": "👀 Preview",
+    "unexpectedError": "❌ There was an error executing the command"
 }
