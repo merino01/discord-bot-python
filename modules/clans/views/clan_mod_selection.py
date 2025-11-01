@@ -51,6 +51,8 @@ class ClanModSelectionView(discord.ui.View):
                 await self._handle_remove_leader(interaction)
             elif self.action_type == "remove_channel":
                 await self._handle_remove_channel(interaction)
+            elif self.action_type == "add_member":
+                await self._handle_add_member(interaction)
         except Exception as e:
             logger.error(f"Error en execute_action: {str(e)}")
             await interaction.followup.send(
@@ -298,6 +300,49 @@ class ClanModSelectionView(discord.ui.View):
                 f"❌ Error al eliminar canal: {error_msg}", 
                 ephemeral=True
             )
+    
+    async def _handle_add_member(self, interaction: Interaction):
+        """Manejar adición directa de miembro al clan"""
+        from .. import constants
+        
+        clan = self.selected_clan
+        miembro = self.kwargs.get('miembro')
+        
+        if not miembro:
+            return await interaction.followup.send(
+                "❌ Error: No se especificó el miembro a añadir.", 
+                ephemeral=True
+            )
+        
+        # Verificar que el miembro no esté ya en el clan
+        es_miembro = any(m.user_id == miembro.id for m in clan.members)
+        if es_miembro:
+            return await interaction.followup.send(
+                f"❌ {miembro.mention} ya es miembro del clan **{clan.name}**.",
+                ephemeral=True
+            )
+        
+        # Añadir miembro al clan
+        error = await self.service.add_member_to_clan(miembro.id, clan.id)
+        if error:
+            return await interaction.followup.send(
+                constants.ERROR_ADDING_MEMBER.format(error=error),
+                ephemeral=True
+            )
+        
+        # Asignar el rol del clan al miembro
+        try:
+            rol_clan = interaction.guild.get_role(clan.role_id)
+            if rol_clan:
+                await miembro.add_roles(rol_clan)
+        except Exception as role_error:
+            logger.error(f"Error al asignar rol al miembro {miembro.id}: {role_error}")
+            # Continuar aunque falle la asignación del rol
+        
+        await interaction.followup.send(
+            constants.SUCCESS_MEMBER_ADDED.format(member=miembro.mention, clan_name=clan.name),
+            ephemeral=True
+        )
 
 
 class ClanSelectionButton(discord.ui.Button):

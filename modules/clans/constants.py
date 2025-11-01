@@ -65,6 +65,7 @@ ERROR_MEMBER_NOT_FOUND = "❌ El miembro especificado no se encontró en el serv
 ERROR_DEMOTING_LEADER = "❌ Error al degradar líder: {error}"
 ERROR_CHANNEL_NOT_FOUND = "❌ Canal no encontrado."
 ERROR_DELETING_CHANNEL = "❌ Error al eliminar canal: {error}"
+ERROR_ADDING_MEMBER = "❌ Error al añadir miembro: {error}"
 
 # Mensajes de éxito
 SUCCESS_CLAN_CREATED = "✅ Clan {nombre} creado con éxito en las categorías 📝 Texto: <#{text_category}> | 🔊 Voz: <#{voice_category}> con 👥 {max_members} miembros máximo."
@@ -133,6 +134,7 @@ SUCCESS_MEMBER_PROMOTED_WITH_ROLE_WARNING = "⚠️ {member} ha sido promovido a
 SUCCESS_LEADER_DEMOTED = "✅ {member} ha sido degradado de líder a miembro del clan **{clan_name}** exitosamente."
 SUCCESS_LEADER_DEMOTED_WITH_ROLE_WARNING = "⚠️ {member} ha sido degradado de líder a miembro del clan **{clan_name}** en la base de datos, pero hubo un problema con los roles: {role_error}"
 SUCCESS_CHANNEL_DELETED = "✅ Canal **{channel_name}** eliminado exitosamente del clan **{clan_name}**."
+SUCCESS_MEMBER_ADDED = "✅ {member} ha sido añadido exitosamente al clan **{clan_name}**."
 
 # Mensajes informativos
 INFO_INVITATION_SENT_TO_USER = "Se le ha enviado la invitación al clan a **{user_name}**"
@@ -169,6 +171,8 @@ TITLE_SELECT_CLAN_REMOVE_CHANNEL = "🗑️ Seleccionar clan para quitar canal"
 DESCRIPTION_SELECT_CLAN_REMOVE_CHANNEL = "Selecciona el clan del que quieres quitar el canal {channel}:"
 TITLE_SELECT_CLAN_VIEW_MEMBERS = "👥 Seleccionar clan para ver miembros"
 DESCRIPTION_SELECT_CLAN_VIEW_MEMBERS = "Selecciona el clan del que quieres ver la lista de miembros:"
+TITLE_SELECT_CLAN_ADD_MEMBER = "➕ Seleccionar clan para añadir miembro"
+DESCRIPTION_SELECT_CLAN_ADD_MEMBER = "Selecciona el clan al que quieres añadir a {member}:"
 
 # Fields para embeds
 FIELD_ID = "ID"

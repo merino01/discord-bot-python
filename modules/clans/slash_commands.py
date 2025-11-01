@@ -1304,6 +1304,38 @@ class ClanCommands(commands.GroupCog, name="clan"):
                 constants.ERROR_DELETING_CHANNEL.format(error=str(e)), ephemeral=True
             )
 
+    @mod.command(name="añadir", description="Añadir un usuario directamente a un clan")
+    @app_commands.describe(usuario="Usuario a añadir al clan")
+    @app_commands.checks.has_permissions(manage_roles=True, manage_channels=True)
+    async def add_member_to_clan(self, interaction: Interaction, usuario: Member):
+        await interaction.response.defer(ephemeral=True)
+        
+        # Obtener todos los clanes
+        clans, error = await self.service.get_all_clans()
+        if error or not clans or len(clans) == 0:
+            return await interaction.followup.send(
+                error or constants.ERROR_NO_CLANS_AVAILABLE, ephemeral=True
+            )
+        
+        # Verificar si el usuario ya está en algún clan
+        settings_service = ClanSettingsService()
+        settings, _ = await settings_service.get_settings()
+        user_clans, _ = await self.service.get_member_clans(usuario.id)
+        
+        if user_clans and len(user_clans) > 0 and not settings.allow_multiple_clans:
+            return await interaction.followup.send(
+                constants.ERROR_USER_ALREADY_IN_CLAN, ephemeral=True
+            )
+        
+        # Mostrar selector de clanes
+        view = ClanModSelectionView(clans, "add_member", miembro=usuario)
+        embed = Embed(
+            title=constants.TITLE_SELECT_CLAN_ADD_MEMBER,
+            description=constants.DESCRIPTION_SELECT_CLAN_ADD_MEMBER.format(member=usuario.mention),
+            color=Color.green()
+        )
+        await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+
     #######################################
     ### Comandos para miembros del clan ###
     #######################################
