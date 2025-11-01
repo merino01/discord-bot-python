@@ -37,7 +37,9 @@ ERROR_SENDING_MESSAGE = "❌ Error al enviar el mensaje: {error}"
 ERROR_TIMEOUT_CLAN_SELECTION = "⏰ Se acabó el tiempo para seleccionar un clan"
 
 # Mensajes de error - Channel Management
-ERROR_MAX_CHANNELS_REACHED = "❌ El clan **{clan_name}** ya tiene el máximo de canales de {type} ({max_channels})."
+ERROR_MAX_CHANNELS_REACHED = (
+    "❌ El clan **{clan_name}** ya tiene el máximo de canales de {type} ({max_channels})."
+)
 ERROR_GETTING_SETTINGS = "❌ Error al obtener configuración: {error}"
 ERROR_CLAN_ROLE_NOT_FOUND = "❌ Error: No se encontró el rol del clan."
 ERROR_SAVING_CHANNEL = "❌ Error al guardar el canal: {error}"
@@ -57,7 +59,9 @@ ERROR_NO_PARAMS_PROVIDED = "❌ Debes proporcionar al menos un parámetro para c
 ERROR_PARAM_MUST_BE_POSITIVE = "❌ {param_name} debe ser mayor que 0."
 ERROR_GETTING_CLANS_CONFIG = "❌ Error al obtener clanes: {error}"
 ERROR_NO_CLANS_TO_CONFIGURE = "❌ No hay clanes disponibles para configurar."
-MESSAGE_CONFIGURE_CLAN_TITLE = "**🔧 Configurar Clan**\n\nSelecciona el clan que quieres configurar:"
+MESSAGE_CONFIGURE_CLAN_TITLE = (
+    "**🔧 Configurar Clan**\n\nSelecciona el clan que quieres configurar:"
+)
 ERROR_EXECUTING_ACTION = "❌ Error al ejecutar la acción: {error}"
 ERROR_TIMEOUT_ACTION = "⏰ **Tiempo agotado** - Selección de clan cancelada."
 ERROR_PROMOTING_MEMBER = "❌ Error al promover miembro: {error}"
@@ -65,6 +69,7 @@ ERROR_MEMBER_NOT_FOUND = "❌ El miembro especificado no se encontró en el serv
 ERROR_DEMOTING_LEADER = "❌ Error al degradar líder: {error}"
 ERROR_CHANNEL_NOT_FOUND = "❌ Canal no encontrado."
 ERROR_DELETING_CHANNEL = "❌ Error al eliminar canal: {error}"
+ERROR_ADDING_MEMBER = "❌ Error al añadir miembro: {error}"
 
 # Mensajes de éxito
 SUCCESS_CLAN_CREATED = "✅ Clan {nombre} creado con éxito en las categorías 📝 Texto: <#{text_category}> | 🔊 Voz: <#{voice_category}> con 👥 {max_members} miembros máximo."
@@ -74,16 +79,22 @@ SUCCESS_MEMBER_KICKED = "🦶 {member} ha sido expulsado del clan **{clan_name}*
 
 # Mensajes informativos
 MESSAGE_CLAN_INVITATION = "📩 Has sido invitado a unirte al clan **{clan_name}**."
-MESSAGE_USE_CLAN_LEAVE = "❌ No puedes expulsarte a ti mismo. Usa el comando `/clan salir` en su lugar."
+MESSAGE_USE_CLAN_LEAVE = (
+    "❌ No puedes expulsarte a ti mismo. Usa el comando `/clan salir` en su lugar."
+)
 MESSAGE_USE_SPECIFIC_CHANNEL = "📢 Ejecuta este comando desde el canal del clan específico del que quieres expulsar al miembro."
 
 # Títulos y descripciones de embeds
 EMBED_CLAN_INFO_TITLE = "🏰 Información del clan **{clan_name}**"
 EMBED_CLAN_INFO_DESCRIPTION = "📋 **Información del clan {clan_name}**."
 EMBED_SELECT_CLAN_DELETE_TITLE = "🗑️ Seleccionar clan a eliminar"
-EMBED_SELECT_CLAN_DELETE_DESCRIPTION = "⚠️ Selecciona el clan que deseas eliminar. **Esta acción no se puede deshacer.**"
+EMBED_SELECT_CLAN_DELETE_DESCRIPTION = (
+    "⚠️ Selecciona el clan que deseas eliminar. **Esta acción no se puede deshacer.**"
+)
 EMBED_CLAN_MIGRATION_TITLE = "✅ Clan migrado exitosamente"
-EMBED_CLAN_MIGRATION_DESCRIPTION = "🔄 El clan **{clan_name}** ha sido migrado al sistema de base de datos."
+EMBED_CLAN_MIGRATION_DESCRIPTION = (
+    "🔄 El clan **{clan_name}** ha sido migrado al sistema de base de datos."
+)
 EMBED_CLAN_STATS_TITLE = "📊 Estadísticas de Clanes"
 EMBED_CLAN_STATS_DESCRIPTION = "📈 Resumen general del sistema de clanes"
 EMBED_CLAN_MEMBERS_TITLE = "👥 Miembros de {clan_name}"
@@ -121,18 +132,29 @@ VALUE_TOTAL_CLANS_AVAILABLE = "📊 {count} clanes disponibles"
 
 # Formatos de estadísticas
 STATS_GENERAL_FORMAT = "**📊 Clanes totales:** {total_clans}\n**👥 Miembros totales:** {total_members}\n**👑 Líderes totales:** {total_leaders}\n**📢 Canales totales:** {total_channels}"
-STATS_LARGEST_CLAN_FORMAT = "**🏰 {clan_name}**\n👥 {member_count} miembros\n📢 {channel_count} canales"
-STATS_AVERAGES_FORMAT = "**👥 Miembros por clan:** {avg_members:.1f}\n**📢 Canales por clan:** {avg_channels:.1f}"
+STATS_LARGEST_CLAN_FORMAT = (
+    "**🏰 {clan_name}**\n👥 {member_count} miembros\n📢 {channel_count} canales"
+)
+STATS_AVERAGES_FORMAT = (
+    "**👥 Miembros por clan:** {avg_members:.1f}\n**📢 Canales por clan:** {avg_channels:.1f}"
+)
 SUCCESS_INVITATION_SENT = "📩 Invitación enviada a {member}."
 SUCCESS_MEMBER_KICKED = "🦶 Se ha expulsado del clan **{clan_name}** a **{member_name}**."
 SUCCESS_LEFT_CLAN = "🚪 Has salido del clan **{clan_name}** exitosamente."
 SUCCESS_JOINED_CLAN = "🎉 ¡Te has unido al clan **{clan_name}** exitosamente!"
 SUCCESS_CHANNEL_ADDED = "✅ Canal **{channel_name}** ({type}) añadido exitosamente al clan **{clan_name}**. Canal: {channel_mention}"
-SUCCESS_MEMBER_PROMOTED = "✅ {member} ha sido promovido a líder del clan **{clan_name}** exitosamente."
+SUCCESS_MEMBER_PROMOTED = (
+    "✅ {member} ha sido promovido a líder del clan **{clan_name}** exitosamente."
+)
 SUCCESS_MEMBER_PROMOTED_WITH_ROLE_WARNING = "⚠️ {member} ha sido promovido a líder del clan **{clan_name}** en la base de datos, pero hubo un problema con los roles: {role_error}"
-SUCCESS_LEADER_DEMOTED = "✅ {member} ha sido degradado de líder a miembro del clan **{clan_name}** exitosamente."
+SUCCESS_LEADER_DEMOTED = (
+    "✅ {member} ha sido degradado de líder a miembro del clan **{clan_name}** exitosamente."
+)
 SUCCESS_LEADER_DEMOTED_WITH_ROLE_WARNING = "⚠️ {member} ha sido degradado de líder a miembro del clan **{clan_name}** en la base de datos, pero hubo un problema con los roles: {role_error}"
-SUCCESS_CHANNEL_DELETED = "✅ Canal **{channel_name}** eliminado exitosamente del clan **{clan_name}**."
+SUCCESS_CHANNEL_DELETED = (
+    "✅ Canal **{channel_name}** eliminado exitosamente del clan **{clan_name}**."
+)
+SUCCESS_MEMBER_ADDED = "✅ {member} ha sido añadido exitosamente al clan **{clan_name}**."
 
 # Mensajes informativos
 INFO_INVITATION_SENT_TO_USER = "Se le ha enviado la invitación al clan a **{user_name}**"
@@ -158,17 +180,29 @@ TITLE_MIGRATION_DESCRIPTION = "El clan **{clan_name}** ha sido migrado al sistem
 TITLE_CLAN_STATS = "📊 Estadísticas de Clanes"
 TITLE_CLAN_STATS_DESCRIPTION = "Resumen general del sistema de clanes"
 TITLE_DELETE_CLAN_SELECT = "🗑️ Seleccionar clan a eliminar"
-TITLE_DELETE_CLAN_DESCRIPTION = "Selecciona el clan que deseas eliminar. **Esta acción no se puede deshacer.**"
+TITLE_DELETE_CLAN_DESCRIPTION = (
+    "Selecciona el clan que deseas eliminar. **Esta acción no se puede deshacer.**"
+)
 TITLE_SELECT_CLAN_ADD_CHANNEL = "🔧 Seleccionar clan para añadir canal"
 DESCRIPTION_SELECT_CLAN_ADD_CHANNEL = "Selecciona el clan al que quieres añadir el canal:"
 TITLE_SELECT_CLAN_ADD_LEADER = "👑 Seleccionar clan para añadir líder"
-DESCRIPTION_SELECT_CLAN_ADD_LEADER = "Selecciona el clan al que quieres añadir a {member} como líder:"
+DESCRIPTION_SELECT_CLAN_ADD_LEADER = (
+    "Selecciona el clan al que quieres añadir a {member} como líder:"
+)
 TITLE_SELECT_CLAN_REMOVE_LEADER = "👑 Seleccionar clan para quitar líder"
-DESCRIPTION_SELECT_CLAN_REMOVE_LEADER = "Selecciona el clan del que quieres quitar a {member} como líder:"
+DESCRIPTION_SELECT_CLAN_REMOVE_LEADER = (
+    "Selecciona el clan del que quieres quitar a {member} como líder:"
+)
 TITLE_SELECT_CLAN_REMOVE_CHANNEL = "🗑️ Seleccionar clan para quitar canal"
-DESCRIPTION_SELECT_CLAN_REMOVE_CHANNEL = "Selecciona el clan del que quieres quitar el canal {channel}:"
+DESCRIPTION_SELECT_CLAN_REMOVE_CHANNEL = (
+    "Selecciona el clan del que quieres quitar el canal {channel}:"
+)
 TITLE_SELECT_CLAN_VIEW_MEMBERS = "👥 Seleccionar clan para ver miembros"
-DESCRIPTION_SELECT_CLAN_VIEW_MEMBERS = "Selecciona el clan del que quieres ver la lista de miembros:"
+DESCRIPTION_SELECT_CLAN_VIEW_MEMBERS = (
+    "Selecciona el clan del que quieres ver la lista de miembros:"
+)
+TITLE_SELECT_CLAN_ADD_MEMBER = "➕ Seleccionar clan para añadir miembro"
+DESCRIPTION_SELECT_CLAN_ADD_MEMBER = "Selecciona el clan al que quieres añadir a {member}:"
 
 # Fields para embeds
 FIELD_ID = "ID"
@@ -198,7 +232,9 @@ VALUE_TEXT_CHANNELS_COUNT = "{channels} ({current}/{max})"
 VALUE_VOICE_CHANNELS_COUNT = "{channels} ({current}/{max})"
 VALUE_GENERAL_STATS = "**Clanes totales:** {total_clans}\n**Miembros totales:** {total_members}\n**Líderes totales:** {total_leaders}\n**Canales totales:** {total_channels}"
 VALUE_LARGEST_CLAN_INFO = "**{clan_name}**\n{member_count} miembros\n{channel_count} canales"
-VALUE_AVERAGES_INFO = "**Miembros por clan:** {avg_members:.1f}\n**Canales por clan:** {avg_channels:.1f}"
+VALUE_AVERAGES_INFO = (
+    "**Miembros por clan:** {avg_members:.1f}\n**Canales por clan:** {avg_channels:.1f}"
+)
 
 # Descripciones de comandos
 COMMAND_CREATE_CLAN_DESC = "🏗️ Crear un nuevo clan"
@@ -222,12 +258,18 @@ COMMAND_REMOVE_CHANNEL_DESC = "🗑️ Eliminar canal del clan"
 PARAM_CLAN_NAME_DESC = "🏷️ Nombre del clan"
 PARAM_LEADER_DESC = "👑 Líder del clan"
 PARAM_CLAN_ID_DESC = "🆔 Id del clan"
-PARAM_CLAN_ID_OPTIONAL_DESC = "🆔 Id del clan (opcional - sin especificar muestra lista para elegir)"
-PARAM_PERSISTENT_DESC = "📌 Si la respuesta debe ser visible para todos (opcional, por defecto falso)"
+PARAM_CLAN_ID_OPTIONAL_DESC = (
+    "🆔 Id del clan (opcional - sin especificar muestra lista para elegir)"
+)
+PARAM_PERSISTENT_DESC = (
+    "📌 Si la respuesta debe ser visible para todos (opcional, por defecto falso)"
+)
 PARAM_ROLE_DESC = ICON_ROLE + " del clan a migrar"
 PARAM_TEXT_CHANNEL_DESC = "📝 Canal de texto del clan"
 PARAM_VOICE_CHANNEL_DESC = "🔊 Canal de voz del clan"
-PARAM_LEADER_OPTIONAL_DESC = "👑 Líder del clan (si no se especifica se toma el primer miembro con el rol)"
+PARAM_LEADER_OPTIONAL_DESC = (
+    "👑 Líder del clan (si no se especifica se toma el primer miembro con el rol)"
+)
 PARAM_MEMBER_DESC = "👤 Miembro a invitar al clan"
 PARAM_MEMBER_KICK_DESC = "🦶 Miembro a expulsar del clan"
 PARAM_CLAN_NAME_JOIN_DESC = "🏷️ Nombre del clan al que quieres unirte"
@@ -240,4 +282,6 @@ GROUP_MOD_DESC = "🛡️ Comandos de moderación de clanes"
 
 # Mensajes de confirmación
 CONFIRM_LEAVE_CLAN = "❓ ¿Estás seguro de que quieres salir del clan **{clan_name}**?"
-CONFIRM_KICK_MEMBER = "❓ ¿Estás seguro de que quieres expulsar a **{member_name}** del clan **{clan_name}**?"
+CONFIRM_KICK_MEMBER = (
+    "❓ ¿Estás seguro de que quieres expulsar a **{member_name}** del clan **{clan_name}**?"
+)
