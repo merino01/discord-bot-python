@@ -1435,7 +1435,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
         settings, _ = await settings_service.get_settings()
         user_clans, _ = await self.service.get_member_clans(usuario.id)
 
-        if user_clans and len(user_clans) > 0 and not settings.allow_multiple_clans:
+        if user_clans and not settings.allow_multiple_clans:
             return await interaction.followup.send(
                 constants.ERROR_USER_ALREADY_IN_CLAN, ephemeral=True
             )

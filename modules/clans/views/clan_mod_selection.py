@@ -11,6 +11,7 @@ from ..utils import (
     demote_leader_to_member,
     remove_clan_channel,
 )
+from .. import constants
 
 
 class ClanModSelectionView(discord.ui.View):
@@ -304,8 +305,6 @@ class ClanModSelectionView(discord.ui.View):
 
     async def _handle_add_member(self, interaction: Interaction):
         """Manejar adición directa de miembro al clan"""
-        from .. import constants
-
         clan = self.selected_clan
         miembro = self.kwargs.get('miembro')
 
