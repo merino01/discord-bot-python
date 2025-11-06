@@ -3,6 +3,7 @@ from typing import Optional
 from discord import ButtonStyle, Interaction, Message, Guild, Member
 from discord.ui import View, Button
 from constants import ONE_DAY
+from i18n import __
 from modules.clans.models import Clan
 from modules.clans.service import ClanService
 from modules.clans.utils import add_member_to_clan
@@ -49,20 +50,20 @@ class ClanInviteView(View):
         
         if error:
             await interaction.response.edit_message(
-                content=f"Error al aceptar la invitación: {error}", view=self
+                content=__("clans.messages.kickedFromClan", error=error), view=self
             )
             return
 
         # Responder la interacción con éxito
         await interaction.response.edit_message(
-            content=f"¡Te has unido al clan **{self.clan.name}** exitosamente!", view=self
+            content=__("clans.messages.acceptedInvitation", clan_name=self.clan.name), view=self
         )
         
         # Actualizar el mensaje del canal si existe
         if self.channel_message:
             try:
                 await self.channel_message.edit(
-                    content=f"{interaction.user.mention} se ha unido al clan **{self.clan.name}**."
+                    content=__("clans.messages.joinedClanNotification", user=interaction.user.mention, clan_name=self.clan.name)
                 )
             except:
                 pass  # Si no se puede editar, continuar
@@ -78,14 +79,14 @@ class ClanInviteView(View):
                 
         # Responder la interacción
         await interaction.response.edit_message(
-            content=f"Has rechazado la invitación al clan **{self.clan.name}**.", view=self
+            content=__("clans.messages.rejectedInvitation", clan_name=self.clan.name), view=self
         )
         
         # Actualizar el mensaje del canal si existe
         if self.channel_message:
             try:
                 await self.channel_message.edit(
-                    content=f"{interaction.user.mention} ha rechazado la invitación al clan **{self.clan.name}**."
+                    content=__("clans.messages.rejectedInvitationNotification", user=interaction.user.mention, clan_name=self.clan.name)
                 )
             except Exception:
                 pass  # Si no se puede editar, continuar
@@ -101,5 +102,5 @@ class ClanInviteView(View):
                 item.disabled = True
 
         await self.message.edit(
-            content=f"La invitación al clan **{self.clan.name}** ha expirado", view=self
+            content=__("clans.messages.invitationExpired", clan_name=self.clan.name), view=self
         )

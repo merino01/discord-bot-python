@@ -4,7 +4,7 @@ from typing import Optional
 from modules.core import logger, send_paginated_embeds
 from ..service import ClanService
 from ..models import ClanMemberRole
-from .. import constants
+from i18n import __
 
 
 class ClanSelector(discord.ui.Select):
@@ -60,8 +60,8 @@ class ClanSelector(discord.ui.Select):
             elif self.action_type == "info":
                 # Mostrar embed de info de clan igual que el comando info
                 embed = Embed(
-                    title=constants.EMBED_CLAN_INFO_TITLE.format(clan_name=selected_clan.name),
-                    description=constants.EMBED_CLAN_INFO_DESCRIPTION.format(clan_name=selected_clan.name),
+                    title=__("clans.embeds.clanInfoTitle", clan_name=selected_clan.name),
+                    description=__("clans.embeds.clanInfoDescription", clan_name=selected_clan.name),
                     color=Color.blue(),
                     timestamp=discord.utils.utcnow(),
                 )
@@ -74,13 +74,13 @@ class ClanSelector(discord.ui.Select):
                     text=f"{guild.name}" if guild else "",
                     icon_url=guild.icon.url if guild and guild.icon else None,
                 )
-                embed.add_field(name=constants.FIELD_ID, value=selected_clan.id, inline=True)
-                embed.add_field(name=constants.FIELD_NAME, value=selected_clan.name, inline=True)
+                embed.add_field(name=__("clans.fields.id"), value=selected_clan.id, inline=True)
+                embed.add_field(name=__("clans.fields.name"), value=selected_clan.name, inline=True)
                 leaders = [f"<@{member.user_id}>" for member in selected_clan.members if member.role == "leader"]
-                embed.add_field(name=constants.FIELD_LEADERS, value=", ".join(leaders) if leaders else "Ninguno", inline=True)
-                embed.add_field(name=constants.FIELD_MEMBERS, value=len(selected_clan.members), inline=True)
-                embed.add_field(name=constants.FIELD_MEMBER_LIMIT, value=selected_clan.max_members, inline=True)
-                embed.add_field(name=constants.FIELD_ROLE, value=f"<@&{selected_clan.role_id}>", inline=True)
+                embed.add_field(name=__("clans.fields.leaders"), value=", ".join(leaders) if leaders else "Ninguno", inline=True)
+                embed.add_field(name=__("clans.fields.members"), value=len(selected_clan.members), inline=True)
+                embed.add_field(name=__("clans.fields.memberLimit"), value=selected_clan.max_members, inline=True)
+                embed.add_field(name=__("clans.fields.role"), value=f"<@&{selected_clan.role_id}>", inline=True)
                 text_channels = [
                     f"<#{channel.channel_id}>" for channel in selected_clan.channels if channel.type == "text"
                 ]
@@ -88,16 +88,16 @@ class ClanSelector(discord.ui.Select):
                     f"<#{channel.channel_id}>" for channel in selected_clan.channels if channel.type == "voice"
                 ]
                 embed.add_field(
-                    name=constants.FIELD_TEXT_CHANNELS,
-                    value=f"{', '.join(text_channels) if text_channels else constants.VALUE_NONE} ({len(text_channels)}/{selected_clan.max_text_channels})",
+                    name=__("clans.fields.textChannels"),
+                    value=f"{', '.join(text_channels) if text_channels else __("clans.values.none")} ({len(text_channels)}/{selected_clan.max_text_channels})",
                     inline=True
                 )
                 embed.add_field(
-                    name=constants.FIELD_VOICE_CHANNELS,
-                    value=f"{', '.join(voice_channels) if voice_channels else constants.VALUE_NONE} ({len(voice_channels)}/{selected_clan.max_voice_channels})",
+                    name=__("clans.fields.voiceChannels"),
+                    value=f"{', '.join(voice_channels) if voice_channels else __("clans.values.none")} ({len(voice_channels)}/{selected_clan.max_voice_channels})",
                     inline=True
                 )
-                embed.add_field(name=constants.FIELD_CREATION_DATE, value=selected_clan.created_at, inline=False)
+                embed.add_field(name=__("clans.fields.creationDate"), value=selected_clan.created_at, inline=False)
                 await interaction.response.send_message(embed=embed, ephemeral=self.kwargs.get('ephemeral', True))
             else:
                 await interaction.response.send_message(
@@ -154,9 +154,9 @@ class ClanSelector(discord.ui.Select):
 
             # Crear embed principal
             embed = Embed(
-                title=constants.EMBED_CLAN_MEMBERS_TITLE.format(clan_name=clan.name),
+                title=__("clans.embeds.clanMembersTitle", clan_name=clan.name),
                 color=Color.green(),
-                description=constants.EMBED_CLAN_MEMBERS_DESCRIPTION.format(member_count=len(clan.members))
+                description=__("clans.embeds.clanMembersDescription", member_count=len(clan.members))
             )
 
             # Dividir en chunks para evitar límites de Discord
@@ -167,7 +167,7 @@ class ClanSelector(discord.ui.Select):
                 leaders_text = "\n".join(leader_mentions)
                 if len(leaders_text) <= MAX_FIELD_LENGTH:
                     embed.add_field(
-                        name=constants.FIELD_LEADERS,
+                        name=__("clans.fields.leaders"),
                         value=leaders_text,
                         inline=False
                     )
@@ -182,7 +182,7 @@ class ClanSelector(discord.ui.Select):
                         current_length += len(mention) + 1
                     
                     embed.add_field(
-                        name=f"{constants.FIELD_LEADERS} (Primeros {len(chunk_leaders)})",
+                        name=f"{__("clans.fields.leaders")} (Primeros {len(chunk_leaders)})",
                         value="\n".join(chunk_leaders),
                         inline=False
                     )
@@ -192,7 +192,7 @@ class ClanSelector(discord.ui.Select):
                 members_text = "\n".join(member_mentions)
                 if len(members_text) <= MAX_FIELD_LENGTH:
                     embed.add_field(
-                        name=constants.FIELD_MEMBERS,
+                        name=__("clans.fields.members"),
                         value=members_text,
                         inline=False
                     )
@@ -207,7 +207,7 @@ class ClanSelector(discord.ui.Select):
                         current_length += len(mention) + 1
                     
                     embed.add_field(
-                        name=f"{constants.FIELD_MEMBERS} (Primeros {len(chunk_members)})",
+                        name=f"{__("clans.fields.members")} (Primeros {len(chunk_members)})",
                         value="\n".join(chunk_members),
                         inline=False
                     )
