@@ -3,8 +3,8 @@
 from discord import Interaction, TextStyle, Embed
 from discord.ui import Modal, TextInput
 from modules.core import logger
+from i18n import __
 from .utils import extract_message_info
-from . import constants
 
 
 class EchoTextModal(Modal):
@@ -34,7 +34,7 @@ class EchoTextModal(Modal):
             # Verificar longitud del mensaje (para texto normal)
             if not self.enviar_embed and len(texto) > 2000:
                 return await interaction.response.send_message(
-                    constants.ERROR_MESSAGE_TOO_LONG,
+                    __("echo.errors.messageTooLong"),
                     ephemeral=True
                 )
             
@@ -42,7 +42,7 @@ class EchoTextModal(Modal):
             member_permissions = self.canal.permissions_for(interaction.user)
             if not member_permissions.send_messages:
                 return await interaction.response.send_message(
-                    constants.ERROR_NO_PERMISSIONS,
+                    __("echo.errors.noPermissions"),
                     ephemeral=True
                 )
             
@@ -50,7 +50,7 @@ class EchoTextModal(Modal):
             bot_permissions = self.canal.permissions_for(interaction.guild.me)
             if not bot_permissions.send_messages:
                 return await interaction.response.send_message(
-                    constants.ERROR_NO_PERMISSIONS,
+                    __("echo.errors.noPermissions"),
                     ephemeral=True
                 )
             
@@ -64,7 +64,7 @@ class EchoTextModal(Modal):
                         embed_data = json.loads(texto)
                     except json.JSONDecodeError:
                         return await interaction.response.send_message(
-                            constants.ERROR_INVALID_JSON,
+                            __("echo.errors.invalidJson"),
                             ephemeral=True
                         )
 
@@ -84,9 +84,9 @@ class EchoTextModal(Modal):
                         )
 
                         # Confirmar al usuario que el embed fue enviado
-                        confirmation_msg = constants.SUCCESS_EMBED_SENT.format(channel=self.canal.mention)
+                        confirmation_msg = __("echo.success.embedSent", channel=self.canal.mention)
                         if echo_id:
-                            confirmation_msg += f"\n{constants.SUCCESS_MESSAGE_SAVED.format(message_id=echo_id[:8])}"
+                            confirmation_msg += f"\n{__('echo.success.messageSaved', message_id=echo_id[:8])}"
                         
                         await interaction.response.send_message(
                             confirmation_msg,
@@ -97,7 +97,7 @@ class EchoTextModal(Modal):
 
                     except Exception as e:
                         return await interaction.response.send_message(
-                            constants.ERROR_EMBED_CREATION.format(error=str(e)),
+                            __("echo.errors.embedCreation", error=str(e)),
                             ephemeral=True
                         )
                 else:
@@ -115,9 +115,9 @@ class EchoTextModal(Modal):
                     )
 
                     # Confirmar al usuario que el mensaje fue enviado
-                    confirmation_msg = constants.SUCCESS_MESSAGE_SENT.format(channel=self.canal.mention)
+                    confirmation_msg = __("echo.success.messageSent", channel=self.canal.mention)
                     if echo_id:
-                        confirmation_msg += f"\n{constants.SUCCESS_MESSAGE_SAVED.format(message_id=echo_id[:8])}"
+                        confirmation_msg += f"\n{__('echo.success.messageSaved', message_id=echo_id[:8])}"
                     
                     await interaction.response.send_message(
                         confirmation_msg,
@@ -129,7 +129,7 @@ class EchoTextModal(Modal):
             except Exception as e:
                 logger.error(f"Error en modal echo: {str(e)}")
                 await interaction.response.send_message(
-                    constants.ERROR_SENDING_MESSAGE.format(error=str(e)),
+                    __("echo.errors.sendingMessage", error=str(e)),
                     ephemeral=True
                 )
         
@@ -177,7 +177,7 @@ class EchoEditModal(Modal):
             # Verificar longitud del nuevo texto (para texto normal)
             if not self.enviar_embed and len(nuevo_texto) > 2000:
                 return await interaction.response.send_message(
-                    constants.ERROR_MESSAGE_TOO_LONG,
+                    __("echo.errors.messageTooLong"),
                     ephemeral=True
                 )
             
@@ -187,7 +187,7 @@ class EchoEditModal(Modal):
                 message_info = extract_message_info(self.enlace_mensaje)
                 if not message_info:
                     return await interaction.response.send_message(
-                        constants.ERROR_INVALID_MESSAGE_LINK,
+                        __("echo.errors.invalidMessageLink"),
                         ephemeral=True
                     )
                 
@@ -208,7 +208,7 @@ class EchoEditModal(Modal):
                 from discord import TextChannel
                 if not isinstance(target_channel, TextChannel):
                     return await interaction.response.send_message(
-                        constants.ERROR_INVALID_CHANNEL,
+                        __("echo.errors.invalidChannel"),
                         ephemeral=True
                     )
                 
@@ -217,14 +217,14 @@ class EchoEditModal(Modal):
                     discord_message = await target_channel.fetch_message(message_id)
                 except Exception:
                     return await interaction.response.send_message(
-                        constants.ERROR_MESSAGE_NOT_IN_DISCORD,
+                        __("echo.errors.messageNotInDiscord"),
                         ephemeral=True
                     )
                 
                 # Verificar permisos: puede editar si es del bot
                 if discord_message.author.id != self.bot_user_id:
                     return await interaction.response.send_message(
-                        constants.ERROR_MESSAGE_NOT_FROM_BOT,
+                        __("echo.errors.messageNotFromBot"),
                         ephemeral=True
                     )
                 
@@ -240,7 +240,7 @@ class EchoEditModal(Modal):
                 
                 if error or not echo_messages:
                     return await interaction.response.send_message(
-                        constants.ERROR_NO_ECHO_MESSAGES,
+                        __("echo.errors.noEchoMessages"),
                         ephemeral=True
                     )
                 
@@ -260,7 +260,7 @@ class EchoEditModal(Modal):
                     discord_message = await channel.fetch_message(selected_message.message_id)
                 except Exception:
                     return await interaction.response.send_message(
-                        constants.ERROR_MESSAGE_NOT_IN_DISCORD,
+                        __("echo.errors.messageNotInDiscord"),
                         ephemeral=True
                     )
                 
@@ -286,12 +286,12 @@ class EchoEditModal(Modal):
                     await discord_message.edit(content=None, embed=embed)
                 except json.JSONDecodeError:
                     return await interaction.response.send_message(
-                        constants.ERROR_INVALID_JSON,
+                        __("echo.errors.invalidJson"),
                         ephemeral=True
                     )
                 except Exception as e:
                     return await interaction.response.send_message(
-                        constants.ERROR_EMBED_CREATION.format(error=str(e)),
+                        __("echo.errors.embedCreation", error=str(e)),
                         ephemeral=True
                     )
             else:
@@ -307,7 +307,7 @@ class EchoEditModal(Modal):
             
         except Exception as e:
             await interaction.response.send_message(
-                constants.ERROR_EDITING_MESSAGE.format(error=str(e)),
+                __("echo.errors.editingMessage", error=str(e)),
                 ephemeral=True
             )
             logger.error(f"Error al editar mensaje desde modal: {e}")
