@@ -451,3 +451,52 @@ uv pip install -r requirements.txt
 ```bash
 python main.py
 ```
+
+## 🌍 SISTEMA DE TRADUCCIONES (i18n)
+
+El bot incluye un sistema completo de internacionalización que permite usar el bot en múltiples idiomas.
+
+### Configurar Idioma
+
+Agrega la clave `language` en tu `config.json`:
+
+```json
+{
+    "app_name": "discord-bot",
+    "bot_token": "TU_TOKEN_AQUI",
+    "guild_id": 1212122343443524324,
+    "admin_id": 8767643756437563653,
+    "send_to_admin": true,
+    "language": "es-ES"
+}
+```
+
+### Idiomas Disponibles
+
+- `es-ES` - Español (España) ✅ Completo
+
+### Agregar Nuevo Idioma
+
+1. Copia el archivo de traducción:
+   ```bash
+   cp translations/es-ES.json translations/en-US.json
+   ```
+
+2. Traduce los valores en el nuevo archivo (mantén las claves iguales)
+
+3. Actualiza tu `config.json`:
+   ```json
+   {
+       "language": "en-US"
+   }
+   ```
+
+4. Reinicia el bot
+
+### Documentación
+
+- `translations/README.md` - Documentación del sistema de traducciones
+- `MIGRATION_GUIDE.md` - Guía para desarrolladores
+- `I18N_IMPLEMENTATION_SUMMARY.md` - Resumen de implementación
+
+Para más información sobre el sistema i18n, consulta la documentación en el repositorio.
