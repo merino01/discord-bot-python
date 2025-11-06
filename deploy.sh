@@ -18,7 +18,10 @@ fi
 # Obtener los últimos cambios del repositorio
 echo ""
 echo "📥 Obteniendo últimos cambios desde Git..."
-git pull
+if ! git pull; then
+    echo "❌ Error: No se pudieron obtener los cambios. Verifica la conexión o conflictos de merge."
+    exit 1
+fi
 
 # Reconstruir la imagen de Docker con los cambios
 echo ""
