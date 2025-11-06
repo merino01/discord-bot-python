@@ -64,7 +64,26 @@ Este es un bot de discord para gestionar el servidor, se pueden configurar **log
    
    # Reiniciar el bot
    docker-compose restart
+   
+   # Desplegar actualizaciones (pull + restart)
+   ./deploy.sh
    ```
+
+5. **Despliegue de actualizaciones:**
+   
+   Para actualizar el bot con los últimos cambios del repositorio y reiniciarlo automáticamente:
+   
+   **En Linux/Mac:**
+   ```bash
+   chmod +x deploy.sh
+   ./deploy.sh
+   ```
+   
+   Este script realiza las siguientes acciones:
+   - Descarga los últimos cambios del repositorio (git pull)
+   - Reconstruye la imagen Docker con los cambios
+   - Reinicia el contenedor
+   - Muestra el estado y los logs recientes
 
 ### Opción 2: Instalación Local
 
