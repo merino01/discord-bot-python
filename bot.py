@@ -78,5 +78,6 @@ class Bot(commands.Bot):
         except Exception as e:
             logger.error("Error al iniciar mensajes automáticos: %s", e)
 
+
     def init(self):
         self.run(token=bot_token, log_handler=logger.handlers[0])
