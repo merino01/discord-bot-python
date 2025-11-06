@@ -25,9 +25,13 @@ Este es un bot de discord para gestionar el servidor, se pueden configurar **log
        "bot_token": "TU_TOKEN_AQUI",
        "guild_id": 1212122343443524324,
        "admin_id": 8767643756437563653,
-       "send_to_admin": true
+       "send_to_admin": true,
+       "api_enabled": false,
+       "api_port": 8000,
+       "api_key": "tu_clave_api_secreta"
    }
    ```
+   > Nota: Establece `api_enabled: true` si quieres habilitar la API REST
 
 3. **Ejecuta el bot:**
    

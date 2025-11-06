@@ -18,4 +18,7 @@ RUN uv sync --frozen
 
 COPY . .
 
+# Expose API port (default 8000, configurable in config.json)
+EXPOSE 8000
+
 CMD ["uv", "run", "python", "main.py"]

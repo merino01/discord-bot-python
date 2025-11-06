@@ -4,6 +4,10 @@ services:
         container_name: discord-bot
         restart: unless-stopped
 
+        # Exponer puerto de la API (opcional, solo si api_enabled=true)
+        ports:
+            - "8000:8000"
+
         volumes:
             - ./logs:/app/logs
             - ./database:/app/database
