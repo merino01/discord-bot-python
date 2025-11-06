@@ -17,10 +17,10 @@ class ClanService:
         self.clan_settings_service = ClanSettingsService()
 
     async def update_clan_config(
-        self, 
-        clan_id: str, 
-        max_text_channels: Optional[int] = None, 
-        max_voice_channels: Optional[int] = None
+        self,
+        clan_id: str,
+        max_text_channels: Optional[int] = None,
+        max_voice_channels: Optional[int] = None,
     ) -> Optional[str]:
         """
         Actualiza la configuración personalizada de un clan.
@@ -35,23 +35,25 @@ class ClanService:
             # Construir query dinámico solo para campos no nulos
             update_fields = []
             params = []
-            
+
             if max_text_channels is not None:
                 update_fields.append("max_text_channels = ?")
                 params.append(max_text_channels)
-            
+
             if max_voice_channels is not None:
                 update_fields.append("max_voice_channels = ?")
                 params.append(max_voice_channels)
-            
+
             if not update_fields:
                 return "No se especificaron campos para actualizar"
-            
+
             params.append(clan_id)
             update_sql = f"UPDATE clans SET {', '.join(update_fields)} WHERE id = ?"
             self.db.execute(update_sql, tuple(params))
-            
-            logger.info(f"Configuración del clan {clan_id} actualizada: texto={max_text_channels}, voz={max_voice_channels}")
+
+            logger.info(
+                f"Configuración del clan {clan_id} actualizada: texto={max_text_channels}, voz={max_voice_channels}"
+            )
             return None
         except Exception as e:
             logger.error(f"Error al actualizar configuración del clan {clan_id}: {str(e)}")
@@ -68,18 +70,18 @@ class ClanService:
         max_text_channels: Optional[int] = None,
         max_voice_channels: Optional[int] = None,
     ) -> tuple[Optional[Clan], Optional[str]]:
-        
+
         # Si no se proporcionan límites específicos, usar la configuración global
         if max_text_channels is None or max_voice_channels is None:
             global_settings, error = await self.clan_settings_service.get_settings()
             if error:
                 return None, f"Error al obtener configuración: {error}"
-            
+
             if max_text_channels is None:
                 max_text_channels = global_settings.max_text_channels
             if max_voice_channels is None:
                 max_voice_channels = global_settings.max_voice_channels
-        
+
         clan = Clan(
             id=str(uuid4()),
             name=name,
@@ -118,9 +120,7 @@ class ClanService:
             INSERT INTO clan_members (user_id, clan_id, role, joined_at)
             VALUES (?, ?, ?, ?)
         """
-        self.db.execute(
-            sql, (member.user_id, member.clan_id, member.role, member.joined_at)
-        )
+        self.db.execute(sql, (member.user_id, member.clan_id, member.role, member.joined_at))
 
         insert_channel_sql = """--sql
             INSERT INTO clan_channels (channel_id, name, type, clan_id, created_at)
@@ -201,7 +201,9 @@ class ClanService:
 
         return Clan(**clan), None
 
-    async def get_clan_role(self, guild: Guild, clan_id: str) -> tuple[Optional[Role], Optional[str]]:
+    async def get_clan_role(
+        self, guild: Guild, clan_id: str
+    ) -> tuple[Optional[Role], Optional[str]]:
         clan = self.db.single(ClanService.CLAN_SELECT_BY_ID_SQL, (clan_id,))
         if not clan:
             return None, "El clan no existe"
@@ -218,7 +220,7 @@ class ClanService:
             if error or not settings:
                 logger.error(f"Error al obtener configuración de clanes: {error}")
                 return "Error al obtener la configuración de clanes"
-                
+
             # Verificar que el clan existe
             clan = self.db.single(ClanService.CLAN_SELECT_BY_ID_SQL, (clan_id,))
             if not clan:
@@ -228,7 +230,7 @@ class ClanService:
             # Verificar si el miembro ya está en algún clan
             select_member_sql = "SELECT * FROM clan_members WHERE user_id = ?"
             member = self.db.single(select_member_sql, (member_id,))
-            
+
             if member and member["clan_id"] != clan_id and settings.allow_multiple_clans is False:
                 logger.info(f"Miembro {member_id} ya pertenece a otro clan {member['clan_id']}")
                 return "El miembro ya pertenece a otro clan"
@@ -241,9 +243,11 @@ class ClanService:
             count_members_sql = "SELECT COUNT(*) as count FROM clan_members WHERE clan_id = ?"
             count_result = self.db.single(count_members_sql, (clan_id,))
             current_members = count_result["count"] if count_result else 0
-            
+
             if current_members >= clan["max_members"]:
-                logger.info(f"Clan {clan_id} ha alcanzado el límite máximo de miembros ({clan['max_members']})")
+                logger.info(
+                    f"Clan {clan_id} ha alcanzado el límite máximo de miembros ({clan['max_members']})"
+                )
                 return f"El clan ha alcanzado el límite máximo de miembros ({clan['max_members']})"
 
             # Insertar el miembro en la base de datos
@@ -251,17 +255,21 @@ class ClanService:
                 INSERT INTO clan_members (user_id, clan_id, role, joined_at) 
                 VALUES (?, ?, ?, ?)
             """
-            
+
             logger.info(f"Intentando añadir miembro {member_id} al clan {clan_id}")
-            result = self.db.execute(insert_member_sql, (member_id, clan_id, "member", datetime.now()))
-            
+            result = self.db.execute(
+                insert_member_sql, (member_id, clan_id, "member", datetime.now())
+            )
+
             if result:
                 logger.info(f"Miembro {member_id} añadido exitosamente al clan {clan_id}")
                 return None
             else:
-                logger.error(f"Error: No se pudo insertar el miembro {member_id} en el clan {clan_id}")
+                logger.error(
+                    f"Error: No se pudo insertar el miembro {member_id} en el clan {clan_id}"
+                )
                 return "Error al insertar el miembro en la base de datos"
-                
+
         except Exception as e:
             logger.error(f"Excepción al añadir miembro {member_id} al clan {clan_id}: {str(e)}")
             return f"Error inesperado al añadir el miembro: {str(e)}"
@@ -270,7 +278,7 @@ class ClanService:
         settings, error = await self.clan_settings_service.get_settings()
         if error or not settings:
             return "Error al obtener la configuración de clanes"
-        
+
         # Validar si el clan existe
         clan_sql = "SELECT * FROM clans WHERE id = ?"
         clan_row = self.db.single(clan_sql, (clan_id,))
@@ -282,7 +290,7 @@ class ClanService:
         member_row = self.db.single(member_sql, (member_id,))
         if not member_row:
             return "El miembro no pertenece a ningún clan"
-        
+
         member = ClanMember(**member_row)
         if member.clan_id != clan_id and settings.allow_multiple_clans is False:
             return "El miembro pertenece a otro clan"
@@ -293,7 +301,7 @@ class ClanService:
         # Eliminar el miembro del clan
         delete_sql = "DELETE FROM clan_members WHERE user_id = ? AND clan_id = ?"
         self.db.execute(delete_sql, (member_id, clan_id))
-        
+
         return None
 
     async def get_clan_by_id(self, clan_id: str) -> tuple[Optional[FullClan], Optional[str]]:
@@ -303,19 +311,19 @@ class ClanService:
             clan_row = self.db.single(clan_sql, (clan_id,))
             if not clan_row:
                 return None, "Clan no encontrado"
-            
+
             clan = Clan(**clan_row)
-            
+
             # Obtener miembros del clan
             members_sql = "SELECT * FROM clan_members WHERE clan_id = ?"
             members_rows = self.db.select(members_sql, (clan_id,))
             members = [ClanMember(**row) for row in members_rows] if members_rows else []
-            
+
             # Obtener canales del clan
             channels_sql = "SELECT * FROM clan_channels WHERE clan_id = ?"
             channels_rows = self.db.select(channels_sql, (clan_id,))
             channels = [ClanChannel(**row) for row in channels_rows] if channels_rows else []
-            
+
             # Crear el objeto FullClan
             full_clan = FullClan(
                 id=clan.id,
@@ -327,9 +335,9 @@ class ClanService:
                 max_text_channels=clan.max_text_channels,
                 max_voice_channels=clan.max_voice_channels,
                 members=members,
-                channels=channels
+                channels=channels,
             )
-            
+
             return full_clan, None
         except Exception as e:
             return None, f"Error al obtener el clan: {str(e)}"
@@ -341,21 +349,21 @@ class ClanService:
             clans_rows = self.db.select(clans_sql)
             if not clans_rows:
                 return [], None
-            
+
             full_clans = []
             for clan_row in clans_rows:
                 clan = Clan(**clan_row)
-                
+
                 # Obtener miembros del clan
                 members_sql = "SELECT * FROM clan_members WHERE clan_id = ?"
                 members_rows = self.db.select(members_sql, (clan.id,))
                 members = [ClanMember(**row) for row in members_rows] if members_rows else []
-                
+
                 # Obtener canales del clan
                 channels_sql = "SELECT * FROM clan_channels WHERE clan_id = ?"
                 channels_rows = self.db.select(channels_sql, (clan.id,))
                 channels = [ClanChannel(**row) for row in channels_rows] if channels_rows else []
-                
+
                 # Crear el objeto FullClan
                 full_clan = FullClan(
                     id=clan.id,
@@ -367,10 +375,10 @@ class ClanService:
                     max_text_channels=clan.max_text_channels,
                     max_voice_channels=clan.max_voice_channels,
                     members=members,
-                    channels=channels
+                    channels=channels,
                 )
                 full_clans.append(full_clan)
-            
+
             return full_clans, None
         except Exception as e:
             return None, f"Error al obtener los clanes: {str(e)}"
@@ -382,11 +390,11 @@ class ClanService:
             result = self.db.execute(delete_sql, (clan_id,))
             if not result:
                 return "No se pudo eliminar el clan"
-            
+
             # Eliminar todos los miembros del clan eliminado
             delete_members_sql = "DELETE FROM clan_members WHERE clan_id = ?"
             self.db.execute(delete_members_sql, (clan_id,))
-            
+
             logger.info(f"Clan {clan_id} eliminado y sus miembros removidos")
             return None
         except Exception as e:
@@ -400,13 +408,15 @@ class ClanService:
             clan_row = self.db.single(clan_sql, (role_id,))
             if not clan_row:
                 return None, "No se encontró un clan con ese rol"
-            
+
             # Usar get_clan_by_id para obtener todos los datos
             return await self.get_clan_by_id(clan_row["id"])
         except Exception as e:
             return None, f"Error al obtener el clan por rol: {str(e)}"
 
-    async def get_clan_by_channel_id(self, channel_id: int) -> tuple[Optional[FullClan], Optional[str]]:
+    async def get_clan_by_channel_id(
+        self, channel_id: int
+    ) -> tuple[Optional[FullClan], Optional[str]]:
         try:
             # Obtener el clan a través del canal
             clan_sql = """--sql
@@ -417,7 +427,7 @@ class ClanService:
             clan_row = self.db.single(clan_sql, (channel_id,))
             if not clan_row:
                 return None, "No se encontró un clan asociado a este canal"
-            
+
             # Usar get_clan_by_id para obtener todos los datos
             return await self.get_clan_by_id(clan_row["id"])
         except Exception as e:
@@ -461,14 +471,14 @@ class ClanService:
             member = self.db.single(member_sql, (user_id, clan_id))
             if not member:
                 return "El usuario no es miembro de este clan"
-            
+
             if member["role"] == ClanMemberRole.LEADER.value:
                 return "El usuario ya es líder de este clan"
-            
+
             # Promover a líder
             update_sql = "UPDATE clan_members SET role = ? WHERE user_id = ? AND clan_id = ?"
             self.db.execute(update_sql, (ClanMemberRole.LEADER.value, user_id, clan_id))
-            
+
             return None
         except Exception as e:
             logger.error(f"Error al promover miembro a líder: {str(e)}")

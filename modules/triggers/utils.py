@@ -118,35 +118,36 @@ async def show_trigger_selection_for_delete(interaction, service: TriggersServic
     if error:
         await interaction.response.send_message(content=error, ephemeral=True)
         return
-    
+
     if not triggers:
-        await interaction.response.send_message(content=constants.NO_TRIGGERS_TO_SELECT, ephemeral=True)
+        await interaction.response.send_message(
+            content=constants.NO_TRIGGERS_TO_SELECT, ephemeral=True
+        )
         return
-    
+
     async def delete_callback(button_interaction, trigger_id: str):
         # Eliminar el trigger seleccionado
         _, error = service.delete_by_id(trigger_id)
         if error:
             await button_interaction.response.send_message(content=error, ephemeral=True)
             return
-        
+
         # Crear embed de confirmación
         success_embed = Embed(
             title=constants.CONFIRMATION_TRIGGER_DELETED,
             description=constants.SUCCESS_TRIGGER_DELETED,
-            color=Color.green()
+            color=Color.green(),
         )
-        
+
         # Editar el mensaje original con la confirmación
         await button_interaction.response.edit_message(
-            embed=success_embed,
-            view=None  # Eliminar la vista con botones
+            embed=success_embed, view=None  # Eliminar la vista con botones
         )
-    
+
     # Crear vista con botones
     view = TriggerSelectView(triggers, delete_callback, constants.SELECT_TRIGGER_TO_DELETE)
     embed = create_trigger_selection_embed(triggers, constants.SELECT_TRIGGER_TO_DELETE)
-    
+
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
@@ -156,43 +157,44 @@ async def show_trigger_selection_for_edit(interaction, service: TriggersService,
     if error:
         await interaction.response.send_message(content=error, ephemeral=True)
         return
-    
+
     if not triggers:
-        await interaction.response.send_message(content=constants.NO_TRIGGERS_TO_SELECT, ephemeral=True)
+        await interaction.response.send_message(
+            content=constants.NO_TRIGGERS_TO_SELECT, ephemeral=True
+        )
         return
-    
+
     async def edit_callback(button_interaction, trigger_id: str):
         # Editar el trigger seleccionado
         result = _edit_trigger_internal(service, trigger_id, **edit_params)
-        
+
         if result["success"]:
             # Crear embed de confirmación
             success_embed = Embed(
-                title=constants.CONFIRMATION_TRIGGER_EDITED, 
+                title=constants.CONFIRMATION_TRIGGER_EDITED,
                 description=result["message"],
-                color=Color.green()
+                color=Color.green(),
             )
-            
+
             # Editar el mensaje original con la confirmación
             await button_interaction.response.edit_message(
-                embed=success_embed,
-                view=None  # Eliminar la vista con botones
+                embed=success_embed, view=None  # Eliminar la vista con botones
             )
         else:
             # Si hay error, mostrar mensaje de error
             await button_interaction.response.send_message(content=result["error"], ephemeral=True)
-    
+
     # Crear vista con botones
     view = TriggerSelectView(triggers, edit_callback, constants.SELECT_TRIGGER_TO_EDIT)
     embed = create_trigger_selection_embed(triggers, constants.SELECT_TRIGGER_TO_EDIT)
-    
+
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
 async def edit_trigger_by_id(interaction, service: TriggersService, id_trigger: str, **edit_params):
     """Editar un trigger específico por ID (comando directo)"""
     result = _edit_trigger_internal(service, id_trigger, **edit_params)
-    
+
     if result["success"]:
         await interaction.response.send_message(content=result["message"], ephemeral=True)
     else:
@@ -205,10 +207,7 @@ def _edit_trigger_internal(service: TriggersService, id_trigger: str, **edit_par
     if error:
         return {"success": False, "error": error}
     if not trigger:
-        return {
-            "success": False, 
-            "error": constants.ERROR_TRIGGER_NOT_FOUND.format(id=id_trigger)
-        }
+        return {"success": False, "error": constants.ERROR_TRIGGER_NOT_FOUND.format(id=id_trigger)}
 
     # Actualizamos los campos que se han pasado como parámetros
     canal = edit_params.get('canal')
@@ -217,7 +216,7 @@ def _edit_trigger_internal(service: TriggersService, id_trigger: str, **edit_par
     clave = edit_params.get('clave')
     posicion = edit_params.get('posicion')
     tiempo_respuesta = edit_params.get('tiempo_respuesta')
-    
+
     if canal:
         trigger.channel_id = canal.id
     if borrar_mensaje is not None:

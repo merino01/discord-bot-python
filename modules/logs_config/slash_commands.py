@@ -26,7 +26,9 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
             app_commands.Choice(name=constants.CHOICE_CHAT, value=constants.LOG_TYPE_CHAT),
             app_commands.Choice(name=constants.CHOICE_VOICE, value=constants.LOG_TYPE_VOICE),
             app_commands.Choice(name=constants.CHOICE_MEMBERS, value=constants.LOG_TYPE_MEMBERS),
-            app_commands.Choice(name=constants.CHOICE_JOIN_LEAVE, value=constants.LOG_TYPE_JOIN_LEAVE),
+            app_commands.Choice(
+                name=constants.CHOICE_JOIN_LEAVE, value=constants.LOG_TYPE_JOIN_LEAVE
+            ),
         ]
     )
     @app_commands.checks.has_permissions(administrator=True)
@@ -55,12 +57,15 @@ class ConfigLogsCommands(commands.GroupCog, name="logs"):
 
         if activar and canal:
             await interaction.response.send_message(
-                content=constants.SUCCESS_LOG_ACTIVATED.format(log_type=tipo_de_log, channel_id=canal.id),
+                content=constants.SUCCESS_LOG_ACTIVATED.format(
+                    log_type=tipo_de_log, channel_id=canal.id
+                ),
                 ephemeral=True,
             )
         elif not activar:
             await interaction.response.send_message(
-                content=constants.SUCCESS_LOG_DEACTIVATED.format(log_type=tipo_de_log), ephemeral=True
+                content=constants.SUCCESS_LOG_DEACTIVATED.format(log_type=tipo_de_log),
+                ephemeral=True,
             )
         else:
             await interaction.response.send_message(

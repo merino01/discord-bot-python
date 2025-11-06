@@ -46,22 +46,19 @@ async def show_channel_format_selection_for_delete(interaction: Interaction):
     """Mostrar vista de selección para eliminar formato de canal"""
     service = ChannelFormatsService()
     channel_formats, error = service.get_all()
-    
+
     if error:
         await interaction.response.send_message(content=error, ephemeral=True)
         return
-    
+
     if not channel_formats:
-        await interaction.response.send_message(
-            constants.NO_FORMATS_FOUND, 
-            ephemeral=True
-        )
+        await interaction.response.send_message(constants.NO_FORMATS_FOUND, ephemeral=True)
         return
-    
+
     # Crear vista de selección
     view = ChannelFormatSelectView(channel_formats, delete_channel_format_callback)
     embed = create_channel_format_selection_embed(channel_formats)
-    
+
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
@@ -69,103 +66,105 @@ async def delete_channel_format_callback(interaction: Interaction, channel_forma
     """Callback para eliminar formato de canal seleccionado"""
     service = ChannelFormatsService()
     _, error = service.delete(channel_format)
-    
+
     if error:
         await interaction.response.edit_message(content=error, embed=None, view=None)
         return
-    
+
     # Crear embed de confirmación
     embed = Embed(
         title=constants.CONFIRMATION_DELETE_TITLE,
         description=constants.CONFIRMATION_DELETE_DESC.format(id=channel_format.id),
-        color=Color.green()
+        color=Color.green(),
     )
-    
+
     await interaction.response.edit_message(embed=embed, view=None)
 
 
-async def show_channel_format_selection_for_edit(interaction: Interaction, canal: Optional[TextChannel], formato: Optional[str]):
+async def show_channel_format_selection_for_edit(
+    interaction: Interaction, canal: Optional[TextChannel], formato: Optional[str]
+):
     """Mostrar vista de selección para editar formato de canal"""
     service = ChannelFormatsService()
     channel_formats, error = service.get_all()
-    
+
     if error:
         await interaction.response.send_message(content=error, ephemeral=True)
         return
-    
+
     if not channel_formats:
-        await interaction.response.send_message(
-            constants.NO_FORMATS_FOUND, 
-            ephemeral=True
-        )
+        await interaction.response.send_message(constants.NO_FORMATS_FOUND, ephemeral=True)
         return
-    
+
     # Crear callback parcial con los parámetros de edición
     def edit_callback(interaction_inner: Interaction, channel_format: ChannelFormat):
         return edit_channel_format_callback(interaction_inner, channel_format, canal, formato)
-    
+
     # Crear vista de selección
     view = ChannelFormatSelectView(channel_formats, edit_callback)
     embed = create_channel_format_selection_embed(channel_formats)
-    
+
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
-async def edit_channel_format_callback(interaction: Interaction, channel_format: ChannelFormat, canal: Optional[TextChannel], formato: Optional[str]):
+async def edit_channel_format_callback(
+    interaction: Interaction,
+    channel_format: ChannelFormat,
+    canal: Optional[TextChannel],
+    formato: Optional[str],
+):
     """Callback para editar formato de canal seleccionado"""
     result = edit_channel_format_by_id(channel_format.id, canal, formato)
-    
+
     if result['success']:
         # Crear embed de confirmación
         embed = Embed(
             title=constants.CONFIRMATION_EDIT_TITLE,
             description=constants.CONFIRMATION_EDIT_DESC.format(id=channel_format.id),
-            color=Color.green()
+            color=Color.green(),
         )
         await interaction.response.edit_message(embed=embed, view=None)
     else:
         await interaction.response.edit_message(content=result['error'], embed=None, view=None)
 
 
-def edit_channel_format_by_id(format_id: str, canal: Optional[TextChannel], formato: Optional[str]) -> dict:
+def edit_channel_format_by_id(
+    format_id: str, canal: Optional[TextChannel], formato: Optional[str]
+) -> dict:
     """Editar formato de canal por ID - función auxiliar reutilizable"""
     return _edit_channel_format_internal(format_id, canal, formato)
 
 
-def _edit_channel_format_internal(format_id: str, canal: Optional[TextChannel], formato: Optional[str]) -> dict:
+def _edit_channel_format_internal(
+    format_id: str, canal: Optional[TextChannel], formato: Optional[str]
+) -> dict:
     """Lógica interna para editar formato de canal"""
     service = ChannelFormatsService()
-    
+
     # Validar regex si se proporciona
     if formato:
         try:
             regex_compile(formato)
         except re_error:
-            return {
-                'success': False, 
-                'error': constants.ERROR_INVALID_REGEX
-            }
-    
+            return {'success': False, 'error': constants.ERROR_INVALID_REGEX}
+
     # Obtener formato existente
     channel_format, error = service.get_by_id(format_id)
     if error:
         return {'success': False, 'error': error}
-    
+
     if not channel_format:
-        return {
-            'success': False, 
-            'error': constants.ERROR_FORMAT_NOT_FOUND.format(id=format_id)
-        }
-    
+        return {'success': False, 'error': constants.ERROR_FORMAT_NOT_FOUND.format(id=format_id)}
+
     # Aplicar cambios
     if canal:
         channel_format.channel_id = canal.id
     if formato:
         channel_format.regex = formato
-    
+
     # Actualizar en base de datos
     error = service.update(channel_format)
     if error:
         return {'success': False, 'error': error}
-    
+
     return {'success': True, 'error': None}

@@ -11,7 +11,7 @@ from discord import (
     Color,
     PermissionOverwrite,
     Forbidden,
-    HTTPException
+    HTTPException,
 )
 from modules.clan_settings.service import ClanSettingsService
 from modules.core import logger
@@ -32,12 +32,16 @@ async def create_clan_role(guild: Guild, name: str) -> Tuple[Optional[Role], Opt
             color_str = settings.default_role_color
             # Asegurar que tenga exactamente 6 caracteres hexadecimales
             if len(color_str) != 6 or not all(c in '0123456789ABCDEFabcdef' for c in color_str):
-                logger.warning(f"Color inválido en configuración: {color_str}, usando color por defecto")
+                logger.warning(
+                    f"Color inválido en configuración: {color_str}, usando color por defecto"
+                )
                 color_str = "7289da"  # Color azul de Discord por defecto
-            
+
             role_color = Color.from_str(f"#{color_str}")
         except Exception as color_error:
-            logger.warning(f"Error al procesar color {settings.default_role_color}: {color_error}, usando color por defecto")
+            logger.warning(
+                f"Error al procesar color {settings.default_role_color}: {color_error}, usando color por defecto"
+            )
             role_color = Color.from_str("#7289da")  # Color azul de Discord por defecto
 
         role = await guild.create_role(name=name, color=role_color)
@@ -73,9 +77,7 @@ async def create_clan_channels(
         # Permisos para canales de texto
         text_overwrites: Mapping[Union[Role, Member, Object], PermissionOverwrite] = {
             guild.default_role: PermissionOverwrite(
-                view_channel=False,
-                read_messages=False,
-                send_messages=False
+                view_channel=False, read_messages=False, send_messages=False
             ),
             role: PermissionOverwrite(
                 view_channel=True,
@@ -85,28 +87,23 @@ async def create_clan_channels(
                 attach_files=True,
                 embed_links=True,
                 read_message_history=True,
-                use_external_emojis=True
+                use_external_emojis=True,
             ),
         }
 
         # Permisos para canales de voz
         voice_overwrites: Mapping[Union[Role, Member, Object], PermissionOverwrite] = {
-            guild.default_role: PermissionOverwrite(
-                view_channel=False,
-                connect=False
-            ),
+            guild.default_role: PermissionOverwrite(view_channel=False, connect=False),
             role: PermissionOverwrite(
-                view_channel=True,
-                connect=True,
-                speak=True,
-                stream=True,
-                use_voice_activation=True
+                view_channel=True, connect=True, speak=True, stream=True, use_voice_activation=True
             ),
         }
 
         # Crear canal de texto
         if text_category and isinstance(text_category, CategoryChannel):
-            text_channel = await text_category.create_text_channel(name=name, overwrites=text_overwrites)
+            text_channel = await text_category.create_text_channel(
+                name=name, overwrites=text_overwrites
+            )
         else:
             text_channel = await guild.create_text_channel(name=name, overwrites=text_overwrites)
 
@@ -174,14 +171,11 @@ async def is_clan_leader(member_id: int) -> bool:
 
 
 async def remove_clan_roles_from_member(
-    guild: Guild, 
-    member_id: int, 
-    clan_role_id: int, 
-    should_check_other_clans: bool = True
+    guild: Guild, member_id: int, clan_role_id: int, should_check_other_clans: bool = True
 ) -> None:
     """
     Función reutilizable para quitar roles de clan de un miembro.
-    
+
     Args:
         guild: El servidor de Discord
         member_id: ID del miembro
@@ -194,10 +188,10 @@ async def remove_clan_roles_from_member(
             miembro = await guild.fetch_member(member_id)
         except Exception:
             return  # Si no se puede obtener el miembro, salir silenciosamente
-        
+
         if not miembro:
             return
-            
+
         # Quitar rol del clan
         try:
             rol_clan = await guild.fetch_role(clan_role_id)
@@ -205,34 +199,31 @@ async def remove_clan_roles_from_member(
                 await miembro.remove_roles(rol_clan)
         except Exception:
             pass  # Continuar aunque no se pueda quitar el rol
-        
+
         # Si no se debe verificar otros clanes, quitar roles adicionales directamente
         if not should_check_other_clans:
             await _remove_additional_and_leader_roles(guild, miembro, member_id, force_remove=True)
             return
-        
+
         # Verificar si el usuario está en otros clanes
         servicio = ClanService()
         clanes_restantes, _ = await servicio.get_member_clans(member_id)
         usuario_en_otros_clanes = clanes_restantes and len(clanes_restantes) > 0
-        
+
         # Si no está en otros clanes, quitar roles adicionales y rol de líder
         if not usuario_en_otros_clanes:
             await _remove_additional_and_leader_roles(guild, miembro, member_id)
-            
+
     except Exception as e:
         logger.error(f"Error en remove_clan_roles_from_member: {str(e)}")
 
 
 async def _remove_additional_and_leader_roles(
-    guild: Guild, 
-    miembro: Member, 
-    member_id: int, 
-    force_remove: bool = False
+    guild: Guild, miembro: Member, member_id: int, force_remove: bool = False
 ) -> None:
     """
     Función auxiliar para quitar roles adicionales y de líder.
-    
+
     Args:
         guild: El servidor de Discord
         miembro: El miembro de Discord
@@ -244,7 +235,7 @@ async def _remove_additional_and_leader_roles(
         settings, settings_error = await settings_service.get_settings()
         if settings_error or not settings:
             return
-        
+
         # Quitar roles adicionales
         for role_id in settings.additional_roles:
             if additional_role := guild.get_role(role_id):
@@ -253,11 +244,11 @@ async def _remove_additional_and_leader_roles(
                         await miembro.remove_roles(additional_role)
                     except Exception:
                         pass  # Continuar aunque no se pueda quitar el rol
-        
+
         # Quitar rol de líder si corresponde
         if settings.leader_role_id:
             should_remove_leader_role = force_remove
-            
+
             if not force_remove:
                 # Verificar si es líder de algún otro clan
                 servicio = ClanService()
@@ -272,7 +263,7 @@ async def _remove_additional_and_leader_roles(
                     should_remove_leader_role = not es_lider_de_otro_clan
                 else:
                     should_remove_leader_role = True
-            
+
             if should_remove_leader_role:
                 if leader_role := guild.get_role(settings.leader_role_id):
                     if leader_role in miembro.roles:
@@ -280,7 +271,7 @@ async def _remove_additional_and_leader_roles(
                             await miembro.remove_roles(leader_role)
                         except Exception:
                             pass  # Continuar aunque no se pueda quitar el rol
-                            
+
     except Exception as e:
         logger.error(f"Error en _remove_additional_and_leader_roles: {str(e)}")
 
@@ -288,7 +279,7 @@ async def _remove_additional_and_leader_roles(
 async def add_member_to_clan(guild: Guild, member_id: int, clan_id: str) -> Optional[str]:
     service = ClanService()
     settings_service = ClanSettingsService()
-    
+
     # Obtener rol del clan
     role, error = await service.get_clan_role(guild, clan_id)
     if error or not role:
@@ -299,15 +290,15 @@ async def add_member_to_clan(guild: Guild, member_id: int, clan_id: str) -> Opti
         return "El miembro no existe"
     if member.bot:
         return "No se puede añadir un bot al clan"
-    
+
     # Obtener la configuración para roles adicionales
     settings, settings_error = await settings_service.get_settings()
     if settings_error:
         return f"Error al obtener configuración: {settings_error}"
-    
+
     # Añadir rol del clan
     await member.add_roles(role)
-    
+
     # Añadir roles adicionales configurados
     additional_roles_added = []
     try:
@@ -345,34 +336,37 @@ async def logica_salir_del_clan(id_usuario: int, id_clan: str, guild: Guild) -> 
     """Lógica para que un usuario salga de un clan."""
     try:
         servicio = ClanService()
-        
+
         # Obtener el clan completo con sus miembros
         clan_completo, error = await servicio.get_clan_by_id(id_clan)
         if error or not clan_completo:
             return f"Error al obtener información del clan: {error}"
-        
+
         # Verificar que el usuario está en el clan
         usuario_en_clan = any(m.user_id == id_usuario for m in clan_completo.members)
         if not usuario_en_clan:
             return "No perteneces a este clan"
-        
+
         # No permitir que el líder se salga si es el único líder
         lideres = [m for m in clan_completo.members if m.role == ClanMemberRole.LEADER.value]
         if len(lideres) <= 1:
-            usuario_es_lider = any(m.user_id == id_usuario and m.role == ClanMemberRole.LEADER.value for m in clan_completo.members)
+            usuario_es_lider = any(
+                m.user_id == id_usuario and m.role == ClanMemberRole.LEADER.value
+                for m in clan_completo.members
+            )
             if usuario_es_lider:
                 return "No puedes salir del clan siendo el único líder. Transfiere el liderazgo primero."
-        
+
         # Eliminar del clan en la base de datos
         error = await servicio.kick_member_from_clan(id_usuario, id_clan)
         if error:
             return f"Error al salir del clan: {error}"
-        
+
         # Quitar roles usando la función reutilizable
         await remove_clan_roles_from_member(guild, id_usuario, clan_completo.role_id)
-        
+
         return None
-        
+
     except Exception as e:
         logger.error(f"Error en logica_salir_del_clan: {str(e)}")
         return f"Error inesperado al salir del clan: {str(e)}"
@@ -382,48 +376,44 @@ async def logica_expulsar_del_clan(id_usuario: int, id_clan: str, guild: Guild) 
     """Lógica para expulsar a un usuario de un clan."""
     try:
         servicio = ClanService()
-        
+
         # Verificar que el usuario está en el clan
         clanes, error = await servicio.get_member_clans(id_usuario)
         if error or not clanes:
             return "El usuario no pertenece a ningún clan"
-        
+
         clan_del_que_expulsar = next((c for c in clanes if c.id == id_clan), None)
         if not clan_del_que_expulsar:
             return "El usuario no pertenece a este clan"
-        
+
         # Expulsar del clan en la base de datos
         error = await servicio.kick_member_from_clan(id_usuario, id_clan)
         if error:
             return f"Error al expulsar del clan: {error}"
-        
+
         # Quitar roles usando la función reutilizable
         await remove_clan_roles_from_member(guild, id_usuario, clan_del_que_expulsar.role_id)
-        
+
         return None
-        
+
     except Exception as e:
         logger.error(f"Error en logica_expulsar_del_clan: {str(e)}")
         return f"Error inesperado al expulsar del clan: {str(e)}"
 
 
-async def crear_canal_adicional(
-    interaction, 
-    nombre: str, 
-    tipo_canal: str
-) -> Tuple[bool, str]:
+async def crear_canal_adicional(interaction, nombre: str, tipo_canal: str) -> Tuple[bool, str]:
     """
     Lógica común para crear canales adicionales.
     Retorna (éxito, mensaje)
     """
     servicio = ClanService()
-    
+
     try:
         # Verificar que es un canal de clan
         clan, error = await servicio.get_clan_by_channel_id(interaction.channel.id)
         if error or not clan:
             return False, "Este canal no pertenece a ningún clan."
-        
+
         # Verificar que es líder del clan
         es_lider, error = await servicio.is_clan_leader(interaction.user.id, clan.id)
         if error or not es_lider:
@@ -431,13 +421,13 @@ async def crear_canal_adicional(
 
         # Contar canales existentes del tipo solicitado
         canales_existentes = [c for c in clan.channels if c.type == tipo_canal]
-        
+
         # Obtener límite del clan directamente
         if tipo_canal == "text":
             max_canales = clan.max_text_channels
         else:
             max_canales = clan.max_voice_channels
-        
+
         if len(canales_existentes) >= max_canales:
             return False, f"El clan ya tiene el máximo de canales de {tipo_canal} ({max_canales})."
 
@@ -457,18 +447,18 @@ async def crear_canal_adicional(
             id_categoria = configuracion.text_category_id
         else:
             id_categoria = configuracion.voice_category_id
-        
+
         categoria = interaction.guild.get_channel(id_categoria) if id_categoria else None
 
         # Configurar permisos
         permisos = {
             interaction.guild.default_role: PermissionOverwrite(
                 read_messages=False if tipo_canal == "text" else None,
-                connect=False if tipo_canal == "voice" else None
+                connect=False if tipo_canal == "voice" else None,
             ),
             rol_clan: PermissionOverwrite(
                 read_messages=True if tipo_canal == "text" else None,
-                connect=True if tipo_canal == "voice" else None
+                connect=True if tipo_canal == "voice" else None,
             ),
         }
 
@@ -477,12 +467,16 @@ async def crear_canal_adicional(
             if categoria:
                 nuevo_canal = await categoria.create_text_channel(name=nombre, overwrites=permisos)
             else:
-                nuevo_canal = await interaction.guild.create_text_channel(name=nombre, overwrites=permisos)
+                nuevo_canal = await interaction.guild.create_text_channel(
+                    name=nombre, overwrites=permisos
+                )
         else:  # voice
             if categoria:
                 nuevo_canal = await categoria.create_voice_channel(name=nombre, overwrites=permisos)
             else:
-                nuevo_canal = await interaction.guild.create_voice_channel(name=nombre, overwrites=permisos)
+                nuevo_canal = await interaction.guild.create_voice_channel(
+                    name=nombre, overwrites=permisos
+                )
 
         # Guardar en la base de datos
         canal_obj = ClanChannel(
@@ -490,38 +484,43 @@ async def crear_canal_adicional(
             name=nuevo_canal.name,
             type=ChannelType.TEXT.value if tipo_canal == "text" else ChannelType.VOICE.value,
             clan_id=clan.id,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
-        
+
         error = servicio.save_clan_channel(canal_obj)
         if error:
             # Si hay error al guardar, eliminar el canal creado
             await nuevo_canal.delete()
             return False, f"Error al guardar el canal: {error}"
 
-        return True, f"Canal de {tipo_canal} **{nombre}** creado exitosamente: {nuevo_canal.mention}"
+        return (
+            True,
+            f"Canal de {tipo_canal} **{nombre}** creado exitosamente: {nuevo_canal.mention}",
+        )
 
     except Exception as e:
         logger.error(f"Error en crear_canal_adicional: {str(e)}")
         return False, f"Error al crear el canal: {str(e)}"
 
 
-async def assign_clan_roles_to_leader(guild, miembro, clan_id, service) -> tuple[bool, Optional[str]]:
+async def assign_clan_roles_to_leader(
+    guild, miembro, clan_id, service
+) -> tuple[bool, Optional[str]]:
     """Asignar roles de clan al nuevo líder promovido"""
     try:
         clan_role, role_error = await service.get_clan_role(guild, clan_id)
         if role_error or not clan_role:
             logger.warning(f"No se pudo obtener el rol del clan {clan_id}: {role_error}")
             return False, f"No se pudo obtener el rol del clan: {role_error}"
-        
+
         # Asignar roles de clan (rol del clan + rol de líder si está configurado)
         role_error = await setup_clan_roles(guild, miembro, clan_role)
         if role_error:
             logger.warning(f"Error al asignar roles al nuevo líder: {role_error}")
             return False, f"Error al asignar los roles: {role_error}"
-        
+
         return True, None
-        
+
     except Exception as e:
         logger.error(f"Error en assign_clan_roles_to_leader: {str(e)}")
         return False, f"Error inesperado al asignar roles: {str(e)}"
@@ -530,25 +529,25 @@ async def assign_clan_roles_to_leader(guild, miembro, clan_id, service) -> tuple
 def generate_channel_name(clan_name: str, existing_channels: list, channel_type: str) -> str:
     """
     Genera automáticamente el nombre del canal siguiendo el patrón: Nombre del clan #número
-    
+
     Args:
         clan_name: Nombre del clan
         existing_channels: Lista de canales existentes del clan
         channel_type: Tipo de canal ('text' o 'voice')
-    
+
     Returns:
         Nombre generado para el canal
     """
     try:
         # Filtrar solo los canales del tipo especificado
         channels_of_type = [ch for ch in existing_channels if ch.type == channel_type]
-        
+
         # El número será la cantidad de canales del mismo tipo + 1
         next_number = len(channels_of_type) + 1
-        
+
         # Generar el nombre final
         return f"{clan_name} #{next_number}"
-        
+
     except Exception as e:
         logger.error(f"Error generando nombre de canal: {str(e)}")
         # Fallback en caso de error
@@ -562,23 +561,23 @@ async def demote_leader_to_member(guild, miembro, clan_id, service) -> tuple[boo
         is_leader_result, error = await service.is_clan_leader(miembro.id, clan_id)
         if error:
             return False, f"Error al verificar liderazgo: {error}"
-        
+
         if not is_leader_result:
             return False, "El usuario no es líder de este clan"
-        
+
         # Verificar que no es el único líder
         success, error_msg = await _check_can_demote_leader(clan_id, service)
         if not success:
             return False, error_msg
-        
+
         # Degradar en la base de datos
         _demote_in_database(miembro.id, clan_id)
-        
+
         # Quitar rol de líder de Discord si corresponde
         await _remove_discord_leader_role_if_needed(guild, miembro, clan_id, service)
-        
+
         return True, None
-        
+
     except Exception as e:
         logger.error(f"Error en demote_leader_to_member: {str(e)}")
         return False, f"Error inesperado al quitar liderazgo: {str(e)}"
@@ -589,11 +588,11 @@ async def _check_can_demote_leader(clan_id: str, service) -> tuple[bool, Optiona
     clan, error = await service.get_clan_by_id(clan_id)
     if error or not clan:
         return False, f"Error al obtener información del clan: {error}"
-    
+
     leaders = [m for m in clan.members if m.role == ClanMemberRole.LEADER.value]
     if len(leaders) <= 1:
         return False, "No se puede quitar el liderazgo del único líder del clan"
-    
+
     return True, None
 
 
@@ -608,13 +607,13 @@ async def _remove_discord_leader_role_if_needed(guild, miembro, clan_id: str, se
     """Quitar rol de líder de Discord si no es líder de otros clanes"""
     settings_service = ClanSettingsService()
     settings, settings_error = await settings_service.get_settings()
-    
+
     if settings_error or not settings or not settings.leader_role_id:
         return
-    
+
     # Verificar si es líder de otros clanes
     is_leader_elsewhere = await _check_is_leader_elsewhere(miembro.id, clan_id, service)
-    
+
     # Solo quitar el rol de líder si no es líder de otros clanes
     if not is_leader_elsewhere:
         await _remove_leader_role_from_discord(guild, miembro, settings.leader_role_id)
@@ -623,16 +622,16 @@ async def _remove_discord_leader_role_if_needed(guild, miembro, clan_id: str, se
 async def _check_is_leader_elsewhere(user_id: int, current_clan_id: str, service) -> bool:
     """Verificar si el usuario es líder de otros clanes"""
     member_clans, _ = await service.get_member_clans(user_id)
-    
+
     if not member_clans:
         return False
-    
+
     for other_clan in member_clans:
         if other_clan.id != current_clan_id:
             is_leader_other, _ = await service.is_clan_leader(user_id, other_clan.id)
             if is_leader_other:
                 return True
-    
+
     return False
 
 
@@ -653,10 +652,10 @@ async def remove_clan_channel(guild, channel_id: int, clan_id: str) -> tuple[boo
         service_instance = ClanService()
         check_sql = "SELECT * FROM clan_channels WHERE channel_id = ? AND clan_id = ?"
         channel_record = service_instance.db.single(check_sql, (channel_id, clan_id))
-        
+
         if not channel_record:
             return False, "El canal no pertenece a este clan"
-        
+
         # Obtener el canal de Discord
         discord_channel = guild.get_channel(channel_id)
         if discord_channel:
@@ -665,13 +664,13 @@ async def remove_clan_channel(guild, channel_id: int, clan_id: str) -> tuple[boo
         else:
             # Si el canal no existe en Discord, solo limpiarlo de la BD
             logger.warning(f"Canal {channel_id} no encontrado en Discord, solo limpiando BD")
-        
+
         # Eliminar de la base de datos
         delete_sql = "DELETE FROM clan_channels WHERE channel_id = ? AND clan_id = ?"
         service_instance.db.execute(delete_sql, (channel_id, clan_id))
-        
+
         return True, None
-        
+
     except Exception as e:
         logger.error(f"Error en remove_clan_channel: {str(e)}")
         return False, f"Error inesperado al eliminar canal: {str(e)}"

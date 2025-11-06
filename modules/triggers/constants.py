@@ -65,7 +65,7 @@ PAGINATION_INFO = "📊 Página {current} de {total} | Total: {count} triggers"
 VIEW_SELECTION_DESCRIPTION = "👆 Haz clic en uno de los botones para seleccionar un trigger:"
 VIEW_SUMMARY_TITLE = "📊 Resumen"
 VIEW_SUMMARY_TEXT = "**Total de triggers:** {total}\n**En esta página:** {in_page}"
-VIEW_PAGINATION_TITLE = "📄 Paginación"  
+VIEW_PAGINATION_TITLE = "📄 Paginación"
 VIEW_INSTRUCTIONS_TITLE = "ℹ️ Instrucciones"
 VIEW_INSTRUCTIONS_TEXT = "• Usa los botones de **◀️Anterior/Siguiente▶️** para navegar\n• 👆 Haz clic en cualquier trigger para seleccionarlo"
 VIEW_BUTTON_PREVIOUS = "◀️ Anterior"
@@ -83,8 +83,12 @@ PARAM_RESPONSE_DESC = "Respuesta del bot al trigger"
 PARAM_KEYWORD_DESC = "Palabra clave que activa el trigger"
 PARAM_POSITION_DESC = "Posición de la palabra clave en el mensaje"
 PARAM_TIMEOUT_DESC = "Tiempo de espera para la respuesta del bot"
-PARAM_TRIGGER_ID_DESC = "ID del trigger (opcional - si no se proporciona, se mostrará una lista para seleccionar)"
-PARAM_TRIGGER_DELETE_ID_DESC = "ID del trigger (opcional - si no se proporciona, se mostrará una lista para seleccionar)"
+PARAM_TRIGGER_ID_DESC = (
+    "ID del trigger (opcional - si no se proporciona, se mostrará una lista para seleccionar)"
+)
+PARAM_TRIGGER_DELETE_ID_DESC = (
+    "ID del trigger (opcional - si no se proporciona, se mostrará una lista para seleccionar)"
+)
 PARAM_LIST_CHANNEL_DESC = "Lista de triggers por canal"
 PARAM_PERSISTENT_DESC = "Hacer la lista persistente"
 

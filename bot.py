@@ -1,18 +1,13 @@
 from discord import Intents, Object
 from discord.ext import commands
-from settings import bot_token, guild_id, prefix
+from settings import bot_token, guild_id, prefix, api_enabled
 from modules.core import logger
 from modules.automatic_messages.tasks import setup_automatic_messages
+from api.server import APIServer
 
 
 EXTENSIONS = {
-    "events": [
-        "events.base",
-        "events.message",
-        "events.member",
-        "events.voice",
-        "events.guild"
-    ],
+    "events": ["events.base", "events.message", "events.member", "events.voice", "events.guild"],
     "slash_commands": [
         "modules.automatic_messages.slash_commands",
         "modules.channel_formats.slash_commands",
@@ -20,7 +15,7 @@ EXTENSIONS = {
         "modules.triggers.slash_commands",
         "modules.clans.slash_commands",
         "modules.clan_settings.slash_commands",
-        "modules.echo.slash_commands"
+        "modules.echo.slash_commands",
     ],
 }
 
@@ -35,8 +30,13 @@ class Bot(commands.Bot):
         intents.guild_reactions = True
 
         super().__init__(command_prefix=prefix, intents=intents)
+        self.api_server = APIServer() if api_enabled else None
 
     async def setup_hook(self):
+        # Start API server if enabled
+        if self.api_server:
+            await self.api_server.start()
+
         # Events
         logger.info("Cargando eventos...")
         for event in EXTENSIONS.get("events", []):
@@ -78,6 +78,11 @@ class Bot(commands.Bot):
         except Exception as e:
             logger.error("Error al iniciar mensajes automáticos: %s", e)
 
+    async def close(self):
+        """Override close to properly shutdown API server"""
+        if self.api_server:
+            await self.api_server.stop()
+        await super().close()
 
     def init(self):
         self.run(token=bot_token, log_handler=logger.handlers[0])

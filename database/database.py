@@ -91,4 +91,3 @@ class Database:
         except sqlite3.Error as e:
             logger.error("Error en la consulta: %s", e)
             return None
-

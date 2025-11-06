@@ -6,7 +6,11 @@ from settings import guild_id
 from modules.core import send_paginated_embeds
 from .service import TriggersService
 from .models import Trigger, TriggerTextPosition, TriggerPosition
-from .utils import show_trigger_selection_for_delete, show_trigger_selection_for_edit, edit_trigger_by_id
+from .utils import (
+    show_trigger_selection_for_delete,
+    show_trigger_selection_for_edit,
+    edit_trigger_by_id,
+)
 from . import constants
 
 
@@ -133,7 +137,9 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
                 description=constants.EMBED_DESCRIPTION,
                 color=Color.green(),
             )
-            embed.add_field(name=constants.FIELD_CHANNEL, value=f"<#{trigger.channel_id}>", inline=True)
+            embed.add_field(
+                name=constants.FIELD_CHANNEL, value=f"<#{trigger.channel_id}>", inline=True
+            )
             embed.add_field(
                 name=constants.FIELD_DELETE_MESSAGE,
                 value=constants.VALUE_YES if trigger.delete_message else constants.VALUE_NO,
@@ -147,7 +153,9 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
             embed.add_field(name=constants.FIELD_KEYWORD, value=trigger.key, inline=True)
             embed.add_field(
                 name=constants.FIELD_POSITION,
-                value=constants.TRIGGER_POSITIONS_TRANSLATIONS.get(trigger.position, constants.VALUE_INVALID),
+                value=constants.TRIGGER_POSITIONS_TRANSLATIONS.get(
+                    trigger.position, constants.VALUE_INVALID
+                ),
                 inline=True,
             )
             if trigger.response_timeout:
@@ -179,7 +187,9 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
-            await interaction.response.send_message(content=constants.SUCCESS_TRIGGER_DELETED, ephemeral=True)
+            await interaction.response.send_message(
+                content=constants.SUCCESS_TRIGGER_DELETED, ephemeral=True
+            )
         else:
             # Si no se proporciona ID, mostrar vista de selección
             await show_trigger_selection_for_delete(interaction, self.service)
@@ -241,16 +251,27 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
         if id_trigger:
             # Si se proporciona ID, editar directamente
             await edit_trigger_by_id(
-                interaction, self.service, id_trigger,
-                canal=canal, borrar_mensaje=borrar_mensaje, respuesta=respuesta,
-                clave=clave, posicion=posicion, tiempo_respuesta=tiempo_respuesta
+                interaction,
+                self.service,
+                id_trigger,
+                canal=canal,
+                borrar_mensaje=borrar_mensaje,
+                respuesta=respuesta,
+                clave=clave,
+                posicion=posicion,
+                tiempo_respuesta=tiempo_respuesta,
             )
         else:
             # Si no se proporciona ID, mostrar vista de selección
             await show_trigger_selection_for_edit(
-                interaction, self.service,
-                canal=canal, borrar_mensaje=borrar_mensaje, respuesta=respuesta,
-                clave=clave, posicion=posicion, tiempo_respuesta=tiempo_respuesta
+                interaction,
+                self.service,
+                canal=canal,
+                borrar_mensaje=borrar_mensaje,
+                respuesta=respuesta,
+                clave=clave,
+                posicion=posicion,
+                tiempo_respuesta=tiempo_respuesta,
             )
 
 

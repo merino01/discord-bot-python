@@ -13,22 +13,20 @@ class ClanDeleteView(View):
         super().__init__(timeout=300)  # 5 minutos
         self.clans = clans
         self.service = service
-        
+
         # Crear botones para cada clan (máximo 25 botones por limitación de Discord)
         for i, clan in enumerate(clans[:25]):
             button = Button(
                 label=f"{clan.name} (ID: {clan.id[:8]}...)",
                 style=ButtonStyle.danger,
-                custom_id=f"delete_clan_{clan.id}"
+                custom_id=f"delete_clan_{clan.id}",
             )
             button.callback = self.create_delete_callback(clan)
             self.add_item(button)
-        
+
         # Botón de cancelar
         cancel_button = Button(
-            label="❌ Cancelar",
-            style=ButtonStyle.secondary,
-            custom_id="cancel_delete"
+            label="❌ Cancelar", style=ButtonStyle.secondary, custom_id="cancel_delete"
         )
         cancel_button.callback = self.cancel_callback
         self.add_item(cancel_button)
@@ -41,31 +39,31 @@ class ClanDeleteView(View):
                 embed = discord.Embed(
                     title="⚠️ Confirmar eliminación",
                     description=f"¿Estás seguro de que quieres eliminar el clan **{clan.name}**?\n\n"
-                               f"**Esta acción no se puede deshacer**\n"
-                               f"- Se eliminarán todos los canales del clan\n"
-                               f"- Se quitarán todos los roles a los miembros\n"
-                               f"- Se eliminará el rol del clan\n"
-                               f"- Se perderán todos los datos del clan",
-                    color=discord.Color.red()
+                    f"**Esta acción no se puede deshacer**\n"
+                    f"- Se eliminarán todos los canales del clan\n"
+                    f"- Se quitarán todos los roles a los miembros\n"
+                    f"- Se eliminará el rol del clan\n"
+                    f"- Se perderán todos los datos del clan",
+                    color=discord.Color.red(),
                 )
                 embed.add_field(name="👥 Miembros", value=str(len(clan.members)), inline=True)
                 embed.add_field(name="📺 Canales", value=str(len(clan.channels)), inline=True)
-                
+
                 await interaction.response.edit_message(embed=embed, view=confirm_view)
-                
+
             except Exception as e:
                 logger.error(f"Error en delete_callback: {str(e)}")
                 await interaction.response.send_message(
                     f"Error inesperado: {str(e)}", ephemeral=True
                 )
-        
+
         return delete_callback
 
     async def cancel_callback(self, interaction: Interaction):
         embed = discord.Embed(
             title="❌ Operación cancelada",
             description="No se eliminó ningún clan.",
-            color=discord.Color.green()
+            color=discord.Color.green(),
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -84,7 +82,7 @@ class ConfirmDeleteView(View):
     @discord.ui.button(label="✅ Sí, eliminar clan", style=ButtonStyle.danger)
     async def confirm_delete(self, interaction: Interaction, button: Button):
         await interaction.response.defer(ephemeral=True)
-        
+
         try:
             # Eliminar clan de la base de datos PRIMERO
             error = await self.service.delete_clan(self.clan.id)
@@ -99,7 +97,7 @@ class ConfirmDeleteView(View):
                     guild=interaction.guild,
                     member_id=member.user_id,
                     clan_role_id=self.clan.role_id,
-                    should_check_other_clans=True
+                    should_check_other_clans=True,
                 )
 
             # Eliminar el rol del clan
@@ -123,9 +121,9 @@ class ConfirmDeleteView(View):
             embed = discord.Embed(
                 title="✅ Clan eliminado",
                 description=f"El clan **{self.clan.name}** ha sido eliminado exitosamente.",
-                color=discord.Color.green()
+                color=discord.Color.green(),
             )
-            
+
             await interaction.edit_original_response(embed=embed, view=None)
             await interaction.followup.send("Clan eliminado con éxito.", ephemeral=True)
 
@@ -140,7 +138,7 @@ class ConfirmDeleteView(View):
         embed = discord.Embed(
             title="❌ Eliminación cancelada",
             description=f"El clan **{self.clan.name}** no fue eliminado.",
-            color=discord.Color.green()
+            color=discord.Color.green(),
         )
         await interaction.response.edit_message(embed=embed, view=None)
 

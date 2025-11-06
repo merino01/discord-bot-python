@@ -46,9 +46,7 @@ class ClanKickView(View):
 
         # Expulsar a miembro del clan usando la lógica completa
         error = await logica_expulsar_del_clan(
-            id_usuario=self.member_to_send.id, 
-            id_clan=self.clan.id, 
-            guild=interaction.guild
+            id_usuario=self.member_to_send.id, id_clan=self.clan.id, guild=interaction.guild
         )
         if error:
             await interaction.response.edit_message(

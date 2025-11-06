@@ -6,22 +6,30 @@ from . import embeds_constants
 
 
 def create_separator(embed: Embed) -> None:
-    embed.add_field(name=embeds_constants.SEPARATOR_FIELD, value=embeds_constants.SEPARATOR_FIELD, inline=False)
+    embed.add_field(
+        name=embeds_constants.SEPARATOR_FIELD, value=embeds_constants.SEPARATOR_FIELD, inline=False
+    )
 
 
 def get_message_edit_embed(before: Message, after: Message) -> Embed | None:
     if not isinstance(after.channel, TextChannel):
         return None
 
-    embed = Embed(title=embeds_constants.TITLE_MESSAGE_EDITED, color=Color.blue(), timestamp=datetime.now())
+    embed = Embed(
+        title=embeds_constants.TITLE_MESSAGE_EDITED, color=Color.blue(), timestamp=datetime.now()
+    )
 
-    embed.add_field(name=embeds_constants.FIELD_AUTHOR_MENTION, value=after.author.mention, inline=True)
+    embed.add_field(
+        name=embeds_constants.FIELD_AUTHOR_MENTION, value=after.author.mention, inline=True
+    )
     embed.add_field(name=embeds_constants.FIELD_AUTHOR_NAME, value=after.author.name, inline=True)
     embed.add_field(name=embeds_constants.FIELD_AUTHOR_ID, value=after.author.id, inline=True)
 
     create_separator(embed)
 
-    embed.add_field(name=embeds_constants.FIELD_CHANNEL_MENTION, value=after.channel.mention, inline=True)
+    embed.add_field(
+        name=embeds_constants.FIELD_CHANNEL_MENTION, value=after.channel.mention, inline=True
+    )
     embed.add_field(name=embeds_constants.FIELD_CHANNEL_NAME, value=after.channel.name, inline=True)
     embed.add_field(name=embeds_constants.FIELD_CHANNEL_ID, value=after.channel.id, inline=True)
 
@@ -38,16 +46,24 @@ def get_message_delete_embed(message: Message) -> Embed | None:
     if not isinstance(message.channel, TextChannel):
         return None
 
-    embed = Embed(title=embeds_constants.TITLE_MESSAGE_DELETED, color=Color.red(), timestamp=datetime.now())
+    embed = Embed(
+        title=embeds_constants.TITLE_MESSAGE_DELETED, color=Color.red(), timestamp=datetime.now()
+    )
 
-    embed.add_field(name=embeds_constants.FIELD_AUTHOR_MENTION, value=message.author.mention, inline=True)
+    embed.add_field(
+        name=embeds_constants.FIELD_AUTHOR_MENTION, value=message.author.mention, inline=True
+    )
     embed.add_field(name=embeds_constants.FIELD_AUTHOR_NAME, value=message.author.name, inline=True)
     embed.add_field(name=embeds_constants.FIELD_AUTHOR_ID, value=message.author.id, inline=True)
 
     create_separator(embed)
 
-    embed.add_field(name=embeds_constants.FIELD_CHANNEL_MENTION, value=message.channel.mention, inline=True)
-    embed.add_field(name=embeds_constants.FIELD_CHANNEL_NAME, value=message.channel.name, inline=True)
+    embed.add_field(
+        name=embeds_constants.FIELD_CHANNEL_MENTION, value=message.channel.mention, inline=True
+    )
+    embed.add_field(
+        name=embeds_constants.FIELD_CHANNEL_NAME, value=message.channel.name, inline=True
+    )
     embed.add_field(name=embeds_constants.FIELD_CHANNEL_ID, value=message.channel.id, inline=True)
 
     create_separator(embed)
@@ -108,9 +124,15 @@ def get_voice_state_join_embed(member, after) -> Embed:
 
     create_separator(embed)
 
-    embed.add_field(name=embeds_constants.FIELD_VOICE_CHANNEL_MENTION, value=after.channel.mention, inline=True)
-    embed.add_field(name=embeds_constants.FIELD_VOICE_CHANNEL_NAME, value=after.channel.name, inline=True)
-    embed.add_field(name=embeds_constants.FIELD_VOICE_CHANNEL_ID, value=after.channel.id, inline=True)
+    embed.add_field(
+        name=embeds_constants.FIELD_VOICE_CHANNEL_MENTION, value=after.channel.mention, inline=True
+    )
+    embed.add_field(
+        name=embeds_constants.FIELD_VOICE_CHANNEL_NAME, value=after.channel.name, inline=True
+    )
+    embed.add_field(
+        name=embeds_constants.FIELD_VOICE_CHANNEL_ID, value=after.channel.id, inline=True
+    )
 
     return embed
 
@@ -127,9 +149,15 @@ def get_voice_state_leave_embed(member, before) -> Embed:
 
     create_separator(embed)
 
-    embed.add_field(name=embeds_constants.FIELD_VOICE_CHANNEL_MENTION, value=before.channel.mention, inline=True)
-    embed.add_field(name=embeds_constants.FIELD_VOICE_CHANNEL_NAME, value=before.channel.name, inline=True)
-    embed.add_field(name=embeds_constants.FIELD_VOICE_CHANNEL_ID, value=before.channel.id, inline=True)
+    embed.add_field(
+        name=embeds_constants.FIELD_VOICE_CHANNEL_MENTION, value=before.channel.mention, inline=True
+    )
+    embed.add_field(
+        name=embeds_constants.FIELD_VOICE_CHANNEL_NAME, value=before.channel.name, inline=True
+    )
+    embed.add_field(
+        name=embeds_constants.FIELD_VOICE_CHANNEL_ID, value=before.channel.id, inline=True
+    )
 
     return embed
 
@@ -151,20 +179,34 @@ def get_voice_state_move_embed(member, before, after) -> Embed:
         value=before.channel.mention,
         inline=True,
     )
-    embed.add_field(name=embeds_constants.FIELD_OLD_VOICE_CHANNEL_NAME, value=before.channel.name, inline=True)
-    embed.add_field(name=embeds_constants.FIELD_OLD_VOICE_CHANNEL_ID, value=before.channel.id, inline=True)
+    embed.add_field(
+        name=embeds_constants.FIELD_OLD_VOICE_CHANNEL_NAME, value=before.channel.name, inline=True
+    )
+    embed.add_field(
+        name=embeds_constants.FIELD_OLD_VOICE_CHANNEL_ID, value=before.channel.id, inline=True
+    )
 
     create_separator(embed)
 
-    embed.add_field(name=embeds_constants.FIELD_NEW_VOICE_CHANNEL_MENTION, value=after.channel.mention, inline=True)
-    embed.add_field(name=embeds_constants.FIELD_NEW_VOICE_CHANNEL_NAME, value=after.channel.name, inline=True)
-    embed.add_field(name=embeds_constants.FIELD_NEW_VOICE_CHANNEL_ID, value=after.channel.id, inline=True)
+    embed.add_field(
+        name=embeds_constants.FIELD_NEW_VOICE_CHANNEL_MENTION,
+        value=after.channel.mention,
+        inline=True,
+    )
+    embed.add_field(
+        name=embeds_constants.FIELD_NEW_VOICE_CHANNEL_NAME, value=after.channel.name, inline=True
+    )
+    embed.add_field(
+        name=embeds_constants.FIELD_NEW_VOICE_CHANNEL_ID, value=after.channel.id, inline=True
+    )
 
     return embed
 
 
 def get_member_update_nick_embed(before: Member, after: Member) -> Embed:
-    embed = Embed(title=embeds_constants.TITLE_NICK_CHANGE, color=Color.blue(), timestamp=datetime.now())
+    embed = Embed(
+        title=embeds_constants.TITLE_NICK_CHANGE, color=Color.blue(), timestamp=datetime.now()
+    )
 
     embed.add_field(name=embeds_constants.FIELD_USER_MENTION, value=after.mention, inline=True)
     embed.add_field(name=embeds_constants.FIELD_USER_NAME, value=after.name, inline=True)
@@ -179,7 +221,9 @@ def get_member_update_nick_embed(before: Member, after: Member) -> Embed:
 
 
 def get_member_update_username_embed(before: Member, after: Member) -> Embed:
-    embed = Embed(title=embeds_constants.TITLE_USERNAME_CHANGE, color=Color.blue(), timestamp=datetime.now())
+    embed = Embed(
+        title=embeds_constants.TITLE_USERNAME_CHANGE, color=Color.blue(), timestamp=datetime.now()
+    )
 
     embed.add_field(name=embeds_constants.FIELD_USER_MENTION, value=after.mention, inline=True)
     embed.add_field(name=embeds_constants.FIELD_USER_ID, value=after.id, inline=True)
@@ -193,7 +237,9 @@ def get_member_update_username_embed(before: Member, after: Member) -> Embed:
 
 
 def get_member_update_avatar_embed(before: Member, after: Member) -> Embed:
-    embed = Embed(title=embeds_constants.TITLE_AVATAR_CHANGE, color=Color.blue(), timestamp=datetime.now())
+    embed = Embed(
+        title=embeds_constants.TITLE_AVATAR_CHANGE, color=Color.blue(), timestamp=datetime.now()
+    )
     if after.avatar is not None:
         embed.set_image(url=after.avatar.url)
 
@@ -218,7 +264,9 @@ def get_member_update_avatar_embed(before: Member, after: Member) -> Embed:
 
 
 def get_member_update_banner_embed(before: Member, after: Member) -> Embed:
-    embed = Embed(title=embeds_constants.TITLE_BANNER_CHANGE, color=Color.blue(), timestamp=datetime.now())
+    embed = Embed(
+        title=embeds_constants.TITLE_BANNER_CHANGE, color=Color.blue(), timestamp=datetime.now()
+    )
 
     embed.add_field(name=embeds_constants.FIELD_USER_MENTION, value=after.mention, inline=True)
     embed.add_field(name=embeds_constants.FIELD_USER_NAME, value=after.name, inline=True)

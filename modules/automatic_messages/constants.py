@@ -31,27 +31,23 @@ SELECT_MESSAGE_TO_VIEW = "👁️ Selecciona el mensaje automático que deseas v
 SCHEDULE_TYPE_TRANSLATIONS = {
     "interval": "⏰ Por intervalo",
     "daily": "📅 Diario",
-    "weekly": "📆 Semanal", 
+    "weekly": "📆 Semanal",
     "custom": "🔧 Personalizado (cron)",
-    "on_channel_create": "🆕 Al crear canal"
+    "on_channel_create": "🆕 Al crear canal",
 }
 
 # Traducciones de unidades de intervalo
-INTERVAL_UNIT_TRANSLATIONS = {
-    "seconds": "segundos",
-    "minutes": "minutos",
-    "hours": "horas"
-}
+INTERVAL_UNIT_TRANSLATIONS = {"seconds": "segundos", "minutes": "minutos", "hours": "horas"}
 
 # Traducciones de días de la semana
 WEEKDAY_TRANSLATIONS = {
     0: "Lunes",
-    1: "Martes", 
+    1: "Martes",
     2: "Miércoles",
     3: "Jueves",
     4: "Viernes",
     5: "Sábado",
-    6: "Domingo"
+    6: "Domingo",
 }
 
 # Labels y títulos para embeds
@@ -137,7 +133,9 @@ TEXT_NO_CONTENT = "Sin contenido configurado"
 
 # Instrucciones de botones
 INSTRUCTION_ADD_TEXT = "1. **📝 Añadir Texto** - Contenido principal del mensaje"
-INSTRUCTION_ADD_EMBED = "2. **🎨 Añadir Embed** - Mensaje con formato enriquecido (incluye imagen del embed)"
+INSTRUCTION_ADD_EMBED = (
+    "2. **🎨 Añadir Embed** - Mensaje con formato enriquecido (incluye imagen del embed)"
+)
 INSTRUCTION_ADD_IMAGE = "3. **🖼️ Imagen Attachment** - Imagen independiente como adjunto"
 INSTRUCTION_COMPLETE = "4. **✅ Completar** - Finalizar y programar el mensaje"
 
@@ -184,8 +182,12 @@ TEXT_NO_TEXT_PREVIEW = "(Sin texto - solo embed/imagen)"
 
 # Textos de programación
 TITLE_CONFIGURE_SCHEDULE = "⚙️ Configurar programación"
-DESC_SCHEDULE_CONFIG = "**Texto del mensaje:**\n```{preview}```\n\nAhora configura cuándo se debe enviar el mensaje:"
-TEXT_AUTO_SEND_CHANNEL_CREATE = "🆕 Se enviará automáticamente en cada canal nuevo creado en la categoría."
+DESC_SCHEDULE_CONFIG = (
+    "**Texto del mensaje:**\n```{preview}```\n\nAhora configura cuándo se debe enviar el mensaje:"
+)
+TEXT_AUTO_SEND_CHANNEL_CREATE = (
+    "🆕 Se enviará automáticamente en cada canal nuevo creado en la categoría."
+)
 
 # Textos de mensajes de fallback
 MSG_FALLBACK_DEFAULT_NAME = "Mensaje {id}"
@@ -312,7 +314,9 @@ PLACEHOLDER_EMBED_DESCRIPTION_MODAL = "Escribe aquí la descripción del embed..
 PLACEHOLDER_EMBED_COLOR_OPTIONS = "blue, red, green, #FF0000, etc."
 
 # Descriptions faltantes
-DESC_CONFIG_COMPLETED = "El mensaje ha sido configurado correctamente. Ahora procederemos con la programación."
+DESC_CONFIG_COMPLETED = (
+    "El mensaje ha sido configurado correctamente. Ahora procederemos con la programación."
+)
 DESC_CONFIG_CANCELLED = "Se ha cancelado la configuración del mensaje automático."
 DESC_MESSAGE_BUILDER = "Personaliza tu mensaje automático añadiendo contenido:"
 
@@ -384,7 +388,9 @@ TEXT_ERROR_PREFIX = "❌ Error: {error}"
 DESC_HOW_TO_SEND = "¿Cómo quieres enviar este mensaje?"
 TEXT_NO_TEXT_ONLY_EMBED = "(Sin texto - solo embed/imagen)"
 DESC_SCHEDULE_NOW = "Ahora configura cuándo se debe enviar el mensaje:"
-TEXT_AUTO_CHANNEL_CREATE = "🆕 Se enviará automáticamente en cada canal nuevo creado en la categoría."
+TEXT_AUTO_CHANNEL_CREATE = (
+    "🆕 Se enviará automáticamente en cada canal nuevo creado en la categoría."
+)
 ERROR_CREATING_MSG = "Error creando el mensaje: {error}"
 TEXT_DEFAULT_MSG_NAME = "Mensaje {id}"
 
@@ -410,7 +416,7 @@ VALIDATION_VALID_MINUTE = "Los minutos deben estar entre 0 y 59"
 
 # Textos para configuración de intervalo
 CHOICE_SECONDS = "segundos"
-CHOICE_MINUTES = "minutos" 
+CHOICE_MINUTES = "minutos"
 CHOICE_HOURS = "horas"
 
 # Placeholders adicionales

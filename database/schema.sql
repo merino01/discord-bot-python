@@ -63,7 +63,9 @@ CREATE TABLE IF NOT EXISTS clans (
     max_members INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
     deleted TINYINT DEFAULT 0,
-    deleted_at TIMESTAMP
+    deleted_at TIMESTAMP,
+    max_text_channels INTEGER DEFAULT 1,
+    max_voice_channels INTEGER DEFAULT 1
 );
 
 -- Configuración global para los clanes

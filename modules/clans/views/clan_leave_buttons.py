@@ -29,7 +29,7 @@ class ClanLeaveView(View):
     async def leave_clan_callback(self, interaction: Interaction):
         if not interaction.data or not (clan_id := interaction.data.get("custom_id")):
             return
-        
+
         self.selected_clan = next((clan for clan in self.clans if clan.id == clan_id), None)
         if not self.selected_clan:
             await interaction.response.send_message("Clan no encontrado", ephemeral=True)
@@ -37,11 +37,9 @@ class ClanLeaveView(View):
 
         try:
             error = await logica_salir_del_clan(
-                self.user.id, 
-                self.selected_clan.id, 
-                interaction.guild
+                self.user.id, self.selected_clan.id, interaction.guild
             )
-            
+
             if error:
                 await interaction.response.edit_message(
                     content=f"Error al salir del clan: {error}", view=None
@@ -51,14 +49,13 @@ class ClanLeaveView(View):
             self.stop()
             await interaction.response.edit_message(
                 content=f"Has salido del clan **{self.selected_clan.name}** exitosamente.",
-                view=None
+                view=None,
             )
 
         except Exception as e:
             logger.error(f"Error al salir del clan: {e}")
             await interaction.response.edit_message(
-                content="Error al procesar la solicitud. Inténtalo de nuevo.",
-                view=None
+                content="Error al procesar la solicitud. Inténtalo de nuevo.", view=None
             )
 
     async def on_timeout(self) -> None:

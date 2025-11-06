@@ -9,7 +9,13 @@ from modules.clans.utils import add_member_to_clan
 
 
 class ClanInviteView(View):
-    def __init__(self, clan: Clan, guild: Guild, service: ClanService, channel_message: Optional[Message] = None):
+    def __init__(
+        self,
+        clan: Clan,
+        guild: Guild,
+        service: ClanService,
+        channel_message: Optional[Message] = None,
+    ):
         super().__init__(timeout=ONE_DAY)
         self.clan = clan
         self.value = None
@@ -42,11 +48,9 @@ class ClanInviteView(View):
 
         # Usar la función de utils que maneja roles adicionales
         error = await add_member_to_clan(
-            guild=self.guild, 
-            member_id=interaction.user.id, 
-            clan_id=self.clan.id
+            guild=self.guild, member_id=interaction.user.id, clan_id=self.clan.id
         )
-        
+
         if error:
             await interaction.response.edit_message(
                 content=f"Error al aceptar la invitación: {error}", view=self
@@ -57,7 +61,7 @@ class ClanInviteView(View):
         await interaction.response.edit_message(
             content=f"¡Te has unido al clan **{self.clan.name}** exitosamente!", view=self
         )
-        
+
         # Actualizar el mensaje del canal si existe
         if self.channel_message:
             try:
@@ -66,7 +70,7 @@ class ClanInviteView(View):
                 )
             except:
                 pass  # Si no se puede editar, continuar
-                
+
         self.stop()
 
     async def reject_callback(self, interaction: Interaction):
@@ -75,12 +79,12 @@ class ClanInviteView(View):
         for item in self.children:
             if isinstance(item, Button):
                 item.disabled = True
-                
+
         # Responder la interacción
         await interaction.response.edit_message(
             content=f"Has rechazado la invitación al clan **{self.clan.name}**.", view=self
         )
-        
+
         # Actualizar el mensaje del canal si existe
         if self.channel_message:
             try:
@@ -89,7 +93,7 @@ class ClanInviteView(View):
                 )
             except Exception:
                 pass  # Si no se puede editar, continuar
-                
+
         self.stop()
 
     async def on_timeout(self) -> None:

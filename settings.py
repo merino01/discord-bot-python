@@ -38,3 +38,8 @@ prefix: str = _config.get("prefix", "!")
 guild_id: int = _config.get("guild_id", 0)
 admin_id: int = _config.get("admin_id", 0)
 send_to_admin: bool = _config.get("send_to_admin", False)
+
+# API settings
+api_enabled: bool = _config.get("api_enabled", False)
+api_port: int = _config.get("api_port", 8000)
+api_key: str = _config.get("api_key", "")

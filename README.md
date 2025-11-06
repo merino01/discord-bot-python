@@ -150,6 +150,27 @@ Para poder levantar el bot se necesita un archivo `config.json` en la raiz del p
 - **admin_id**: El ID del usuario admin, se le enviarán mensajes si hay algún fallo en el bot
 - **send_to_admin**: Valores posibles `true` o `false`. Configura si se quieren enviar mensajes al admin
 
+### Configuración de la API (Opcional)
+
+El bot incluye una API REST para interactuar con sus datos desde scripts externos. Para habilitarla, añade estos campos al `config.json`:
+
+```json
+{
+    "app_name": "discord-bot",
+    "bot_token": "MTA2Mdfmvksmkvsv78ndsndsn8.4rerevv...",
+    "guild_id": 1212122343443524324,
+    "admin_id": 8767643756437563653,
+    "send_to_admin": true,
+    "api_enabled": true,
+    "api_port": 8000,
+    "api_key": "tu_clave_api_secreta_aqui"
+}
+```
+
+- **api_enabled**: `true` para habilitar la API, `false` o ausente para deshabilitarla
+- **api_port**: Puerto donde se ejecutará la API (por defecto: 8000)
+- **api_key**: Clave secreta para autenticar las peticiones a la API
+
 ## LOGS
 
 El bot se encarga de gestionar los siguientes logs
@@ -451,3 +472,90 @@ uv pip install -r requirements.txt
 ```bash
 python main.py
 ```
+
+## API REST
+
+El bot incluye una API REST opcional para acceder a los datos y funcionalidades del bot desde scripts externos o dashboards.
+
+### Habilitar la API
+
+Para habilitar la API, añade estos campos a tu `config.json`:
+
+```json
+{
+    "api_enabled": true,
+    "api_port": 8000,
+    "api_key": "tu_clave_api_secreta_aqui"
+}
+```
+
+### Endpoints disponibles
+
+#### Health Check
+- **GET** `/api/health` - Verifica que la API esté funcionando (no requiere autenticación)
+- **GET** `/api/status` - Estado detallado (requiere autenticación)
+
+#### Clanes
+- **GET** `/api/clans/` - Lista todos los clanes con sus miembros y canales
+- **GET** `/api/clans/{clan_id}` - Obtiene información de un clan específico
+- **GET** `/api/clans/{clan_id}/members` - Lista los miembros de un clan
+
+### Autenticación
+
+Todas las rutas (excepto `/api/health`) requieren autenticación mediante API key. Incluye la clave en el header de la petición:
+
+```bash
+X-API-Key: tu_clave_api_secreta_aqui
+```
+
+### Ejemplos de uso
+
+#### Bash con curl
+
+```bash
+# Verificar que la API está activa
+curl http://localhost:8000/api/health
+
+# Listar todos los clanes
+curl -H "X-API-Key: tu_clave_api_secreta_aqui" http://localhost:8000/api/clans/
+
+# Obtener miembros de un clan específico
+curl -H "X-API-Key: tu_clave_api_secreta_aqui" http://localhost:8000/api/clans/CLAN_ID/members
+```
+
+#### Python
+
+```python
+import requests
+
+API_URL = "http://localhost:8000"
+API_KEY = "tu_clave_api_secreta_aqui"
+headers = {"X-API-Key": API_KEY}
+
+# Listar todos los clanes
+response = requests.get(f"{API_URL}/api/clans/", headers=headers)
+clans = response.json()
+print(f"Total de clanes: {len(clans)}")
+
+# Obtener miembros de un clan
+clan_id = clans[0]["id"]
+response = requests.get(f"{API_URL}/api/clans/{clan_id}/members", headers=headers)
+members = response.json()
+print(f"Miembros en el clan: {len(members)}")
+```
+
+### Documentación interactiva
+
+Cuando la API está activa, puedes acceder a la documentación interactiva automática:
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+Estas interfaces te permiten probar los endpoints directamente desde el navegador.
+
+### Consideraciones de seguridad
+
+1. **Mantén tu API key segura**: No la compartas ni la incluyas en repositorios públicos
+2. **Usa HTTPS en producción**: Configura un proxy reverso (nginx, apache) con SSL/TLS
+3. **Firewall**: Restringe el acceso al puerto de la API solo a IPs confiables
+4. **Cambia la API key regularmente**: Especialmente si sospechas que ha sido comprometida

@@ -12,7 +12,9 @@ from ..service import ClanService
 
 
 class ClanSelectView(View):
-    def __init__(self, clans: List[Clan], member: Member, service: ClanService, interaction: Interaction):
+    def __init__(
+        self, clans: List[Clan], member: Member, service: ClanService, interaction: Interaction
+    ):
         super().__init__(timeout=ONE_SECOND * 30)
         self.clans = clans
         self.selected_clan: Optional[Clan] = None

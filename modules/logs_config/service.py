@@ -19,7 +19,8 @@ class LogsConfigService:
             return None, error
 
     def get_by_type(
-        self, log_type: LogConfigType,
+        self,
+        log_type: LogConfigType,
     ) -> tuple[Optional[LogConfig], Optional[str]]:
         try:
             row = self.db.single("SELECT * FROM logs WHERE type = ?", (log_type,))

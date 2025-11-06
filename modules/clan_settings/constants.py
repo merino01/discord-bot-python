@@ -14,7 +14,9 @@ ERROR_NO_VALID_ADDITIONAL_ROLES = "❌ No se encontraron roles adicionales váli
 # Mensajes de éxito
 SUCCESS_CONFIG_UPDATED = "✅ Configuración actualizada con éxito."
 SUCCESS_ADDITIONAL_ROLE_ADDED = "✅ Rol adicional {role} agregado con éxito. Se asignará automáticamente a todos los nuevos miembros de clanes."
-SUCCESS_ADDITIONAL_ROLE_REMOVED = "🗑️ Rol adicional {role} removido con éxito. Ya no se asignará a los nuevos miembros de clanes."
+SUCCESS_ADDITIONAL_ROLE_REMOVED = (
+    "🗑️ Rol adicional {role} removido con éxito. Ya no se asignará a los nuevos miembros de clanes."
+)
 SUCCESS_ALL_ADDITIONAL_ROLES_CLEARED = "🧹 Todos los roles adicionales han sido removidos."
 SUCCESS_ROLES_APPLIED = "✅ Proceso completado. Se procesaron {total_members} miembros. Se asignaron roles adicionales exitosamente a {successful_members} miembros."
 

@@ -6,7 +6,7 @@ en canales específicos o cuando se crean canales en categorías.
 
 Tipos de programación soportados:
 - Por intervalo: cada X segundos/minutos/horas
-- Diario: todos los días a una hora específica  
+- Diario: todos los días a una hora específica
 - Semanal: ciertos días de la semana a una hora específica
 - Personalizado: usando expresiones cron
 - Al crear canal: cuando se crea un canal en una categoría
@@ -18,8 +18,8 @@ from .slash_commands import AutomaticMessagesCommands
 
 __all__ = [
     'AutomaticMessagesService',
-    'AutomaticMessage', 
+    'AutomaticMessage',
     'ScheduleTypeEnum',
     'IntervalUnitEnum',
-    'AutomaticMessagesCommands'
+    'AutomaticMessagesCommands',
 ]

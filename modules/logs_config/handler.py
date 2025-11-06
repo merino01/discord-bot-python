@@ -30,7 +30,6 @@ class LogHandler:
         except HTTPException as e:
             logger.error("Error al enviar el log al canal %s. Error: %s", channel.name, e)
 
-
     async def log_message_edit(self, before: Message, after: Message) -> None:
         if before.author.bot:
             return

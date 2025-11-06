@@ -3,9 +3,11 @@ from database import Database
 from modules.core import logger
 from .models import Trigger
 
+
 class TriggersService:
     def __init__(self):
         self.db = Database()
+
     def get_all(self) -> tuple[Optional[List[Trigger]], Optional[str]]:
         try:
             rows = self.db.select("SELECT * FROM triggers")
@@ -29,7 +31,8 @@ class TriggersService:
             return None, error
 
     def get_one_by_channel_id(
-        self, channel_id: int,
+        self,
+        channel_id: int,
     ) -> tuple[Optional[Trigger], Optional[str]]:
         try:
             row = self.db.single("SELECT * FROM triggers WHERE channel_id = ?", (channel_id,))
@@ -43,7 +46,8 @@ class TriggersService:
             return None, error
 
     def get_all_by_channel_id(
-        self, channel_id: int,
+        self,
+        channel_id: int,
     ) -> tuple[Optional[List[Trigger]], Optional[str]]:
         try:
             rows = self.db.select("SELECT * FROM triggers WHERE channel_id = ?", (channel_id,))
@@ -66,7 +70,7 @@ class TriggersService:
                 trigger.response,
                 trigger.key,
                 trigger.position,
-                trigger.response_timeout
+                trigger.response_timeout,
             )
             self.db.execute(sql, params)
             return trigger, None
@@ -105,7 +109,7 @@ class TriggersService:
                 trigger.response,
                 trigger.key,
                 trigger.position,
-                trigger.response_timeout
+                trigger.response_timeout,
             )
             self.db.execute(sql, params)
             return trigger, None

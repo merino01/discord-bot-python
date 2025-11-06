@@ -32,7 +32,9 @@ COMMAND_EDIT_DESC = "✏️ Edita un formato de canal"
 # Descripciones de parámetros
 PARAM_CHANNEL_DESC = "📢 Canal donde se aplicará el formato"
 PARAM_FORMAT_DESC = "🔧 Formato que se aplicará al canal"
-PARAM_FORMAT_ID_DESC = "🆔 ID del formato de canal (opcional - se mostrará lista si no se proporciona)"
+PARAM_FORMAT_ID_DESC = (
+    "🆔 ID del formato de canal (opcional - se mostrará lista si no se proporciona)"
+)
 PARAM_LIST_CHANNEL_DESC = "📢 Listar formatos por canal"
 PARAM_PERSISTENT_DESC = "📌 Hacer persistente"
 

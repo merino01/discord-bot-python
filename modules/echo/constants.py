@@ -4,10 +4,14 @@
 COMMAND_ECHO_DESC = "Envía un mensaje a un canal o hilo específico, o al canal/hilo actual"
 COMMAND_EDIT_DESC = "Edita un mensaje enviado previamente con echo"
 PARAM_TEXT_DESC = "El texto que se enviará al canal (o JSON del embed si enviar_embed=True)"
-PARAM_CHANNEL_DESC = "El canal o hilo donde se enviará el mensaje (opcional, por defecto el canal/thread actual)"
+PARAM_CHANNEL_DESC = (
+    "El canal o hilo donde se enviará el mensaje (opcional, por defecto el canal/thread actual)"
+)
 PARAM_EMBED_DESC = "Si el mensaje se enviará como un embed usando JSON (opcional)"
 PARAM_PARAGRAPH_DESC = "Abrir una ventana para escribir texto largo cómodamente (opcional)"
-PARAM_MESSAGE_ID_DESC = "Enlace del mensaje a editar (opcional, si no se proporciona se mostrará un selector)"
+PARAM_MESSAGE_ID_DESC = (
+    "Enlace del mensaje a editar (opcional, si no se proporciona se mostrará un selector)"
+)
 PARAM_NEW_TEXT_DESC = "El nuevo texto para el mensaje (o JSON del embed si enviar_embed=True)"
 PARAM_NEW_EMBED_DESC = "Si el nuevo mensaje será un embed usando JSON (opcional)"
 PARAM_NEW_PARAGRAPH_DESC = "Abrir una ventana para escribir el nuevo texto cómodamente (opcional)"
@@ -28,12 +32,18 @@ ERROR_INVALID_MESSAGE_LINK = "❌ El enlace del mensaje no es válido"
 ERROR_MESSAGE_NOT_FROM_BOT = "❌ Solo puedes editar mensajes enviados por el bot"
 ERROR_MESSAGE_NOT_IN_DISCORD = "❌ El mensaje ya no existe en Discord"
 ERROR_EDITING_MESSAGE = "❌ Error al editar el mensaje: {error}"
-ERROR_TEXT_REQUIRED = "❌ Debes proporcionar el texto o usar la opción `parrafo=True` para abrir la ventana de texto."
-ERROR_MODAL_REQUIRES_LINK = "❌ Para usar el modo párrafo en edición, debes proporcionar el enlace del mensaje a editar."
+ERROR_TEXT_REQUIRED = (
+    "❌ Debes proporcionar el texto o usar la opción `parrafo=True` para abrir la ventana de texto."
+)
+ERROR_MODAL_REQUIRES_LINK = (
+    "❌ Para usar el modo párrafo en edición, debes proporcionar el enlace del mensaje a editar."
+)
 
 # Títulos y descripciones para embeds
 TITLE_SELECT_MESSAGE_TO_EDIT = "Seleccionar Mensaje para Editar"
-DESCRIPTION_SELECT_MESSAGE_TO_EDIT = "Selecciona uno de los últimos 10 mensajes echo del servidor para editar:"
+DESCRIPTION_SELECT_MESSAGE_TO_EDIT = (
+    "Selecciona uno de los últimos 10 mensajes echo del servidor para editar:"
+)
 
 # Mensajes de ayuda
 HELP_MESSAGE_LINK_FORMAT = """

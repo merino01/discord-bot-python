@@ -10,11 +10,11 @@ from .models import EchoMessage
 
 class EchoService:
     """Servicio para gestionar mensajes echo"""
-    
+
     def __init__(self):
         self.db = Database()
         self._ensure_table_exists()
-    
+
     def _ensure_table_exists(self):
         """Crea la tabla echo_messages si no existe"""
         try:
@@ -34,7 +34,7 @@ class EchoService:
             logger.info("Tabla echo_messages verificada/creada")
         except Exception as e:
             logger.error(f"Error al crear tabla echo_messages: {e}")
-    
+
     def save_echo_message(
         self,
         message_id: int,
@@ -42,7 +42,7 @@ class EchoService:
         guild_id: int,
         user_id: int,
         content: str,
-        is_embed: bool
+        is_embed: bool,
     ) -> Tuple[Optional[str], Optional[str]]:
         """
         Guarda un mensaje echo en la base de datos
@@ -63,7 +63,7 @@ class EchoService:
                 user_id,
                 content,
                 is_embed,
-                datetime.now().isoformat()
+                datetime.now().isoformat(),
             )
             self.db.execute(sql, params)
             logger.info(f"Mensaje echo guardado: {echo_id}")
@@ -72,12 +72,9 @@ class EchoService:
             error_msg = f"Error al guardar mensaje echo: {e}"
             logger.error(error_msg)
             return None, error_msg
-    
+
     def get_user_echo_messages(
-        self,
-        user_id: int,
-        guild_id: int,
-        limit: int = 10
+        self, user_id: int, guild_id: int, limit: int = 10
     ) -> Tuple[Optional[List[EchoMessage]], Optional[str]]:
         """
         Obtiene los últimos mensajes echo de un usuario
@@ -93,10 +90,10 @@ class EchoService:
                 LIMIT ?
             """
             rows = self.db.select(sql, (user_id, guild_id, limit))
-            
+
             if not rows:
                 return [], None
-            
+
             messages = []
             for row in rows:
                 message = EchoMessage(
@@ -107,20 +104,22 @@ class EchoService:
                     user_id=row['user_id'],
                     content=row['content'],
                     is_embed=bool(row['is_embed']),
-                    created_at=datetime.fromisoformat(row['created_at']) if isinstance(row['created_at'], str) else row['created_at']
+                    created_at=(
+                        datetime.fromisoformat(row['created_at'])
+                        if isinstance(row['created_at'], str)
+                        else row['created_at']
+                    ),
                 )
                 messages.append(message)
-            
+
             return messages, None
         except Exception as e:
             error_msg = f"Error al obtener mensajes echo: {e}"
             logger.error(error_msg)
             return None, error_msg
-    
+
     def get_guild_echo_messages(
-        self,
-        guild_id: int,
-        limit: int = 10
+        self, guild_id: int, limit: int = 10
     ) -> Tuple[Optional[List[EchoMessage]], Optional[str]]:
         """
         Obtiene los últimos mensajes echo de todo el servidor
@@ -136,10 +135,10 @@ class EchoService:
                 LIMIT ?
             """
             rows = self.db.select(sql, (guild_id, limit))
-            
+
             if not rows:
                 return [], None
-            
+
             messages = []
             for row in rows:
                 message = EchoMessage(
@@ -150,20 +149,21 @@ class EchoService:
                     user_id=row['user_id'],
                     content=row['content'],
                     is_embed=bool(row['is_embed']),
-                    created_at=datetime.fromisoformat(row['created_at']) if isinstance(row['created_at'], str) else row['created_at']
+                    created_at=(
+                        datetime.fromisoformat(row['created_at'])
+                        if isinstance(row['created_at'], str)
+                        else row['created_at']
+                    ),
                 )
                 messages.append(message)
-            
+
             return messages, None
         except Exception as e:
             error_msg = f"Error al obtener mensajes echo del servidor: {e}"
             logger.error(error_msg)
             return None, error_msg
-    
-    def get_echo_message_by_id(
-        self,
-        echo_id: str
-    ) -> Tuple[Optional[EchoMessage], Optional[str]]:
+
+    def get_echo_message_by_id(self, echo_id: str) -> Tuple[Optional[EchoMessage], Optional[str]]:
         """
         Obtiene un mensaje echo por su ID
         Returns: (message, error)
@@ -176,10 +176,10 @@ class EchoService:
                 WHERE id = ?
             """
             row = self.db.single(sql, (echo_id,))
-            
+
             if not row:
                 return None, "Mensaje echo no encontrado"
-            
+
             message = EchoMessage(
                 id=row['id'],
                 message_id=row['message_id'],
@@ -188,19 +188,20 @@ class EchoService:
                 user_id=row['user_id'],
                 content=row['content'],
                 is_embed=bool(row['is_embed']),
-                created_at=datetime.fromisoformat(row['created_at']) if isinstance(row['created_at'], str) else row['created_at']
+                created_at=(
+                    datetime.fromisoformat(row['created_at'])
+                    if isinstance(row['created_at'], str)
+                    else row['created_at']
+                ),
             )
-            
+
             return message, None
         except Exception as e:
             error_msg = f"Error al obtener mensaje echo: {e}"
             logger.error(error_msg)
             return None, error_msg
-    
-    def delete_echo_message(
-        self,
-        echo_id: str
-    ) -> Optional[str]:
+
+    def delete_echo_message(self, echo_id: str) -> Optional[str]:
         """
         Elimina un mensaje echo de la base de datos
         Returns: error (si existe)

@@ -31,10 +31,13 @@ class ChannelFormatsService:
             return None, error
 
     def get_one_by_channel_id(
-        self, channel_id: int,
+        self,
+        channel_id: int,
     ) -> tuple[Optional[ChannelFormat], Optional[str]]:
         try:
-            row = self.db.single("SELECT * FROM channel_formats WHERE channel_id = ?", (channel_id,))
+            row = self.db.single(
+                "SELECT * FROM channel_formats WHERE channel_id = ?", (channel_id,)
+            )
             if not row:
                 return None, None
             channel_format = ChannelFormat(**row)
@@ -45,10 +48,13 @@ class ChannelFormatsService:
             return None, error
 
     def get_all_by_channel_id(
-        self, channel_id: int,
+        self,
+        channel_id: int,
     ) -> tuple[Optional[List[ChannelFormat]], Optional[str]]:
         try:
-            rows = self.db.select("SELECT * FROM channel_formats WHERE channel_id = ?", (channel_id,))
+            rows = self.db.select(
+                "SELECT * FROM channel_formats WHERE channel_id = ?", (channel_id,)
+            )
             channel_formats = [ChannelFormat(**row) for row in rows]
             return channel_formats, None
         except Exception as e:
@@ -57,7 +63,8 @@ class ChannelFormatsService:
             return None, error
 
     def add(
-        self, channel_format: ChannelFormat,
+        self,
+        channel_format: ChannelFormat,
     ) -> tuple[Optional[ChannelFormat], Optional[str]]:
         try:
             sql = """INSERT INTO channel_formats (id, channel_id, regex) VALUES (?, ?, ?)"""
