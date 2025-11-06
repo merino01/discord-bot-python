@@ -478,7 +478,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
         embed.add_field(
             name=__("clans.fields.generalNumbers"),
-            value=constants.STATS_GENERAL_FORMAT.format(
+            value=__("clans.values.generalStats",
                 total_clans=total_clans,
                 total_members=total_members,
                 total_leaders=total_leaders,
@@ -489,7 +489,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
         embed.add_field(
             name=__("clans.fields.largestClan"),
-            value=constants.STATS_LARGEST_CLAN_FORMAT.format(
+            value=__("clans.values.largestClanInfo",
                 clan_name=largest_clan.name,
                 member_count=len(largest_clan.members),
                 channel_count=len(largest_clan.channels),
@@ -499,7 +499,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
 
         embed.add_field(
             name=__("clans.fields.averages"),
-            value=constants.STATS_AVERAGES_FORMAT.format(
+            value=__("clans.values.averagesInfo",
                 avg_members=total_members / total_clans, avg_channels=total_channels / total_clans
             ),
             inline=True,
@@ -1158,7 +1158,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
         except Exception as e:
             logger.error(f"Error al crear canal adicional: {str(e)}")
             await interaction.followup.send(
-                constants.ERROR_CREATING_ADDITIONAL_CHANNEL.format(error=str(e)), ephemeral=True
+                __("clans.errors.unexpected", error=str(e)), ephemeral=True
             )
 
     @mod.command(name="añadir_lider", description="Añadir un líder adicional a un clan existente")
@@ -1476,7 +1476,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                         __("clans.errors.leavingClan", error=error), ephemeral=True
                     )
                 return await interaction.response.send_message(
-                    constants.SUCCESS_LEFT_CLAN_MESSAGE.format(clan_name=clan_del_canal.name),
+                    __("clans.success.leftClan", clan_name=clan_del_canal.name),
                     ephemeral=True,
                 )
 
@@ -1497,7 +1497,7 @@ class ClanCommands(commands.GroupCog, name="clan"):
                     __("clans.errors.leavingClan", error=error), ephemeral=True
                 )
             return await interaction.response.send_message(
-                constants.SUCCESS_LEFT_CLAN_MESSAGE.format(clan_name=clan.name), ephemeral=True
+                __("clans.success.leftClan", clan_name=clan.name), ephemeral=True
             )
 
         # Si está en múltiples clanes, mostrar botones para elegir
