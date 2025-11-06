@@ -20,7 +20,7 @@ from .views import (
     MessageSelectView,
     MessageBuilderView
 )
-from . import constants
+from i18n import __
 
 
 class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
@@ -161,7 +161,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
     #####################################
     ### Comando para listar mensajes ###
     #####################################
-    @app_commands.command(name="listar", description=constants.COMMAND_LIST_DESC)
+    @app_commands.command(name="listar", description=__("triggers.commands.list"))
     @app_commands.describe(
         canal="Filtrar por canal específico",
         categoria="Filtrar por categoría específica"
@@ -209,7 +209,7 @@ class AutomaticMessagesCommands(commands.GroupCog, name="mensajes_automaticos"):
     ######################################
     ### Comando para eliminar mensajes ###
     ######################################
-    @app_commands.command(name="eliminar", description=constants.COMMAND_DELETE_DESC)
+    @app_commands.command(name="eliminar", description=__("triggers.commands.delete"))
     @app_commands.describe(
         canal="Filtrar por canal específico",
         categoria="Filtrar por categoría específica"

@@ -7,8 +7,8 @@ from discord import Forbidden, Embed, Color
 from modules.core import logger
 from .service import TriggersService
 from .models import TriggerPosition, Trigger
-from . import constants
 from .views import TriggerSelectView, create_trigger_selection_embed
+from i18n import __
 
 
 def _find_trigger(channel_id: int, text: str) -> Optional[Trigger]:
@@ -120,7 +120,7 @@ async def show_trigger_selection_for_delete(interaction, service: TriggersServic
         return
     
     if not triggers:
-        await interaction.response.send_message(content=constants.NO_TRIGGERS_TO_SELECT, ephemeral=True)
+        await interaction.response.send_message(content=__("triggers.messages.noTriggersToSelect"), ephemeral=True)
         return
     
     async def delete_callback(button_interaction, trigger_id: str):
@@ -132,8 +132,8 @@ async def show_trigger_selection_for_delete(interaction, service: TriggersServic
         
         # Crear embed de confirmación
         success_embed = Embed(
-            title=constants.CONFIRMATION_TRIGGER_DELETED,
-            description=constants.SUCCESS_TRIGGER_DELETED,
+            title=__("triggers.embeds.confirmationDeleteTitle"),
+            description=__("triggers.success.triggerDeleted"),
             color=Color.green()
         )
         
@@ -144,8 +144,8 @@ async def show_trigger_selection_for_delete(interaction, service: TriggersServic
         )
     
     # Crear vista con botones
-    view = TriggerSelectView(triggers, delete_callback, constants.SELECT_TRIGGER_TO_DELETE)
-    embed = create_trigger_selection_embed(triggers, constants.SELECT_TRIGGER_TO_DELETE)
+    view = TriggerSelectView(triggers, delete_callback, __("triggers.messages.selectTriggerToDelete"))
+    embed = create_trigger_selection_embed(triggers, __("triggers.messages.selectTriggerToDelete"))
     
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
@@ -158,7 +158,7 @@ async def show_trigger_selection_for_edit(interaction, service: TriggersService,
         return
     
     if not triggers:
-        await interaction.response.send_message(content=constants.NO_TRIGGERS_TO_SELECT, ephemeral=True)
+        await interaction.response.send_message(content=__("triggers.messages.noTriggersToSelect"), ephemeral=True)
         return
     
     async def edit_callback(button_interaction, trigger_id: str):
@@ -168,7 +168,7 @@ async def show_trigger_selection_for_edit(interaction, service: TriggersService,
         if result["success"]:
             # Crear embed de confirmación
             success_embed = Embed(
-                title=constants.CONFIRMATION_TRIGGER_EDITED, 
+                title=__("triggers.embeds.confirmationEditTitle"), 
                 description=result["message"],
                 color=Color.green()
             )
@@ -183,8 +183,8 @@ async def show_trigger_selection_for_edit(interaction, service: TriggersService,
             await button_interaction.response.send_message(content=result["error"], ephemeral=True)
     
     # Crear vista con botones
-    view = TriggerSelectView(triggers, edit_callback, constants.SELECT_TRIGGER_TO_EDIT)
-    embed = create_trigger_selection_embed(triggers, constants.SELECT_TRIGGER_TO_EDIT)
+    view = TriggerSelectView(triggers, edit_callback, __("triggers.messages.selectTriggerToEdit"))
+    embed = create_trigger_selection_embed(triggers, __("triggers.messages.selectTriggerToEdit"))
     
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
@@ -207,7 +207,7 @@ def _edit_trigger_internal(service: TriggersService, id_trigger: str, **edit_par
     if not trigger:
         return {
             "success": False, 
-            "error": constants.ERROR_TRIGGER_NOT_FOUND.format(id=id_trigger)
+            "error": __("triggers.errors.triggerNotFound", id=id_trigger)
         }
 
     # Actualizamos los campos que se han pasado como parámetros
@@ -235,4 +235,4 @@ def _edit_trigger_internal(service: TriggersService, id_trigger: str, **edit_par
     if error:
         return {"success": False, "error": error}
 
-    return {"success": True, "message": constants.SUCCESS_TRIGGER_EDITED}
+    return {"success": True, "message": __("triggers.success.triggerEdited")}

@@ -6,8 +6,8 @@ from discord.ui import View, Modal, TextInput, Select
 from ..models import AutomaticMessage
 from ..services import AutomaticMessagesService
 from ..utils import send_error_message, validate_message_content
-from .. import constants
 from ..tasks import reload_all_schedules
+from i18n import __
 
 
 class IntervalConfigModal(Modal):

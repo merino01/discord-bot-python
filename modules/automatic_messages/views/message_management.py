@@ -5,8 +5,8 @@ from discord.ui import View, Select, Button
 from ..models import AutomaticMessage
 from ..services import AutomaticMessagesService
 from ..utils import format_message_for_embed, send_error_message
-from .. import constants
 from ..tasks import reload_all_schedules
+from i18n import __
 
 
 class MessageSelectView(View):

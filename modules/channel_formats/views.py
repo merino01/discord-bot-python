@@ -6,7 +6,7 @@ import discord
 from discord import Interaction, Embed, Color
 from typing import List, Callable, Any
 from .models import ChannelFormat
-from . import constants
+from i18n import __
 
 
 class ChannelFormatSelectView(discord.ui.View):
@@ -39,7 +39,7 @@ class ChannelFormatSelectView(discord.ui.View):
         # Botón anterior
         if self.page > 0:
             prev_button = discord.ui.Button(
-                label=constants.PAGE_PREVIOUS,
+                label=__("channelFormats.pagination.previous"),
                 style=discord.ButtonStyle.secondary,
                 emoji="⬅️"
             )
@@ -48,7 +48,7 @@ class ChannelFormatSelectView(discord.ui.View):
         
         # Indicador de página
         page_button = discord.ui.Button(
-            label=constants.PAGE_INDICATOR.format(current=self.page + 1, total=self.total_pages),
+            label=__("triggers.pagination.indicator", current=self.page + 1, total=self.total_pages),
             style=discord.ButtonStyle.secondary,
             disabled=True
         )
@@ -57,7 +57,7 @@ class ChannelFormatSelectView(discord.ui.View):
         # Botón siguiente
         if self.page < self.total_pages - 1:
             next_button = discord.ui.Button(
-                label=constants.PAGE_NEXT,
+                label=__("channelFormats.pagination.next"),
                 style=discord.ButtonStyle.secondary,
                 emoji="➡️"
             )
@@ -113,15 +113,15 @@ class ChannelFormatButton(discord.ui.Button):
 def create_channel_format_selection_embed(channel_formats: List[ChannelFormat], page: int = 0, per_page: int = 20) -> Embed:
     """Crear embed para la selección de formatos de canal"""
     embed = Embed(
-        title=constants.VIEW_SELECT_FORMAT_TITLE,
-        description=constants.VIEW_SELECT_FORMAT_DESC,
+        title=__("channelFormats.embeds.selectFormatTitle"),
+        description=__("channelFormats.embeds.selectFormatDescription"),
         color=Color.blue()
     )
     
     # Agregar información de paginación si hay múltiples páginas
     total_pages = (len(channel_formats) + per_page - 1) // per_page
     if total_pages > 1:
-        embed.set_footer(text=constants.PAGE_INFO.format(
+        embed.set_footer(text=__("channelFormats.pagination.info", 
             current=page + 1,
             total=total_pages,
             showing=min(per_page, len(channel_formats) - page * per_page),
