@@ -1,8 +1,9 @@
 from discord import Intents, Object
 from discord.ext import commands
-from settings import bot_token, guild_id, prefix
+from settings import bot_token, guild_id, prefix, language
 from modules.core import logger
 from modules.automatic_messages.tasks import setup_automatic_messages
+from i18n import init_i18n
 
 
 EXTENSIONS = {
@@ -35,6 +36,9 @@ class Bot(commands.Bot):
         intents.guild_reactions = True
 
         super().__init__(command_prefix=prefix, intents=intents)
+        
+        # Inicializar sistema de traducciones
+        init_i18n(language=language)
 
     async def setup_hook(self):
         # Events
