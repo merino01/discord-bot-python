@@ -70,7 +70,7 @@ class Bot(commands.Bot):
         # Sincronize slash commands with discord
         await self.tree.sync(guild=Object(id=guild_id))
         logger.info("Comandos de barra sincronizados")
-        
+
         # Inicializar sistema de mensajes automáticos
         try:
             setup_automatic_messages(self)
