@@ -1,6 +1,6 @@
 import json
 import re
-from .. import constants
+from i18n import __
 
 
 def validate_cron_expression(cron_expr: str) -> bool:

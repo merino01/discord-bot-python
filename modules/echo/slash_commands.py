@@ -6,11 +6,11 @@ from discord import app_commands, Interaction, TextChannel, Thread, Object, Embe
 from discord.ext import commands
 from settings import guild_id
 from modules.core import logger
+from i18n import __
 from .service import EchoService
 from .views.message_selector import EchoMessageSelectView
 from .modal import EchoTextModal, EchoEditModal
 from .utils import extract_message_info
-from . import constants
 
 
 class EchoCommands(commands.Cog):
@@ -20,12 +20,12 @@ class EchoCommands(commands.Cog):
         self.bot = bot
         self.service = EchoService()
 
-    @app_commands.command(name="echo", description=constants.COMMAND_ECHO_DESC)
+    @app_commands.command(name="echo", description=__("echo.commands.echo"))
     @app_commands.describe(
-        texto=constants.PARAM_TEXT_DESC,
-        canal=constants.PARAM_CHANNEL_DESC,
-        enviar_embed=constants.PARAM_EMBED_DESC,
-        parrafo=constants.PARAM_PARAGRAPH_DESC
+        texto=__("echo.params.text"),
+        canal=__("echo.params.channel"),
+        enviar_embed=__("echo.params.embed"),
+        parrafo=__("echo.params.paragraph")
     )
     @app_commands.checks.has_permissions(manage_messages=True)
     async def echo(
@@ -47,7 +47,7 @@ class EchoCommands(commands.Cog):
             # Verificar que el canal sea un TextChannel o Thread
             if not isinstance(canal, (TextChannel, Thread)):
                 return await interaction.response.send_message(
-                    constants.ERROR_INVALID_CHANNEL,
+                    __("echo.errors.invalidChannel"),
                     ephemeral=True
                 )
 
@@ -59,7 +59,7 @@ class EchoCommands(commands.Cog):
         # Si no se usa modal, el texto es obligatorio
         if not texto:
             return await interaction.response.send_message(
-                constants.ERROR_TEXT_REQUIRED,
+                __("echo.errors.textRequired"),
                 ephemeral=True
             )
 
@@ -70,7 +70,7 @@ class EchoCommands(commands.Cog):
         # Verificar que el canal sea un TextChannel o Thread
         if not isinstance(canal, (TextChannel, Thread)):
             return await interaction.response.send_message(
-                constants.ERROR_INVALID_CHANNEL,
+                __("echo.errors.invalidChannel"),
                 ephemeral=True
             )
 
@@ -78,7 +78,7 @@ class EchoCommands(commands.Cog):
         member_permissions = canal.permissions_for(interaction.user)
         if not member_permissions.send_messages:
             return await interaction.response.send_message(
-                constants.ERROR_NO_PERMISSIONS,
+                __("echo.errors.noPermissions"),
                 ephemeral=True
             )
 
@@ -86,14 +86,14 @@ class EchoCommands(commands.Cog):
         bot_permissions = canal.permissions_for(interaction.guild.me)
         if not bot_permissions.send_messages:
             return await interaction.response.send_message(
-                constants.ERROR_NO_PERMISSIONS,
+                __("echo.errors.noPermissions"),
                 ephemeral=True
             )
 
         # Verificar longitud del mensaje (para texto normal)
         if not enviar_embed and len(texto) > 2000:
             return await interaction.response.send_message(
-                constants.ERROR_MESSAGE_TOO_LONG,
+                __("echo.errors.messageTooLong"),
                 ephemeral=True
             )
 
@@ -105,7 +105,7 @@ class EchoCommands(commands.Cog):
                     embed_data = json.loads(texto)
                 except json.JSONDecodeError:
                     return await interaction.response.send_message(
-                        constants.ERROR_INVALID_JSON,
+                        __("echo.errors.invalidJson"),
                         ephemeral=True
                     )
 
@@ -125,9 +125,9 @@ class EchoCommands(commands.Cog):
                     )
 
                     # Confirmar al usuario que el embed fue enviado
-                    confirmation_msg = constants.SUCCESS_EMBED_SENT.format(channel=canal.mention)
+                    confirmation_msg = __("echo.success.embedSent", channel=canal.mention)
                     if echo_id:
-                        confirmation_msg += f"\n{constants.SUCCESS_MESSAGE_SAVED.format(message_id=echo_id[:8])}"
+                        confirmation_msg += f"\n{__("echo.success.messageSaved", message_id=echo_id[:8])}"
                     
                     await interaction.response.send_message(
                         confirmation_msg,
@@ -138,7 +138,7 @@ class EchoCommands(commands.Cog):
 
                 except Exception as e:
                     return await interaction.response.send_message(
-                        constants.ERROR_EMBED_CREATION.format(error=str(e)),
+                        __("echo.errors.embedCreation", error=str(e)),
                         ephemeral=True
                     )
             else:
@@ -156,9 +156,9 @@ class EchoCommands(commands.Cog):
                 )
 
                 # Confirmar al usuario que el mensaje fue enviado
-                confirmation_msg = constants.SUCCESS_MESSAGE_SENT.format(channel=canal.mention)
+                confirmation_msg = __("echo.success.messageSent", channel=canal.mention)
                 if echo_id:
-                    confirmation_msg += f"\n{constants.SUCCESS_MESSAGE_SAVED.format(message_id=echo_id[:8])}"
+                    confirmation_msg += f"\n{__("echo.success.messageSaved", message_id=echo_id[:8])}"
                 
                 await interaction.response.send_message(
                     confirmation_msg,
@@ -170,7 +170,7 @@ class EchoCommands(commands.Cog):
         except Exception as e:
             logger.error(f"Error en comando echo: {str(e)}")
             await interaction.response.send_message(
-                constants.ERROR_SENDING_MESSAGE.format(error=str(e)),
+                __("echo.errors.sendingMessage", error=str(e)),
                 ephemeral=True
             )
 
@@ -189,12 +189,12 @@ class EchoCommands(commands.Cog):
                 ephemeral=True
             )
 
-    @app_commands.command(name="echo_editar", description=constants.COMMAND_EDIT_DESC)
+    @app_commands.command(name="echo_editar", description=__("echo.commands.edit"))
     @app_commands.describe(
-        nuevo_texto=constants.PARAM_NEW_TEXT_DESC,
-        enviar_embed=constants.PARAM_NEW_EMBED_DESC,
-        enlace_mensaje=constants.PARAM_MESSAGE_ID_DESC,
-        parrafo=constants.PARAM_NEW_PARAGRAPH_DESC
+        nuevo_texto=__("echo.params.newText"),
+        enviar_embed=__("echo.params.newEmbed"),
+        enlace_mensaje=__("echo.params.messageId"),
+        parrafo=__("echo.params.newParagraph")
     )
     @app_commands.checks.has_permissions(manage_messages=True)
     async def echo_edit(
@@ -209,7 +209,7 @@ class EchoCommands(commands.Cog):
         
         # Si se usa modal para texto largo
         if parrafo and not enlace_mensaje:
-            await interaction.response.send_message(constants.ERROR_MODAL_REQUIRES_LINK, ephemeral=True)
+            await interaction.response.send_message(__("echo.errors.modalRequiresLink"), ephemeral=True)
             return
         
         if parrafo:
@@ -220,13 +220,13 @@ class EchoCommands(commands.Cog):
         
         # Validar que se proporcione texto si no se usa modal
         if not nuevo_texto:
-            await interaction.response.send_message(constants.ERROR_TEXT_REQUIRED, ephemeral=True)
+            await interaction.response.send_message(__("echo.errors.textRequired"), ephemeral=True)
             return
         
         # Verificar longitud del nuevo texto (para texto normal)
         if not enviar_embed and len(nuevo_texto) > 2000:
             return await interaction.response.send_message(
-                constants.ERROR_MESSAGE_TOO_LONG,
+                __("echo.errors.messageTooLong"),
                 ephemeral=True
             )
         
@@ -236,7 +236,7 @@ class EchoCommands(commands.Cog):
             message_info = extract_message_info(enlace_mensaje)
             if not message_info:
                 return await interaction.response.send_message(
-                    constants.ERROR_INVALID_MESSAGE_LINK,
+                    __("echo.errors.invalidMessageLink"),
                     ephemeral=True
                 )
             
@@ -256,7 +256,7 @@ class EchoCommands(commands.Cog):
             # Verificar que es un TextChannel o Thread
             if not isinstance(target_channel, (TextChannel, Thread)):
                 return await interaction.response.send_message(
-                    constants.ERROR_INVALID_CHANNEL,
+                    __("echo.errors.invalidChannel"),
                     ephemeral=True
                 )
             
@@ -265,7 +265,7 @@ class EchoCommands(commands.Cog):
                 discord_message = await target_channel.fetch_message(message_id)
             except Exception:
                 return await interaction.response.send_message(
-                    constants.ERROR_MESSAGE_NOT_IN_DISCORD,
+                    __("echo.errors.messageNotInDiscord"),
                     ephemeral=True
                 )
             
@@ -277,7 +277,7 @@ class EchoCommands(commands.Cog):
             if discord_message.author.id == interaction.client.user.id:
                 can_edit = True
             else:
-                error_reason = constants.ERROR_MESSAGE_NOT_FROM_BOT
+                error_reason = __("echo.errors.messageNotFromBot")
             
             if not can_edit:
                 return await interaction.response.send_message(
@@ -297,15 +297,15 @@ class EchoCommands(commands.Cog):
             
             if error or not echo_messages:
                 return await interaction.response.send_message(
-                    constants.ERROR_NO_ECHO_MESSAGES,
+                    __("echo.errors.noEchoMessages"),
                     ephemeral=True
                 )
             
             # Mostrar selector de mensajes
             view = EchoMessageSelectView(echo_messages, nuevo_texto, enviar_embed, interaction.guild)
             embed = Embed(
-                title=constants.TITLE_SELECT_MESSAGE_TO_EDIT,
-                description=constants.DESCRIPTION_SELECT_MESSAGE_TO_EDIT,
+                title=__("echo.embeds.selectMessageTitle"),
+                description=__("echo.embeds.selectMessageDescription"),
                 color=Color.blue()
             )
             
@@ -328,12 +328,12 @@ class EchoCommands(commands.Cog):
                         await discord_message.edit(content=None, embed=embed)
                     except json.JSONDecodeError:
                         return await interaction.response.send_message(
-                            constants.ERROR_INVALID_JSON,
+                            __("echo.errors.invalidJson"),
                             ephemeral=True
                         )
                     except Exception as e:
                         return await interaction.response.send_message(
-                            constants.ERROR_EMBED_CREATION.format(error=str(e)),
+                            __("echo.errors.embedCreation", error=str(e)),
                             ephemeral=True
                         )
                 else:
@@ -349,7 +349,7 @@ class EchoCommands(commands.Cog):
                 
             except Exception as e:
                 await interaction.response.send_message(
-                    constants.ERROR_EDITING_MESSAGE.format(error=str(e)),
+                    __("echo.errors.editingMessage", error=str(e)),
                     ephemeral=True
                 )
                 logger.error(f"Error al editar mensaje: {e}")

@@ -11,7 +11,7 @@ from ..utils import (
     demote_leader_to_member,
     remove_clan_channel,
 )
-from .. import constants
+from i18n import __
 
 
 class ClanModSelectionView(discord.ui.View):
@@ -324,7 +324,7 @@ class ClanModSelectionView(discord.ui.View):
         error = await self.service.add_member_to_clan(miembro.id, clan.id)
         if error:
             return await interaction.followup.send(
-                constants.ERROR_ADDING_MEMBER.format(error=error), ephemeral=True
+                __("clans.errors.addingMember", error=error), ephemeral=True
             )
 
         # Asignar el rol del clan al miembro
@@ -337,7 +337,7 @@ class ClanModSelectionView(discord.ui.View):
             # Continuar aunque falle la asignación del rol
 
         await interaction.followup.send(
-            constants.SUCCESS_MEMBER_ADDED.format(member=miembro.mention, clan_name=clan.name),
+            __("clans.success.memberAdded", member=miembro.mention, clan_name=clan.name),
             ephemeral=True,
         )
 

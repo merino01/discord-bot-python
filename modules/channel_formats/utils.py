@@ -5,7 +5,7 @@ from modules.core import logger
 from .service import ChannelFormatsService
 from .models import ChannelFormat
 from .views import ChannelFormatSelectView, create_channel_format_selection_embed
-from . import constants
+from i18n import __
 
 
 async def check_channel_format(message: Message):
@@ -53,7 +53,7 @@ async def show_channel_format_selection_for_delete(interaction: Interaction):
     
     if not channel_formats:
         await interaction.response.send_message(
-            constants.NO_FORMATS_FOUND, 
+            __("channelFormats.messages.noFormatsFound"), 
             ephemeral=True
         )
         return
@@ -76,8 +76,8 @@ async def delete_channel_format_callback(interaction: Interaction, channel_forma
     
     # Crear embed de confirmación
     embed = Embed(
-        title=constants.CONFIRMATION_DELETE_TITLE,
-        description=constants.CONFIRMATION_DELETE_DESC.format(id=channel_format.id),
+        title=__("channelFormats.embeds.confirmationDeleteTitle"),
+        description=__("channelFormats.embeds.confirmationDeleteDescription", id=channel_format.id),
         color=Color.green()
     )
     
@@ -95,7 +95,7 @@ async def show_channel_format_selection_for_edit(interaction: Interaction, canal
     
     if not channel_formats:
         await interaction.response.send_message(
-            constants.NO_FORMATS_FOUND, 
+            __("channelFormats.messages.noFormatsFound"), 
             ephemeral=True
         )
         return
@@ -118,8 +118,8 @@ async def edit_channel_format_callback(interaction: Interaction, channel_format:
     if result['success']:
         # Crear embed de confirmación
         embed = Embed(
-            title=constants.CONFIRMATION_EDIT_TITLE,
-            description=constants.CONFIRMATION_EDIT_DESC.format(id=channel_format.id),
+            title=__("channelFormats.embeds.confirmationEditTitle"),
+            description=__("channelFormats.embeds.confirmationEditDescription", id=channel_format.id),
             color=Color.green()
         )
         await interaction.response.edit_message(embed=embed, view=None)
@@ -143,7 +143,7 @@ def _edit_channel_format_internal(format_id: str, canal: Optional[TextChannel], 
         except re_error:
             return {
                 'success': False, 
-                'error': constants.ERROR_INVALID_REGEX
+                'error': __("channelFormats.errors.invalidRegex")
             }
     
     # Obtener formato existente
@@ -154,7 +154,7 @@ def _edit_channel_format_internal(format_id: str, canal: Optional[TextChannel], 
     if not channel_format:
         return {
             'success': False, 
-            'error': constants.ERROR_FORMAT_NOT_FOUND.format(id=format_id)
+            'error': __("channelFormats.errors.formatNotFound", id=format_id)
         }
     
     # Aplicar cambios

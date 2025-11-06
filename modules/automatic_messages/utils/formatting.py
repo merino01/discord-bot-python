@@ -2,29 +2,29 @@ from typing import Optional
 from discord import Embed, Color
 import json
 from ..models import AutomaticMessage
-from .. import constants
+from i18n import __
 
 
 def format_message_for_embed(message: AutomaticMessage, bot) -> Embed:
     """Formatea un mensaje automático para mostrarlo en un embed"""
     embed = Embed(
         title=constants.TITLE_MESSAGE_ID.format(name=message.display_name),
-        description=constants.EMBED_DESCRIPTION,
+        description=__("clanSettings.embeds.description"),
         color=Color.blue()
     )
     
     # Canal o categoría
     if message.channel_id:
         channel = bot.get_channel(message.channel_id)
-        channel_name = channel.name if channel else constants.VALUE_INVALID
+        channel_name = channel.name if channel else __("triggers.values.invalid")
         embed.add_field(
-            name=constants.FIELD_CHANNEL,
+            name=__("triggers.fields.channel"),
             value=f"<#{message.channel_id}> ({channel_name})",
             inline=True
         )
     elif message.category_id:
         category = bot.get_channel(message.category_id)
-        category_name = category.name if category else constants.VALUE_INVALID
+        category_name = category.name if category else __("triggers.values.invalid")
         embed.add_field(
             name=constants.FIELD_CATEGORY,
             value=f"{category_name} (ID: {message.category_id})",
@@ -33,7 +33,7 @@ def format_message_for_embed(message: AutomaticMessage, bot) -> Embed:
     
     # Tipo de programación
     schedule_type_display = constants.SCHEDULE_TYPE_TRANSLATIONS.get(
-        message.schedule_type, message.schedule_type or constants.VALUE_NONE
+        message.schedule_type, message.schedule_type or __("triggers.values.none")
     )
     embed.add_field(
         name=constants.FIELD_SCHEDULE_TYPE,
@@ -104,12 +104,12 @@ def format_message_for_embed(message: AutomaticMessage, bot) -> Embed:
 def format_weekdays(weekdays_json: Optional[str]) -> str:
     """Formatea los días de la semana desde JSON a texto legible"""
     if not weekdays_json:
-        return constants.VALUE_NONE
+        return __("triggers.values.none")
     
     try:
         weekdays = json.loads(weekdays_json)
         if not isinstance(weekdays, list):
-            return constants.VALUE_INVALID
+            return __("triggers.values.invalid")
         
         day_names = []
         for day in sorted(weekdays):
@@ -117,11 +117,11 @@ def format_weekdays(weekdays_json: Optional[str]) -> str:
                 day_names.append(constants.WEEKDAY_TRANSLATIONS[day])
         
         if not day_names:
-            return constants.VALUE_NONE
+            return __("triggers.values.none")
         
         return ", ".join(day_names)
     except (json.JSONDecodeError, KeyError, TypeError):
-        return constants.VALUE_INVALID
+        return __("triggers.values.invalid")
 
 
 def create_message_summary(message: AutomaticMessage, bot) -> str:

@@ -5,7 +5,7 @@ Views para la selección interactiva de triggers
 from typing import List, Callable, Any
 from discord import Interaction, ui, ButtonStyle, Embed, Color
 from .models import Trigger
-from . import constants
+from i18n import __
 
 
 class TriggerSelectView(ui.View):
@@ -46,7 +46,7 @@ class TriggerSelectView(ui.View):
             # Botón "Anterior" 
             if self.current_page > 0:
                 prev_button = ui.Button(
-                    label=constants.VIEW_BUTTON_PREVIOUS,
+                    label=__("triggers.views.buttonPrevious"),
                     style=ButtonStyle.primary,
                     row=4
                 )
@@ -55,7 +55,7 @@ class TriggerSelectView(ui.View):
             
             # Indicador de página
             page_indicator = ui.Button(
-                label=constants.PAGE_INDICATOR.format(
+                label=__("triggers.pagination.indicator", 
                     current=self.current_page + 1,
                     total=self.max_pages
                 ),
@@ -68,7 +68,7 @@ class TriggerSelectView(ui.View):
             # Botón "Siguiente"
             if self.current_page < self.max_pages - 1:
                 next_button = ui.Button(
-                    label=constants.VIEW_BUTTON_NEXT,
+                    label=__("triggers.views.buttonNext"),
                     style=ButtonStyle.primary,
                     row=4
                 )
@@ -82,7 +82,7 @@ class TriggerSelectView(ui.View):
             self._update_buttons()
             
             # Actualizar embed para la nueva página
-            title = constants.VIEW_PAGE_TITLE.format(
+            title = __("triggers.views.pageTitle", 
                 action=self.base_title,
                 current=self.current_page + 1,
                 total=self.max_pages
@@ -105,7 +105,7 @@ class TriggerSelectView(ui.View):
             self._update_buttons()
             
             # Actualizar embed para la nueva página
-            title = constants.VIEW_PAGE_TITLE.format(
+            title = __("triggers.views.pageTitle", 
                 action=self.base_title,
                 current=self.current_page + 1,
                 total=self.max_pages
@@ -159,7 +159,7 @@ def create_trigger_selection_embed(
     """Crear embed para mostrar la lista de triggers disponibles con paginación"""
     embed = Embed(
         title=title,
-        description=constants.VIEW_SELECTION_DESCRIPTION,
+        description=__("triggers.views.selectionDescription"),
         color=Color.blue()
     )
     
@@ -173,8 +173,8 @@ def create_trigger_selection_embed(
     triggers_in_page = end_idx - start_idx
     
     embed.add_field(
-        name=constants.VIEW_SUMMARY_TITLE,
-        value=constants.VIEW_SUMMARY_TEXT.format(
+        name=__("triggers.views.summaryTitle"),
+        value=__("triggers.views.summaryText", 
             total=total_triggers,
             in_page=triggers_in_page
         ),
@@ -183,8 +183,8 @@ def create_trigger_selection_embed(
     
     if max_pages > 1:
         embed.add_field(
-            name=constants.VIEW_PAGINATION_TITLE,
-            value=constants.PAGINATION_INFO.format(
+            name=__("triggers.views.paginationTitle"),
+            value=__("triggers.pagination.info", 
                 current=current_page + 1,
                 total=max_pages,
                 count=total_triggers
@@ -193,8 +193,8 @@ def create_trigger_selection_embed(
         )
     
     embed.add_field(
-        name=constants.VIEW_INSTRUCTIONS_TITLE,
-        value=constants.VIEW_INSTRUCTIONS_TEXT,
+        name=__("triggers.views.instructionsTitle"),
+        value=__("triggers.views.instructionsText"),
         inline=False
     )
     

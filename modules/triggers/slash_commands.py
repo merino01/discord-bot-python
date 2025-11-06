@@ -7,7 +7,7 @@ from modules.core import send_paginated_embeds
 from .service import TriggersService
 from .models import Trigger, TriggerTextPosition, TriggerPosition
 from .utils import show_trigger_selection_for_delete, show_trigger_selection_for_edit, edit_trigger_by_id
-from . import constants
+from i18n import __
 
 
 class TriggersCommands(commands.GroupCog, name="triggers"):
@@ -15,42 +15,56 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
         self.bot = bot
         self.service = TriggersService()
 
+def get_position_translation(position: str, fallback: str = "") -> str:
+    """Get translation for trigger position."""
+    position_translations = {
+        "contains": __("triggers.positions.contains"),
+        "starts_with": __("triggers.positions.startsWidth"),
+        "ends_with": __("triggers.positions.endsWidth"),
+        "equal": __("triggers.positions.equal"),
+        "text_between": __("triggers.positions.textBetween"),
+        "regex": __("triggers.positions.regex"),
+    }
+    return position_translations.get(position, fallback)
+
+
+
     ######################################
     ### Comando para añadir un trigger ###
     ######################################
-    @app_commands.command(name="crear", description=constants.COMMAND_CREATE_DESC)
+    @app_commands.command(name="crear", description=__("triggers.commands.create"))
     @app_commands.describe(
-        canal=constants.PARAM_CHANNEL_DESC,
-        borrar_mensaje=constants.PARAM_DELETE_MESSAGE_DESC,
-        respuesta=constants.PARAM_RESPONSE_DESC,
-        clave=constants.PARAM_KEYWORD_DESC,
-        posicion=constants.PARAM_POSITION_DESC,
-        tiempo_respuesta=constants.PARAM_TIMEOUT_DESC,
+        canal=__("triggers.params.channel"),
+        borrar_mensaje=__("triggers.params.deleteMessage"),
+        respuesta=__("triggers.params.response"),
+        clave=__("triggers.params.keyword"),
+        posicion=__("triggers.params.position"),
+        tiempo_respuesta=__("triggers.params.timeout"),
     )
     @app_commands.choices(
         posicion=[
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.CONTAINS.value],
+                name=__("triggers.positions.contains"),
                 value=TriggerPosition.CONTAINS.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.STARTS_WITH.value],
+                name=__("triggers.positions.startsWidth"),
                 value=TriggerPosition.STARTS_WITH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.ENDS_WITH.value],
+                name=__("triggers.positions.endsWidth"),
                 value=TriggerPosition.ENDS_WITH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.EXACT_MATCH.value],
+                name=__("triggers.positions.equal"),
                 value=TriggerPosition.EXACT_MATCH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.TEXT_BETWEEN.value],
+                name=__("triggers.positions.textBetween"),
                 value=TriggerPosition.TEXT_BETWEEN.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.REGEX.value],
+                name=__("triggers.positions.regex"),
                 value=TriggerPosition.REGEX.value,
             ),
         ]
@@ -79,16 +93,16 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
         if error:
             await interaction.response.send_message(content=error, ephemeral=True)
             return
-        await interaction.response.send_message(constants.SUCCESS_TRIGGER_CREATED, ephemeral=True)
+        await interaction.response.send_message(__("triggers.success.triggerCreated"), ephemeral=True)
 
     ##################################################
     ### Comando para ver una lista de los triggers ###
     ##################################################
-    @app_commands.command(name="listar", description=constants.COMMAND_LIST_DESC)
+    @app_commands.command(name="listar", description=__("triggers.commands.list"))
     @app_commands.describe(
-        id_trigger=constants.PARAM_TRIGGER_ID_DESC,
-        canal=constants.PARAM_LIST_CHANNEL_DESC,
-        persistente=constants.PARAM_PERSISTENT_DESC,
+        id_trigger=__("triggers.params.triggerId"),
+        canal=__("triggers.params.listChannel"),
+        persistente=__("triggers.params.persistent"),
     )
     @app_commands.checks.has_permissions(manage_channels=True, manage_messages=True)
     async def list_triggers(
@@ -106,7 +120,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
                 return
             if not trigger:
                 await interaction.response.send_message(
-                    content=constants.ERROR_TRIGGER_NOT_FOUND.format(id=id_trigger),
+                    content=__("triggers.errors.triggerNotFound", id=id_trigger),
                     ephemeral=True,
                 )
                 return
@@ -123,37 +137,37 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
                 return
 
         if not triggers or len(triggers) == 0:
-            await interaction.response.send_message(constants.NO_TRIGGERS_FOUND, ephemeral=True)
+            await interaction.response.send_message(__("triggers.messages.noTriggersFound"), ephemeral=True)
             return
 
         embeds = []
         for trigger in triggers:
             embed = Embed(
-                title=constants.TITLE_TRIGGER_ID.format(id=trigger.id),
-                description=constants.EMBED_DESCRIPTION,
+                title=__("triggers.embeds.triggerIdTitle", id=trigger.id),
+                description=__("clanSettings.embeds.description"),
                 color=Color.green(),
             )
-            embed.add_field(name=constants.FIELD_CHANNEL, value=f"<#{trigger.channel_id}>", inline=True)
+            embed.add_field(name=__("triggers.fields.channel"), value=f"<#{trigger.channel_id}>", inline=True)
             embed.add_field(
-                name=constants.FIELD_DELETE_MESSAGE,
-                value=constants.VALUE_YES if trigger.delete_message else constants.VALUE_NO,
+                name=__("triggers.fields.deleteMessage"),
+                value=__("clanSettings.values.yes") if trigger.delete_message else __("clanSettings.values.no"),
                 inline=True,
             )
             embed.add_field(
-                name=constants.FIELD_RESPONSE,
-                value=trigger.response if trigger.response else constants.VALUE_NONE,
+                name=__("triggers.fields.response"),
+                value=trigger.response if trigger.response else __("triggers.values.none"),
                 inline=True,
             )
-            embed.add_field(name=constants.FIELD_KEYWORD, value=trigger.key, inline=True)
+            embed.add_field(name=__("triggers.fields.keyword"), value=trigger.key, inline=True)
             embed.add_field(
-                name=constants.FIELD_POSITION,
-                value=constants.TRIGGER_POSITIONS_TRANSLATIONS.get(trigger.position, constants.VALUE_INVALID),
+                name=__("triggers.fields.position"),
+                value=get_position_translation(trigger.position, __("triggers.values.invalid")),
                 inline=True,
             )
             if trigger.response_timeout:
                 embed.add_field(
-                    name=constants.FIELD_TIMEOUT,
-                    value=constants.VALUE_TIMEOUT_SECONDS.format(timeout=trigger.response_timeout),
+                    name=__("triggers.fields.timeout"),
+                    value=__("triggers.values.timeoutSeconds", timeout=trigger.response_timeout),
                     inline=True,
                 )
             embeds.append(embed)
@@ -162,14 +176,14 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
             interaction=interaction,
             embeds=embeds,
             ephemeral=not persistente,
-            message=constants.SHOWING_TRIGGERS.format(count=len(triggers)),
+            message=__("triggers.messages.showingTriggers", count=len(triggers)),
         )
 
     ########################################
     ### Comando para eliminar un trigger ###
     ########################################
-    @app_commands.command(name="eliminar", description=constants.COMMAND_DELETE_DESC)
-    @app_commands.describe(id_del_trigger=constants.PARAM_TRIGGER_DELETE_ID_DESC)
+    @app_commands.command(name="eliminar", description=__("triggers.commands.delete"))
+    @app_commands.describe(id_del_trigger=__("triggers.params.triggerDeleteId"))
     @app_commands.checks.has_permissions(manage_channels=True, manage_messages=True)
     async def delete_trigger(self, interaction: Interaction, id_del_trigger: Optional[str] = None):
         """Delete trigger command"""
@@ -179,7 +193,7 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
             if error:
                 await interaction.response.send_message(content=error, ephemeral=True)
                 return
-            await interaction.response.send_message(content=constants.SUCCESS_TRIGGER_DELETED, ephemeral=True)
+            await interaction.response.send_message(content=__("triggers.success.triggerDeleted"), ephemeral=True)
         else:
             # Si no se proporciona ID, mostrar vista de selección
             await show_trigger_selection_for_delete(interaction, self.service)
@@ -187,40 +201,40 @@ class TriggersCommands(commands.GroupCog, name="triggers"):
     #######################################
     ### Comando para editar un trigger ####
     #######################################
-    @app_commands.command(name="editar", description=constants.COMMAND_EDIT_DESC)
+    @app_commands.command(name="editar", description=__("triggers.commands.edit"))
     @app_commands.describe(
-        id_trigger=constants.PARAM_TRIGGER_ID_DESC,
-        canal=constants.PARAM_CHANNEL_DESC,
-        borrar_mensaje=constants.PARAM_DELETE_MESSAGE_DESC,
-        respuesta=constants.PARAM_RESPONSE_DESC,
-        clave=constants.PARAM_KEYWORD_DESC,
-        posicion=constants.PARAM_POSITION_DESC,
-        tiempo_respuesta=constants.PARAM_TIMEOUT_DESC,
+        id_trigger=__("triggers.params.triggerId"),
+        canal=__("triggers.params.channel"),
+        borrar_mensaje=__("triggers.params.deleteMessage"),
+        respuesta=__("triggers.params.response"),
+        clave=__("triggers.params.keyword"),
+        posicion=__("triggers.params.position"),
+        tiempo_respuesta=__("triggers.params.timeout"),
     )
     @app_commands.choices(
         posicion=[
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.CONTAINS.value],
+                name=__("triggers.positions.contains"),
                 value=TriggerPosition.CONTAINS.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.STARTS_WITH.value],
+                name=__("triggers.positions.startsWidth"),
                 value=TriggerPosition.STARTS_WITH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.ENDS_WITH.value],
+                name=__("triggers.positions.endsWidth"),
                 value=TriggerPosition.ENDS_WITH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.EXACT_MATCH.value],
+                name=__("triggers.positions.equal"),
                 value=TriggerPosition.EXACT_MATCH.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.TEXT_BETWEEN.value],
+                name=__("triggers.positions.textBetween"),
                 value=TriggerPosition.TEXT_BETWEEN.value,
             ),
             app_commands.Choice(
-                name=constants.TRIGGER_POSITIONS_TRANSLATIONS[TriggerPosition.REGEX.value],
+                name=__("triggers.positions.regex"),
                 value=TriggerPosition.REGEX.value,
             ),
         ]

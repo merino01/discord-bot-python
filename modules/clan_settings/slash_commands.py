@@ -4,7 +4,7 @@ from discord.ext import commands
 from settings import guild_id
 from .service import ClanSettingsService
 from modules.clans.service import ClanService
-from . import constants
+from i18n import __
 
 
 class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
@@ -13,17 +13,17 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
         self.service = ClanSettingsService()
         super().__init__()
 
-    @app_commands.command(name="config", description=constants.COMMAND_CONFIG_DESC)
+    @app_commands.command(name="config", description=__("clanSettings.commands.config"))
     @app_commands.describe(
-        categoria_testo=constants.PARAM_TEXT_CATEGORY_DESC,
-        categoria_voz=constants.PARAM_VOICE_CATEGORY_DESC,
-        max_miembros=constants.PARAM_MAX_MEMBERS_DESC,
-        rol_lider=constants.PARAM_LEADER_ROLE_DESC,
-        color_roles=constants.PARAM_ROLE_COLOR_DESC,
-        varios_clanes=constants.PARAM_MULTIPLE_CLANS_DESC,
-        varios_lideres=constants.PARAM_MULTIPLE_LEADERS_DESC,
-        max_texto=constants.PARAM_MAX_TEXT_DESC,
-        max_voz=constants.PARAM_MAX_VOICE_DESC
+        categoria_testo=__("clanSettings.params.textCategory"),
+        categoria_voz=__("clanSettings.params.voiceCategory"),
+        max_miembros=__("clanSettings.params.maxMembers"),
+        rol_lider=__("clanSettings.params.leaderRole"),
+        color_roles=__("clanSettings.params.roleColor"),
+        varios_clanes=__("clanSettings.params.multipleClans"),
+        varios_lideres=__("clanSettings.params.multipleLeaders"),
+        max_texto=__("clanSettings.params.maxText"),
+        max_voz=__("clanSettings.params.maxVoice")
     )
     @app_commands.checks.has_permissions(administrator=True)
     async def clan_config(
@@ -59,7 +59,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
                 settings.default_role_color = int(color_roles, 16)
             except ValueError:
                 await interaction.response.send_message(
-                    constants.ERROR_INVALID_COLOR, ephemeral=True
+                    __("clanSettings.errors.invalidColor"), ephemeral=True
                 )
                 return
         if varios_clanes is not None:
@@ -78,10 +78,10 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_CONFIG_UPDATED, ephemeral=True
+            __("clanSettings.success.configUpdated"), ephemeral=True
         )
 
-    @app_commands.command(name="info", description=constants.COMMAND_INFO_DESC)
+    @app_commands.command(name="info", description=__("clanSettings.commands.info"))
     @app_commands.checks.has_permissions(administrator=True)
     async def ver_config(self, interaction: Interaction):
         settings, error = await self.service.get_settings()
@@ -92,27 +92,27 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         embed = Embed(
-            title=constants.TITLE_CLAN_CONFIG,
+            title=__("clanSettings.embeds.clanConfigTitle"),
             color=Color.blue(),
-            description=constants.EMBED_DESCRIPTION,
+            description=__("clanSettings.embeds.description"),
         )
 
         # Canales
         embed.add_field(
-            name=constants.FIELD_CATEGORIES,
+            name=__("clanSettings.fields.categories"),
             value=(
-                constants.VALUE_CATEGORIES_FORMAT.format(
+                __("clanSettings.values.categoriesFormat", 
                     text_category=settings.text_category_id,
                     voice_category=settings.voice_category_id
                 )
                 if settings.text_category_id and settings.voice_category_id
-                else constants.VALUE_NOT_CONFIGURED
+                else __("clanSettings.values.notConfigured")
             ),
             inline=False,
         )
         embed.add_field(
-            name=constants.FIELD_MAX_CHANNELS,
-            value=constants.VALUE_MAX_CHANNELS_FORMAT.format(
+            name=__("clanSettings.fields.maxChannels"),
+            value=__("clanSettings.values.maxChannelsFormat", 
                 max_text=settings.max_text_channels,
                 max_voice=settings.max_voice_channels
             ),
@@ -123,35 +123,35 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
         additional_roles_text = (
             ", ".join([f"<@&{role_id}>" for role_id in settings.additional_roles])
             if settings.additional_roles
-            else constants.VALUE_NO_ADDITIONAL_ROLES
+            else __("clanSettings.values.noAdditionalRoles")
         )
         embed.add_field(
-            name=constants.FIELD_ADDITIONAL_ROLES,
+            name=__("clanSettings.fields.additionalRoles"),
             value=additional_roles_text,
             inline=False,
         )
         embed.add_field(
-            name=constants.FIELD_LEADER_ROLE,
-            value=f"<@&{settings.leader_role_id}>" if settings.leader_role_id else constants.VALUE_NOT_CONFIGURED,
+            name=__("clanSettings.fields.leaderRole"),
+            value=f"<@&{settings.leader_role_id}>" if settings.leader_role_id else __("clanSettings.values.notConfigured"),
             inline=True,
         )
-        embed.add_field(name=constants.FIELD_ROLE_COLOR, value=f"#{settings.default_role_color}", inline=True)
+        embed.add_field(name=__("clanSettings.fields.roleColor"), value=f"#{settings.default_role_color}", inline=True)
 
         # Límites
         embed.add_field(
-            name=constants.FIELD_LIMITS,
-            value=constants.VALUE_LIMITS_FORMAT.format(
+            name=__("clanSettings.fields.limits"),
+            value=__("clanSettings.values.limitsFormat", 
                 max_members=settings.max_members,
-                multiple_clans=constants.VALUE_YES if settings.allow_multiple_clans else constants.VALUE_NO,
-                multiple_leaders=constants.VALUE_YES if settings.allow_multiple_leaders else constants.VALUE_NO
+                multiple_clans=__("clanSettings.values.yes") if settings.allow_multiple_clans else __("clanSettings.values.no"),
+                multiple_leaders=__("clanSettings.values.yes") if settings.allow_multiple_leaders else __("clanSettings.values.no")
             ),
             inline=False,
         )
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name="añadir_rol_adicional", description=constants.COMMAND_ADD_ROLE_DESC)
-    @app_commands.describe(rol=constants.PARAM_ADDITIONAL_ROLE_DESC)
+    @app_commands.command(name="añadir_rol_adicional", description=__("clanSettings.commands.addRole"))
+    @app_commands.describe(rol=__("clanSettings.params.additionalRole"))
     @app_commands.checks.has_permissions(administrator=True)
     async def add_additional_role(self, interaction: Interaction, rol: Role):
         settings, error = await self.service.get_settings()
@@ -163,7 +163,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if rol.id in settings.additional_roles:
             await interaction.response.send_message(
-                constants.ERROR_ROLE_ALREADY_EXISTS.format(role=rol.mention), 
+                __("clanSettings.errors.roleAlreadyExists", role=rol.mention), 
                 ephemeral=True
             )
             return
@@ -175,12 +175,12 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_ADDITIONAL_ROLE_ADDED.format(role=rol.mention),
+            __("clanSettings.success.additionalRoleAdded", role=rol.mention),
             ephemeral=True
         )
 
-    @app_commands.command(name="quitar_rol_adicional", description=constants.COMMAND_REMOVE_ROLE_DESC)
-    @app_commands.describe(rol=constants.PARAM_REMOVE_ROLE_DESC)
+    @app_commands.command(name="quitar_rol_adicional", description=__("clanSettings.commands.removeRole"))
+    @app_commands.describe(rol=__("clanSettings.params.removeRole"))
     @app_commands.checks.has_permissions(administrator=True)
     async def remove_additional_role(self, interaction: Interaction, rol: Role):
         settings, error = await self.service.get_settings()
@@ -192,7 +192,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if rol.id not in settings.additional_roles:
             await interaction.response.send_message(
-                constants.ERROR_ROLE_NOT_IN_LIST.format(role=rol.mention), 
+                __("clanSettings.errors.roleNotInList", role=rol.mention), 
                 ephemeral=True
             )
             return
@@ -204,11 +204,11 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_ADDITIONAL_ROLE_REMOVED.format(role=rol.mention),
+            __("clanSettings.success.additionalRoleRemoved", role=rol.mention),
             ephemeral=True
         )
 
-    @app_commands.command(name="limpiar_roles_adicionales", description=constants.COMMAND_CLEAR_ROLES_DESC)
+    @app_commands.command(name="limpiar_roles_adicionales", description=__("clanSettings.commands.clearRoles"))
     @app_commands.checks.has_permissions(administrator=True)
     async def clear_additional_roles(self, interaction: Interaction):
         settings, error = await self.service.get_settings()
@@ -220,7 +220,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if not settings.additional_roles:
             await interaction.response.send_message(
-                constants.NO_ADDITIONAL_ROLES_CONFIGURED, 
+                __("clanSettings.messages.noAdditionalRolesConfigured"), 
                 ephemeral=True
             )
             return
@@ -232,11 +232,11 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
             return
 
         await interaction.response.send_message(
-            constants.SUCCESS_ALL_ADDITIONAL_ROLES_CLEARED,
+            __("clanSettings.success.allAdditionalRolesCleared"),
             ephemeral=True
         )
 
-    @app_commands.command(name="aplicar_roles_adicionales", description=constants.COMMAND_APPLY_ROLES_DESC)
+    @app_commands.command(name="aplicar_roles_adicionales", description=__("clanSettings.commands.applyRoles"))
     @app_commands.checks.has_permissions(administrator=True)
     async def apply_additional_roles_to_existing_members(self, interaction: Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -250,7 +250,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if not settings.additional_roles:
             await interaction.followup.send(
-                constants.NO_ADDITIONAL_ROLES_CONFIGURED, 
+                __("clanSettings.messages.noAdditionalRolesConfigured"), 
                 ephemeral=True
             )
             return
@@ -261,7 +261,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
         clans, error = await clan_service.get_all_clans()
         if error or not clans:
             await interaction.followup.send(
-                error or constants.ERROR_NO_CLANS_TO_PROCESS, 
+                error or __("clanSettings.errors.noClansToProcess"), 
                 ephemeral=True
             )
             return
@@ -278,7 +278,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
 
         if not additional_roles:
             await interaction.followup.send(
-                constants.ERROR_NO_VALID_ADDITIONAL_ROLES, 
+                __("clanSettings.errors.noValidAdditionalRoles"), 
                 ephemeral=True
             )
             return
@@ -302,7 +302,7 @@ class ClanSettingsCommands(commands.GroupCog, name="clan_settings"):
                     continue  # Continuar con el siguiente miembro si hay error
 
         await interaction.followup.send(
-            constants.SUCCESS_ROLES_APPLIED.format(
+            __("clanSettings.success.rolesApplied", 
                 total_members=total_members,
                 successful_members=successful_assignments
             ),
