@@ -64,7 +64,51 @@ Este es un bot de discord para gestionar el servidor, se pueden configurar **log
    
    # Reiniciar el bot
    docker-compose restart
+   
+   # Desplegar actualizaciones (pull + restart)
+   ./deploy.sh
    ```
+
+5. **Despliegue de actualizaciones:**
+   
+   Para actualizar el bot con los últimos cambios del repositorio y reiniciarlo automáticamente:
+   
+   **En Linux/Mac:**
+   ```bash
+   chmod +x deploy.sh
+   ./deploy.sh
+   ```
+   
+   Este script realiza las siguientes acciones:
+   - Descarga los últimos cambios del repositorio (git pull)
+   - Reconstruye la imagen Docker con los cambios
+   - Reinicia el contenedor
+   - Muestra el estado y los logs recientes
+
+6. **CI/CD - Despliegue Automático:**
+
+   El repositorio incluye un workflow de GitHub Actions que despliega automáticamente el bot cuando se realiza un push a la rama `master`.
+
+   **Configuración de secrets en GitHub:**
+   
+   Para habilitar el despliegue automático, configura los siguientes secrets en tu repositorio de GitHub (Settings > Secrets and variables > Actions):
+   
+   - `SERVER_HOST`: Dirección IP o hostname del servidor
+   - `SERVER_USERNAME`: Usuario SSH del servidor
+   - `SSH_PRIVATE_KEY`: Clave privada SSH para autenticación (contenido completo del archivo)
+   - `SERVER_PORT`: Puerto SSH del servidor (opcional, por defecto 22)
+   - `PROJECT_PATH`: Ruta completa del proyecto en el servidor (ejemplo: `/home/usuario/discord-bot-python`)
+   
+   **Funcionamiento:**
+   
+   Cada vez que se hace push a la rama `master`, el workflow automáticamente:
+   1. Se conecta al servidor via SSH
+   2. Navega al directorio del proyecto
+   3. Ejecuta el script `deploy.sh` que actualiza y reinicia el bot
+   
+   **Ver el estado del deployment:**
+   
+   Puedes ver el progreso y logs del deployment en la pestaña "Actions" de tu repositorio en GitHub.
 
 ### Opción 2: Instalación Local
 
