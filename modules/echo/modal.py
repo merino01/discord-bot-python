@@ -86,7 +86,7 @@ class EchoTextModal(Modal):
                         # Confirmar al usuario que el embed fue enviado
                         confirmation_msg = __("echo.success.embedSent", channel=self.canal.mention)
                         if echo_id:
-                            confirmation_msg += f"\n{__('echo.success.messageSaved', message_id=echo_id[:8])}"
+                            confirmation_msg += f"\n{__("echo.success.messageSaved", message_id=echo_id[:8])}"
                         
                         await interaction.response.send_message(
                             confirmation_msg,
@@ -117,7 +117,7 @@ class EchoTextModal(Modal):
                     # Confirmar al usuario que el mensaje fue enviado
                     confirmation_msg = __("echo.success.messageSent", channel=self.canal.mention)
                     if echo_id:
-                        confirmation_msg += f"\n{__('echo.success.messageSaved', message_id=echo_id[:8])}"
+                        confirmation_msg += f"\n{__("echo.success.messageSaved", message_id=echo_id[:8])}"
                     
                     await interaction.response.send_message(
                         confirmation_msg,

@@ -38,7 +38,8 @@ class I18n:
             self.translations = {}
         except json.JSONDecodeError as e:
             print(f"❌ Error al procesar el archivo de traducción: {translation_file}")
-            print(f"   Error: {e}")
+            print(f"   Error de JSON: {e}")
+            print(f"   Línea {e.lineno}, columna {e.colno}: {e.msg}")
             self.translations = {}
     
     def get(self, key: str, **kwargs) -> str:
